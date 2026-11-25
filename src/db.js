@@ -208,6 +208,24 @@ export function saveApiChapter(courseId, chapter, progress = null) {
       progress?.diamond ?? null, JSON.stringify({ chapter, progress }), new Date().toISOString());
 }
 
+export function syncApiChapters(courseId, chapters, progressById = new Map()) {
+  const valid = (Array.isArray(chapters) ? chapters : []).filter(chapter =>
+    chapter?.id !== undefined && chapter?.id !== null
+  );
+  if (!valid.length) throw new Error(`Refusing to replace cached chapters for ${courseId} with an empty response.`);
+
+  const ids = valid.map(chapter => String(chapter.id));
+  const placeholders = ids.map(() => '?').join(',');
+  db.transaction(() => {
+    db.prepare(`DELETE FROM api_chapters WHERE course_id=? AND chapter_id NOT IN (${placeholders})`)
+      .run(String(courseId), ...ids);
+    for (const chapter of valid) {
+      saveApiChapter(courseId, chapter, progressById.get(String(chapter.id)) || null);
+    }
+  })();
+  return valid.length;
+}
+
 export function saveApiQuestion(chapterId, item) {
   const q = item?.question || item;
   const id = q?.id;
