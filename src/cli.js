@@ -189,6 +189,14 @@ program.command('export')
       errors: []
     };
 
+    const outputPath = options.out ? path.resolve(options.out) : path.join(ROOT, 'exports', 'qureo-export.json');
+    const saveCheckpoint = () => {
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      const temporaryPath = outputPath + '.tmp';
+      fs.writeFileSync(temporaryPath, JSON.stringify(report, null, 2), 'utf8');
+      fs.renameSync(temporaryPath, outputPath);
+    };
+    const isAuthError = error => /authentication expired \\(HTTP (401|403)\\)/i.test(error && error.message || '');
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     const targetChapter = options.chapter ? String(options.chapter) : null;
 
@@ -280,26 +288,32 @@ program.command('export')
             } catch (error) {
               chapterOut.questions_error = error.message;
               report.errors.push({ course_id: course.id, chapter_id: chapterId, stage: 'chapter_questions', message: error.message });
+              if (isAuthError(error)) {
+                courseOut.chapters.push(chapterOut);
+                report.courses.push(courseOut);
+                saveCheckpoint();
+                throw error;
+              }
             }
 
             console.log(`${course.id} | ${chapterOut.sequence ?? '?'} | ${chapterOut.title} | ${chapterOut.lessons.length} lesson(s) | ${chapterOut.questions.length} question(s)`);
             courseOut.chapters.push(chapterOut);
+            report.courses = report.courses.filter(item => String(item.id) !== String(course.id));
+            report.courses.push(courseOut);
+            saveCheckpoint();
             await delay(140);
           }
           report.courses.push(courseOut);
           console.log(`Finished ${course.id}: ${courseOut.chapters.length} chapters.`);
         } catch (error) {
+          if (isAuthError(error)) throw error;
           report.errors.push({ course_id: course.id, stage: 'course', message: error.message });
           console.log(`${course.id}: ${error.message}`);
         }
       }
     }
 
-    const outputPath = options.out
-      ? path.resolve(options.out)
-      : path.join(ROOT, 'exports', 'qureo-export.json');
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, JSON.stringify(report, null, 2), 'utf8');
+    saveCheckpoint();
     const chapterCount = report.chapters?.length || report.courses.reduce((n, c) => n + c.chapters.length, 0);
     const lessonCount = (report.chapters || report.courses.flatMap(c => c.chapters)).reduce((n, ch) => n + ch.lessons.length, 0);
     const questionCount = (report.chapters || report.courses.flatMap(c => c.chapters)).reduce((n, ch) => n + ch.questions.length, 0);
