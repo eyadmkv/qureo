@@ -5,7 +5,7 @@ import { stdin as input, stdout as output } from 'node:process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  getStats, listExercises, listSolutions, saveApiCourse, saveApiChapter,
+  getStats, listExercises, listSolutions, saveApiCourse, saveApiChapter, syncApiChapters,
   saveApiQuestion, listApiCourses, listApiChapters, getApiChapter,
   saveCustomAnswer, saveRetrievedAnswer, findApiQuestion, getCustomAnswer, listCustomAnswers
 } from './db.js';
@@ -293,10 +293,7 @@ program.command('sync')
         const chapters = asArray(sectionData);
         saveApiCourse(courseId, courseData?.course?.name || courseData?.name || courseId, sectionId, courseData);
         courseCount++;
-        for (const chapter of chapters) {
-          saveApiChapter(courseId, chapter, progressById.get(String(chapter.id)) || null);
-          chapterCount++;
-        }
+        chapterCount += syncApiChapters(courseId, chapters, progressById);
         console.log(`${courseId}: ${chapters.length} chapters | ${chapters.filter(ch => progressById.get(String(ch.id))?.completed_at).length} completed`);
       } catch (error) {
         failures++;
