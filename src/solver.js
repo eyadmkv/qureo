@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
-import { ROOT } from './paths.js';
+import { DATA_DIR, ROOT } from './paths.js';
+import { planChapterSelection } from './solveSelection.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
@@ -102,18 +103,6 @@ async function requestJson(client, pathname, { method = 'GET', body, referer } =
   return payload;
 }
 
-function resolveTargetIndex(chapters, target) {
-  if (target === null || target === undefined || String(target).trim() === '') return chapters.length - 1;
-  const value = String(target).trim();
-  const byId = chapters.findIndex(ch => String(ch.id) === value);
-  if (byId >= 0) return byId;
-  const numeric = Number(value);
-  if (Number.isInteger(numeric)) {
-    return chapters.findIndex(ch => Number(ch.seq ?? ch.sequence) === numeric);
-  }
-  return -1;
-}
-
 function getQuestionAnswer(item, answers) {
   const question = item?.question || item;
   const id = String(question?.id ?? '');
@@ -168,6 +157,24 @@ function openLecturePage(url) {
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const CHECKPOINT_PATH = path.join(DATA_DIR, 'solve-checkpoint.json');
+
+function readSolveCheckpoint() {
+  try {
+    const value = JSON.parse(fs.readFileSync(CHECKPOINT_PATH, 'utf8'));
+    return value && value.schema_version === 1 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSolveCheckpoint(value) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  const temporaryPath = CHECKPOINT_PATH + '.tmp';
+  fs.writeFileSync(temporaryPath, JSON.stringify(value, null, 2), { encoding: 'utf8', mode: 0o600 });
+  fs.renameSync(temporaryPath, CHECKPOINT_PATH);
 }
 
 async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress) {
@@ -283,7 +290,12 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
   const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
   throw error;
 }
-async function solveChapter(client, chapter, chapterMeta, questions, answers, { dryRun, onProgress }) {
+async function solveChapter(client, chapter, chapterMeta, questions, answers, {
+  dryRun,
+  onProgress,
+  onCheckpoint = () => {},
+  questionDelayMs = 0
+}) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
   if (!questionRows.length) {
@@ -301,6 +313,16 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, { 
 
   const lectures = asArray(chapterMeta?.lectures || chapterMeta?.chapter?.lectures || chapterMeta?.data?.lectures);
   onProgress(`Chapter ${chapter.seq ?? chapter.sequence ?? chapterId}: ${chapter.name || chapter.title || 'Untitled'} | ${lectures.length} lesson(s), ${prepared.length} question(s)`);
+  onCheckpoint({
+    state: 'running',
+    stage: 'chapter-start',
+    chapter_id: chapterId,
+    chapter_sequence: chapter.seq ?? chapter.sequence ?? null,
+    chapter_title: chapter.name || chapter.title || '',
+    lesson_id: null,
+    question_id: null,
+    question_index: null
+  });
 
   if (dryRun) {
     for (const row of prepared) {
@@ -310,7 +332,10 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, { 
   }
 
   for (const lesson of lectures) {
+    const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
+    onCheckpoint({ stage: 'lesson-start', lesson_id: lessonId, question_id: null, question_index: null });
     await markLectureCompleted(client, chapterId, lesson, false, onProgress);
+    onCheckpoint({ stage: 'lesson-completed', lesson_id: lessonId });
   }
 
   const testType = chapter.test_type || chapterMeta?.test_type || chapterMeta?.chapter?.test_type || 'review';
@@ -319,23 +344,40 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, { 
   const testReferer = `${COURSE_ORIGIN}/chapter/${chapterId}/${testSlug}`;
   const initPath = `/students/chapters/${encodeURIComponent(chapterId)}/test`;
   onProgress(`  initializing ${testType} attempt`);
+  onCheckpoint({ stage: 'assessment-initializing', lesson_id: null, question_id: null, question_index: null });
   await requestJson(client, initPath, { method: 'PUT', referer: testReferer });
+  onCheckpoint({ stage: 'assessment-initialized' });
 
   let submitted = 0;
   let correct = 0;
-  for (const row of prepared) {
+  for (const [index, row] of prepared.entries()) {
     const questionId = String(row.question.id);
     const answerPath = `/students/${endpointKind}/${encodeURIComponent(questionId)}/answer/${row.answer.type}`;
     const payload = row.answer.type === 'choice'
       ? { choice_id: row.answer.choice_id }
       : { answer_code: row.answer.answer_code };
+    onCheckpoint({
+      stage: 'question-submitting',
+      question_id: questionId,
+      question_index: index + 1
+    });
     const result = await requestJson(client, answerPath, { method: 'PUT', body: payload, referer: testReferer });
     submitted++;
     if (result?.result?.correct === true) correct++;
     if (result?.result?.correct === false) {
       throw new Error(`QUREO marked question ${questionId} incorrect. Submitted ${submitted}/${prepared.length}; stopping before the next chapter.`);
     }
+    onCheckpoint({
+      stage: 'question-submitted',
+      question_id: questionId,
+      question_index: index + 1,
+      questions_submitted_in_chapter: submitted
+    });
     onProgress(`  submitted ${submitted}/${prepared.length} | question ${questionId}${result?.result?.correct === true ? ' | correct' : ''}`);
+    if (questionDelayMs > 0 && index < prepared.length - 1) {
+      onProgress(`  waiting ${(questionDelayMs / 1000).toFixed(1)}s before the next question`);
+      await wait(questionDelayMs);
+    }
   }
 
   let resultPayload = null;
@@ -361,61 +403,234 @@ export async function solveCourse(client, {
   courseId = 'javascript_ar',
   targetChapter = null,
   dryRun = false,
+  maxChapters = null,
+  single = false,
+  skipCompleted = true,
+  chapterDelayMs = 0,
+  questionDelayMs = 0,
+  interactive = false,
+  shouldContinue = async () => true,
+  resume = true,
   onProgress = message => console.log(message)
 } = {}) {
+  if (!Number.isInteger(chapterDelayMs) || chapterDelayMs < 0 || chapterDelayMs > 3600000) {
+    throw new Error('Chapter pause must be between 0 and 3600 seconds.');
+  }
+  if (!Number.isInteger(questionDelayMs) || questionDelayMs < 0 || questionDelayMs > 3600000) {
+    throw new Error('Question pause must be between 0 and 3600 seconds.');
+  }
+
   const answers = loadAnswers(courseId);
   const courseRaw = await client.json(`/courses/${encodeURIComponent(courseId)}`);
   const sectionId = courseRaw?.basic_section?.id || courseRaw?.course?.basic_section?.id;
   if (!sectionId) throw new Error(`Course ${courseId} did not return basic_section.id.`);
 
   const sectionRaw = await client.json(`/sections/${encodeURIComponent(sectionId)}`);
-  const chapters = asArray(sectionRaw).sort((a, b) => Number(a.seq ?? a.sequence ?? 0) - Number(b.seq ?? b.sequence ?? 0));
-  if (!chapters.length) throw new Error(`No chapters found for course ${courseId}.`);
-
-  const targetIndex = resolveTargetIndex(chapters, targetChapter);
-  if (targetIndex < 0) throw new Error(`Target chapter "${targetChapter}" was not found by chapter sequence or ID.`);
+  const rawChapters = asArray(sectionRaw).sort((a, b) =>
+    Number(a.seq ?? a.sequence ?? 0) - Number(b.seq ?? b.sequence ?? 0)
+  );
+  if (!rawChapters.length) throw new Error(`No chapters found for course ${courseId}.`);
 
   const progressById = await getProgress(client, sectionId);
-  const startIndex = chapters.findIndex(ch => !isCompleted(progressById.get(String(ch.id))));
-  if (startIndex < 0) {
-    const summary = `All ${chapters.length} chapters are already marked complete.`;
-    onProgress(summary);
-    return { summary, startChapter: null, endChapter: null, chaptersCompleted: 0 };
-  }
-  if (targetIndex < startIndex) {
-    throw new Error(`Target chapter ${targetChapter} is before the first unfinished chapter ${chapters[startIndex].seq ?? startIndex + 1}.`);
+  const chapters = rawChapters.map(chapter => ({
+    ...chapter,
+    completed: isCompleted(progressById.get(String(chapter.id)))
+  }));
+
+  const plan = planChapterSelection(chapters, {
+    targetChapter,
+    single,
+    maxChapters,
+    skipCompleted
+  });
+
+  const previousCheckpoint = resume ? readSolveCheckpoint() : null;
+  if (previousCheckpoint?.course_id === courseId && previousCheckpoint.state !== 'completed') {
+    const location = previousCheckpoint.chapter_sequence ?? previousCheckpoint.chapter_id ?? 'unknown';
+    onProgress(`Resume checkpoint found at chapter ${location}, stage ${previousCheckpoint.stage || 'unknown'}. Rechecking QUREO progress before continuing.`);
   }
 
-  const start = chapters[startIndex];
-  const end = chapters[targetIndex];
-  onProgress(`Account progress: starting at chapter ${start.seq ?? startIndex + 1} (${start.name || start.title || start.id}), through chapter ${end.seq ?? targetIndex + 1}.`);
+  if (!plan.chapters.length) {
+    const summary = plan.summary || 'No chapters selected.';
+    onProgress(summary);
+    writeSolveCheckpoint({
+      schema_version: 1,
+      course_id: courseId,
+      state: 'completed',
+      stage: 'nothing-to-do',
+      summary,
+      updated_at: new Date().toISOString()
+    });
+    return {
+      summary,
+      startChapter: null,
+      endChapter: null,
+      chaptersCompleted: 0,
+      questionsSubmitted: 0,
+      skippedCompleted: plan.skippedCompleted
+    };
+  }
+
+  const start = plan.chapters[0];
+  const end = plan.chapters[plan.chapters.length - 1];
+  const startLabel = start.chapter.seq ?? start.chapter.sequence ?? start.chapter.id;
+  const endLabel = end.chapter.seq ?? end.chapter.sequence ?? end.chapter.id;
+
+  onProgress(`Account progress: selected ${plan.selectionLabel}, chapters ${startLabel} through ${endLabel}.`);
+  if (plan.skippedCompleted) onProgress(`Skipping ${plan.skippedCompleted} completed chapter(s).`);
+  if (maxChapters !== null) onProgress(`Maximum chapter limit: ${maxChapters}.`);
   if (dryRun) onProgress('Dry run enabled: no completion or answer requests will be sent.');
 
   let chaptersCompleted = 0;
   let questionsSubmitted = 0;
-  for (let index = startIndex; index <= targetIndex; index++) {
-    const chapter = chapters[index];
-    const chapterId = String(chapter.id);
-    if (isCompleted(progressById.get(chapterId))) {
-      onProgress(`Skipping chapter ${chapter.seq ?? index + 1}: already complete.`);
-      continue;
-    }
+  let lastCheckpoint = {
+    schema_version: 1,
+    course_id: courseId,
+    state: 'running',
+    stage: 'starting',
+    updated_at: new Date().toISOString()
+  };
 
-    const chapterMeta = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
-    const questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
-    const solved = await solveChapter(client, chapter, chapterMeta, questions, answers, { dryRun, onProgress });
-    questionsSubmitted += solved.submitted;
-    if (dryRun) continue;
+  const checkpoint = patch => {
+    lastCheckpoint = {
+      ...lastCheckpoint,
+      ...patch,
+      schema_version: 1,
+      course_id: courseId,
+      updated_at: new Date().toISOString()
+    };
+    writeSolveCheckpoint(lastCheckpoint);
+  };
 
-    const completionConfirmed = await waitForChapterCompletion(client, sectionId, chapterId);
-    if (!completionConfirmed) {
-      throw new Error(`Chapter ${chapter.seq ?? chapterId} received ${solved.correct}/${solved.total} confirmed correct answers, but QUREO has not marked it complete. Stopping before the next chapter.`);
+  try {
+    for (let position = 0; position < plan.chapters.length; position++) {
+      const { chapter } = plan.chapters[position];
+      const chapterId = String(chapter.id);
+      const chapterSequence = chapter.seq ?? chapter.sequence ?? chapterId;
+      const chapterTitle = chapter.name || chapter.title || 'Untitled';
+
+      if (interactive && !await shouldContinue({
+        chapter,
+        position: position + 1,
+        total: plan.chapters.length
+      })) {
+        checkpoint({
+          state: 'paused',
+          stage: 'paused-before-chapter',
+          chapter_id: chapterId,
+          chapter_sequence: chapterSequence,
+          chapter_title: chapterTitle,
+          completed_chapters: chaptersCompleted,
+          questions_submitted: questionsSubmitted
+        });
+        const summary = `Paused before chapter ${chapterSequence}. Completed ${chaptersCompleted} chapter(s) and submitted ${questionsSubmitted} answer(s) in this run.`;
+        onProgress(summary);
+        return {
+          summary,
+          startChapter: startLabel,
+          endChapter: chapterSequence,
+          chaptersCompleted,
+          questionsSubmitted,
+          paused: true
+        };
+      }
+
+      checkpoint({
+        state: 'running',
+        stage: 'chapter-start',
+        chapter_id: chapterId,
+        chapter_sequence: chapterSequence,
+        chapter_title: chapterTitle,
+        lesson_id: null,
+        question_id: null,
+        question_index: null,
+        completed_chapters: chaptersCompleted,
+        questions_submitted: questionsSubmitted
+      });
+
+      const chapterMeta = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
+      const questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+      const solved = await solveChapter(client, chapter, chapterMeta, questions, answers, {
+        dryRun,
+        onProgress,
+        questionDelayMs,
+        onCheckpoint: patch => checkpoint({
+          ...patch,
+          chapter_id: chapterId,
+          chapter_sequence: chapterSequence,
+          chapter_title: chapterTitle,
+          completed_chapters: chaptersCompleted,
+          questions_submitted: questionsSubmitted
+        })
+      });
+
+      questionsSubmitted += solved.submitted;
+      if (dryRun) {
+        checkpoint({
+          state: 'previewed',
+          stage: 'chapter-previewed',
+          chapter_id: chapterId,
+          chapter_sequence: chapterSequence,
+          chapter_title: chapterTitle
+        });
+        continue;
+      }
+
+      checkpoint({ stage: 'verifying-chapter-completion' });
+      const completionConfirmed = await waitForChapterCompletion(client, sectionId, chapterId);
+      if (!completionConfirmed) {
+        throw new Error(`Chapter ${chapterSequence} received ${solved.correct}/${solved.total} confirmed correct answers, but QUREO has not marked it complete. Stopping before the next chapter.`);
+      }
+
+      chaptersCompleted++;
+      checkpoint({
+        state: 'running',
+        stage: 'chapter-completed',
+        chapter_id: chapterId,
+        chapter_sequence: chapterSequence,
+        chapter_title: chapterTitle,
+        completed_chapters: chaptersCompleted,
+        questions_submitted: questionsSubmitted,
+        lesson_id: null,
+        question_id: null,
+        question_index: null
+      });
+      onProgress(`  QUREO confirmed chapter ${chapterSequence} as complete.`);
+
+      if (chapterDelayMs > 0 && position < plan.chapters.length - 1) {
+        onProgress(`Waiting ${(chapterDelayMs / 1000).toFixed(1)}s before the next chapter`);
+        await wait(chapterDelayMs);
+      }
     }
-    chaptersCompleted++;
+  } catch (error) {
+    checkpoint({
+      state: 'failed',
+      stage: lastCheckpoint.stage || 'unknown',
+      last_error: error.message,
+      completed_chapters: chaptersCompleted,
+      questions_submitted: questionsSubmitted
+    });
+    throw error;
   }
 
   const summary = dryRun
-    ? `Preview complete: chapters ${start.seq ?? start.id}–${end.seq ?? end.id}; no answers submitted.`
+    ? `Preview complete: ${plan.chapters.length} chapter(s) selected; no answers submitted.`
     : `Solve run complete: ${chaptersCompleted} chapter(s), ${questionsSubmitted} answer(s) submitted. QUREO responses confirmed the submitted answers as correct.`;
-  return { summary, startChapter: start.seq ?? start.id, endChapter: end.seq ?? end.id, chaptersCompleted, questionsSubmitted };
+
+  checkpoint({
+    state: dryRun ? 'previewed' : 'completed',
+    stage: 'run-completed',
+    completed_chapters: chaptersCompleted,
+    questions_submitted: questionsSubmitted,
+    summary
+  });
+
+  return {
+    summary,
+    startChapter: startLabel,
+    endChapter: endLabel,
+    chaptersCompleted,
+    questionsSubmitted,
+    skippedCompleted: plan.skippedCompleted
+  };
 }
