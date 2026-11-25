@@ -196,7 +196,7 @@ program.command('export')
       fs.writeFileSync(temporaryPath, JSON.stringify(report, null, 2), 'utf8');
       fs.renameSync(temporaryPath, outputPath);
     };
-    const isAuthError = error => /authentication expired \\(HTTP (401|403)\\)/i.test(error && error.message || '');
+    const isAuthError = error => /authentication expired \(HTTP (401|403)\)/i.test(error && error.message || '');
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     const targetChapter = options.chapter ? String(options.chapter) : null;
 
@@ -278,6 +278,13 @@ program.command('export')
               }));
             } catch (error) {
               report.errors.push({ course_id: course.id, chapter_id: chapterId, stage: 'chapter_metadata', message: error.message });
+              if (isAuthError(error)) {
+                courseOut.chapters.push(chapterOut);
+                report.courses = report.courses.filter(item => String(item.id) !== String(course.id));
+                report.courses.push(courseOut);
+                saveCheckpoint();
+                throw error;
+              }
             }
 
             try {
@@ -303,7 +310,9 @@ program.command('export')
             saveCheckpoint();
             await delay(140);
           }
+          report.courses = report.courses.filter(item => String(item.id) !== String(course.id));
           report.courses.push(courseOut);
+          saveCheckpoint();
           console.log(`Finished ${course.id}: ${courseOut.chapters.length} chapters.`);
         } catch (error) {
           if (isAuthError(error)) throw error;
