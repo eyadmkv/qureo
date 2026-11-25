@@ -173,11 +173,11 @@ function wait(ms) {
 async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress) {
   const lessonId = lesson?.id ?? lesson?.lecture_id;
   if (lessonId === undefined || lessonId === null) return;
-  const endpoint = `/students/lectures/${encodeURIComponent(lessonId)}/complete`;
-  const referer = `${COURSE_ORIGIN}/chapter/${chapterId}/lecture/${lessonId}`;
-  const lectureUrl = referer;
+
+  const endpoint = '/students/lectures/' + encodeURIComponent(lessonId) + '/complete';
+  const referer = COURSE_ORIGIN + '/chapter/' + chapterId + '/lecture/' + lessonId;
   if (dryRun) {
-    onProgress(`  [dry-run] complete lesson ${lessonId}`);
+    onProgress('  [dry-run] complete lesson ' + lessonId);
     return;
   }
 
@@ -185,9 +185,104 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
   const submitCompletion = () => {
     const remainingMs = deadline - Date.now();
     if (remainingMs <= 0) throw new Error('Lesson completion retry window expired.');
-    return client.request(`${API_BASE}${endpoint}`, {
+    return client.request(API_BASE + endpoint, {
       method: 'PUT',
-      headers: { Accept: 'application/json, *.,¨°IÉÈèÉÉÈô°(Ñ¥µ½ÕÑ5Ìè5Ñ ¹µ¥¸¡1MM=9}IEUMQ}Q%5=UQ}5L°Éµ¥¹¥¹5Ì¤(ô¤ì(ôì((±ÐÉÍÁ½¹Íô¹Õ±°ì(±Ð±ÍÑ9ÑÝ½É­ÉÉ½Èô¹Õ±°ì(ÑÉäì(ÉÍÁ½¹ÍôÝ¥ÐÍÕµ¥Ñ½µÁ±Ñ¥½¸ ¤ì(ôÑ ¡ÉÉ½È¤ì(¥ ¥ÍIÑÉå±9ÑÝ½É­ÉÉ½È¡ÉÉ½È¤¤Ñ¡É½ÜÉÉ½Èì(±ÍÑ9ÑÝ½É­ÉÉ½ÈôÉÉ½Èì(ô((½¹ÍÐ¹ÍA%¹¥Ñ¥±¥éÑ¥½¸ôÉÍÁ½¹ÍñðÉÍÁ½¹Í¹ÍÑÑÕÌôôôÐÀÐì(¥¡¹ÍA%¹¥Ñ¥±¥éÑ¥½¸¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèí±ÍÑ9ÑÝ½É­ÉÉ½ÈüÑµÁ½ÉÉä¹ÑÝ½É¬¥±ÕÉèA$ÉÑÕÉ¹ÐÀÐ½ÉÑ¡±ÍÍ½¸Á¥¹¥Ñ¥±¥éôì½Á¹¥¹¥Ð¥¸å½ÕÈÕ±ÐÉ½ÝÍÉ¤ì(½Á¹1ÑÕÉA¡±ÑÕÉUÉ°¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèÝ¥Ñ¥¹í5Ñ ¹¥°¡1MM=9}%9%Q}]%Q}5L¼ÄÀÀÀ¥õÌ½ÈEUI<Ñ¼¥¹¥Ñ¥±¥é¤ì(Ý¥ÐÝ¥Ð¡5Ñ ¹µ¥¸¡1MM=9}%9%Q}]%Q}5L°5Ñ ¹µà À°±¥¹´Ñ¹¹½Ü ¤¤¤¤ì(ô((½È¡±ÐÑÑµÁÐôÄìÑÑµÁÐðô1MM=9}IQIe}QQ5AQLÑ¹¹½Ü ¤ð±¥¹ìÑÑµÁÐ¬¬¤ì(ÑÉäì(ÉÍÁ½¹ÍôÝ¥ÐÍÕµ¥Ñ½µÁ±Ñ¥½¸ ¤ì(±ÍÑ9ÑÝ½É­ÉÉ½Èô¹Õ±°ì(ôÑ ¡ÉÉ½È¤ì(¥ ¥ÍIÑÉå±9ÑÝ½É­ÉÉ½È¡ÉÉ½È¤¤Ñ¡É½ÜÉÉ½Èì(ÉÍÁ½¹Íô¹Õ±°ì(±ÍÑ9ÑÝ½É­ÉÉ½ÈôÉÉ½Èì(ô((¥¡ÉÍÁ½¹Í¥ÍIÑÉå±IÍÁ½¹Í¡ÉÍÁ½¹Í¤¤É¬ì((½¹ÍÐÉµ¥¹¥¹5Ìô±¥¹´Ñ¹¹½Ü ¤ì(¥¡ÑÑµÁÐð1MM=9}IQIe}QQ5AQLÉµ¥¹¥¹5ÌøÀ¤ì(½¹ÍÐ±å5Ìô5Ñ ¹µ¥¸¡1MM=9}IQIe}%9QIY1}5L°Éµ¥¹¥¹5Ì¤ì(½¹ÍÐÉÍ½¸ô±ÍÑ9ÑÝ½É­ÉÉ½È(ü¹ÑÝ½É¬ÉÉ½È í±ÍÑ9ÑÝ½É­ÉÉ½È¹µÍÍô¥(è!QQ@íÉÍÁ½¹Í¹ÍÑÑÕÍõì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèíÉÍ½¹ôìÉÑÉäíÑÑµÁÑô¼í1MM=9}IQIe}QQ5AQMô¥¸í5Ñ ¹¥°¡±å5Ì¼ÄÀÀÀ¥õÍ¤ì(Ý¥ÐÝ¥Ð¡±å5Ì¤ì(ô(ô((¥¡ÉÍÁ½¹Íü¹½¬¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôè½µÁ±Ñ¤ì(ÉÑÕÉ¸ì(ô(¥¡ÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀÀñðÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀä¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôè±Éä½µÁ±Ñ¤ì(ÉÑÕÉ¸ì(ô((¥ ÉÍÁ½¹Í±ÍÑ9ÑÝ½É­ÉÉ½È¤ì(½¹ÍÐÉÉ½Èô¹ÜÉÉ½È (1ÍÍ½¸í±ÍÍ½¹%ô½Õ±¹½Ð½µÁ±ÑÕÍÑ¡¹ÑÝ½É¬­ÁÐ¥±¥¹ÕÉ¥¹Ñ¡í5Ñ ¹¥°¡1MM=9}IQIe}Q%5=UQ}5L¼ÄÀÀÀ¥õÌÉÑÉäÝ¥¹½Ü¸¡¬å½ÕÈ½¹¹Ñ¥½¸¹ÉÉÕ¸Ñ¡Í½±ÙÈ¸1ÑÈ±ÍÍ½¹Ì¹Ñ¡¡ÁÑÈÍÍÍÍµ¹ÐÝÉ¹½ÐÍÑÉÑ¹(¤ì(ÉÉ½È¹½ô1MM=9}9Q]=I-}Q%5=UPì(ÉÉ½È¹±ÍÍ½¹%ôMÑÉ¥¹¡±ÍÍ½¹%¤ì(ÉÉ½È¹ÕÍô±ÍÑ9ÑÝ½É­ÉÉ½Èì(Ñ¡É½ÜÉÉ½Èì(ô((¥¡ÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀÐ¤ì(½¹ÍÐÉÉ½Èô¹ÜÉÉ½È (1ÍÍ½¸í±ÍÍ½¹%ôÍÑ¥±°ÉÑÕÉ¹Ì!QQ@ÐÀÐÑÈí5Ñ ¹¥°¡1MM=9}IQIe}Q%5=UQ}5L¼ÄÀÀÀ¥õÌ½ÉÑÉ¥Ì¸¡¬Ñ¡Ðå½ÕÈÕ±ÐÉ½ÝÍÈ¥ÌÍ¥¹¥¸Ñ¼Ñ¡ÍµEUI<½Õ¹Ð°½µÁ±ÑÑ¡±ÍÍ½¸Ñ¡É°Ñ¡¸ÉÉÕ¸Ñ¡Í½±ÙÈ¸1ÑÈ±ÍÍ½¹Ì¹Ñ¡¡ÁÑÈÍÍÍÍµ¹ÐÝÉ¹½ÐÍÑÉÑ¹(¤ì(ÉÉ½È¹½ô1MM=9}9=Q}Y%1	1ì(ÉÉ½È¹ÍÑÑÕÌôÐÀÐì(ÉÉ½È¹±ÍÍ½¹%ôMÑÉ¥¹¡±ÍÍ½¹%¤ì(Ñ¡É½ÜÉÉ½Èì(ô((½¹ÍÐ½äôÝ¥ÐÉÍÁ½¹Íü¹ÑáÐ ¤¹Ñ   ¤ôø¤üüì(½¹ÍÐÉÉ½ÈôÉÉ½ÉÉ½µIÍÁ½¹Í¡¹Á½¥¹Ð°ÉÍÁ½¹Í°½äüìµÍÍè½ä¹Í±¥ À°ÈÀÀ¤ôè¹Õ±°¤ì(Ñ¡É½ÜÉÉ½Èì)ô
+      headers: { Accept: 'application/json, */*', Referer: referer },
+      timeoutMs: Math.min(LESSON_REQUEST_TIMEOUT_MS, remainingMs)
+    });
+  };
+
+  let response = null;
+  let lastNetworkError = null;
+  try {
+    response = await submitCompletion();
+  } catch (error) {
+    if (!isRetryableNetworkError(error)) throw error;
+    lastNetworkError = error;
+  }
+
+  if (response?.ok) {
+    onProgress('  lesson ' + lessonId + ': completed');
+    return;
+  }
+  if (response?.status === 400 || response?.status === 409) {
+    onProgress('  lesson ' + lessonId + ': already completed');
+    return;
+  }
+  if (response && !isRetryableResponse(response) && !lastNetworkError) {
+    const body = await response.text().catch(() => '');
+    throw errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
+  }
+
+  const needsPageInitialization = !response || response.status === 404;
+  if (needsPageInitialization) {
+    const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson page initialized';
+    onProgress('  lesson ' + lessonId + ': ' + reason + '; opening it in your default browser');
+    openLecturePage(referer);
+    onProgress('  lesson ' + lessonId + ': waiting ' + Math.ceil(LESSON_INIT_WAIT_MS / 1000) + 's for QUREO to initialize');
+    await wait(Math.min(LESSON_INIT_WAIT_MS, Math.max(0, deadline - Date.now())));
+  }
+
+  for (let attempt = 1; attempt <= LESSON_RETRY_ATTEMPTS && Date.now() < deadline; attempt++) {
+    try {
+      response = await submitCompletion();
+      lastNetworkError = null;
+    } catch (error) {
+      if (!isRetryableNetworkError(error)) throw error;
+      response = null;
+      lastNetworkError = error;
+    }
+
+    if (response && !isRetryableResponse(response)) break;
+
+    const remainingMs = deadline - Date.now();
+    if (attempt < LESSON_RETRY_ATTEMPTS && remainingMs > 0) {
+      const delayMs = Math.min(LESSON_RETRY_INTERVAL_MS, remainingMs);
+      const reason = lastNetworkError
+        ? 'network error (' + lastNetworkError.message + ')'
+        : 'HTTP ' + response.status;
+      onProgress('  lesson ' + lessonId + ': ' + reason + '; retry ' + attempt + '/' + LESSON_RETRY_ATTEMPTS + ' in ' + Math.ceil(delayMs / 1000) + 's');
+      await wait(delayMs);
+    }
+  }
+
+  if (response?.ok) {
+    onProgress('  lesson ' + lessonId + ': completed');
+    return;
+  }
+  if (response?.status === 400 || response?.status === 409) {
+    onProgress('  lesson ' + lessonId + ': already completed');
+    return;
+  }
+
+  if (!response && lastNetworkError) {
+    const error = new Error(
+      'Lesson ' + lessonId + ' could not be completed because the network kept failing during the ' +
+      Math.ceil(LESSON_RETRY_TIMEOUT_MS / 1000) +
+      's retry window. Check your connection and rerun the solver. Later lessons and the chapter assessment were not started.'
+    );
+    error.code = 'LESSON_NETWORK_TIMEOUT';
+    error.lessonId = String(lessonId);
+    error.cause = lastNetworkError;
+    throw error;
+  }
+
+  if (response?.status === 404) {
+    const error = new Error(
+      'Lesson ' + lessonId + ' still returns HTTP 404 after ' +
+      Math.ceil(LESSON_RETRY_TIMEOUT_MS / 1000) +
+      's of retries. Check that your default browser is signed in to the same QUREO account, complete the lesson there, then rerun the solver. Later lessons and the chapter assessment were not started.'
+    );
+    error.code = 'LESSON_NOT_AVAILABLE';
+    error.status = 404;
+    error.lessonId = String(lessonId);
+    throw error;
+  }
+
+  const body = response ? await response.text().catch(() => '') : '';
+  const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
+  throw error;
+}
 async function solveChapter(client, chapter, chapterMeta, questions, answers, { dryRun, onProgress }) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
