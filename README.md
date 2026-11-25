@@ -80,7 +80,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo config show` | View terminal configuration |
 | `qureo history` | View recent command names and timestamps |
 
-Run `qureo --help` for the complete command list. Detailed solver behavior and options are documented in [docs/solver.md](docs/solver.md) and [docs/usage.md](docs/usage.md). The terminal interface is documented in [docs/terminal-experience.md](docs/terminal-experience.md).
+Run `qureo --help` for the complete command list. See the [usage guide](docs/usage.md), [solver guide](docs/solver.md) and [terminal experience guide](docs/terminal-experience.md) for detailed command examples and behavior.
 
 ## Solver safety
 

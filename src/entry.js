@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { QureoHttpClient } from './http.js';
 import { getStats, listApiCourses, listApiChapters } from './db.js';
 import { DB_PATH } from './paths.js';
+import { formatDashboardMetrics } from './terminal.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.join(ROOT, 'data');
@@ -77,15 +78,10 @@ function dashboard(config) {
   const stats = getStats();
   const courses = listApiCourses();
   const chapters = listApiChapters();
-  if (config.dashboard.compact) {
-    console.log(paint('QUREO DASHBOARD', 'primary', config));
-    console.log(`  ${stats.apiCourses} courses · ${stats.apiChapters} chapters · ${stats.apiQuestions} questions · ${stats.customAnswers} saved answers`);
-  } else {
-    heading('QUREO DASHBOARD', config);
-    console.log('  Cached courses   ' + stats.apiCourses);
-    console.log('  Cached chapters  ' + stats.apiChapters);
-    console.log('  Cached questions ' + stats.apiQuestions);
-    console.log('  Saved answers    ' + stats.customAnswers);
+  if (config.dashboard.compact) console.log(paint('QUREO DASHBOARD', 'primary', config));
+  else heading('QUREO DASHBOARD', config);
+  for (const line of formatDashboardMetrics(stats, config.dashboard.compact).split('\n')) {
+    console.log('  ' + line);
   }
   if (!courses.length || !chapters.length) return console.log('  No progress cached. Run qureo sync.');
   for (const course of courses) {
