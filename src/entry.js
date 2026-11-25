@@ -77,18 +77,28 @@ function dashboard(config) {
   const stats = getStats();
   const courses = listApiCourses();
   const chapters = listApiChapters();
-  heading('QUREO DASHBOARD', config);
-  console.log('  Cached courses   ' + stats.apiCourses);
-  console.log('  Cached chapters  ' + stats.apiChapters);
-  console.log('  Cached questions ' + stats.apiQuestions);
-  console.log('  Saved answers    ' + stats.customAnswers);
-  console.log('');
+  if (config.dashboard.compact) {
+    console.log(paint('QUREO DASHBOARD', 'primary', config));
+    console.log(`  ${stats.apiCourses} courses · ${stats.apiChapters} chapters · ${stats.apiQuestions} questions · ${stats.customAnswers} saved answers`);
+  } else {
+    heading('QUREO DASHBOARD', config);
+    console.log('  Cached courses   ' + stats.apiCourses);
+    console.log('  Cached chapters  ' + stats.apiChapters);
+    console.log('  Cached questions ' + stats.apiQuestions);
+    console.log('  Saved answers    ' + stats.customAnswers);
+  }
   if (!courses.length || !chapters.length) return console.log('  No progress cached. Run qureo sync.');
   for (const course of courses) {
     const rows = chapters.filter(item => item.course_id === course.course_id);
     const completed = rows.filter(item => item.completed).length;
-    console.log('  ' + (course.title || course.course_id));
-    console.log('  ' + progressBar(completed, rows.length, 26, config) + '  ' + completed + '/' + rows.length);
+    if (config.dashboard.compact) {
+      const bar = config.progressBars ? progressBar(completed, rows.length, 12, config) + '  ' : '';
+      console.log('  ' + (course.title || course.course_id) + '  ' + bar + completed + '/' + rows.length);
+    } else {
+      console.log('  ' + (course.title || course.course_id));
+      if (config.progressBars) console.log('  ' + progressBar(completed, rows.length, 26, config) + '  ' + completed + '/' + rows.length);
+      else console.log('  ' + completed + '/' + rows.length + ' chapters completed');
+    }
   }
 }
 function status(config) {
@@ -105,7 +115,7 @@ function status(config) {
 async function doctor(config) {
   heading('QUREO DOCTOR', config);
   const checks = [
-    ['Node.js >= 22', Number(process.versions.node.split('.')[0]) >= 22],
+    ['Node.js >= 22.12', Number(process.versions.node.split('.')[0]) > 22 || (Number(process.versions.node.split('.')[0]) === 22 && Number(process.versions.node.split('.')[1]) >= 12)],
     ['Windows DPAPI platform', process.platform === 'win32'],
     ['PowerShell 7', process.platform !== 'win32' || spawnSync('pwsh', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { encoding: 'utf8', windowsHide: true }).status === 0],
     ['SQLite database', fs.existsSync(DB_PATH)],
@@ -180,7 +190,11 @@ async function main() {
     if (!allowed.includes(key)) throw new Error('Unsupported configuration key: ' + key);
     const value = raw === 'true' ? true : raw === 'false' ? false : /^\d+$/.test(raw) ? Number(raw) : raw;
     if (key === 'theme' && !['auto','cyan','green','amber','monochrome','none'].includes(value)) throw new Error('Invalid theme.');
-    if (key === 'dashboard.compact') config.dashboard.compact = Boolean(value);
+    if (key === 'dashboard.compact' && typeof value !== 'boolean') throw new Error('dashboard.compact must be true or false.');
+    if (key === 'progressBars' && typeof value !== 'boolean') throw new Error('progressBars must be true or false.');
+    if (key === 'commandSuggestions' && typeof value !== 'boolean') throw new Error('commandSuggestions must be true or false.');
+    if (key === 'historyLimit' && (!Number.isInteger(value) || value < 10 || value > 1000)) throw new Error('historyLimit must be an integer from 10 to 1000.');
+    if (key === 'dashboard.compact') config.dashboard.compact = value;
     else config[key] = value;
     writeConfig(config);
     console.log('Updated ' + key + ' in qureo.config.json');
