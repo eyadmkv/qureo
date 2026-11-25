@@ -137,7 +137,10 @@ function completion() {
     '  $commands | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, "Command", $_) }',
     "}"
   ].join('\n') + '\n';
-  const profile = path.join(os.homedir(), 'Documents', 'PowerShell', 'Microsoft.PowerShell_profile.ps1');
+  const profileResult = spawnSync('pwsh', ['-NoProfile', '-Command', '[Console]::Write($PROFILE)'], { encoding: 'utf8', windowsHide: true });
+  const profile = profileResult.status === 0 && profileResult.stdout.trim()
+    ? profileResult.stdout.trim()
+    : path.join(os.homedir(), 'Documents', 'PowerShell', 'Microsoft.PowerShell_profile.ps1');
   if (process.argv.includes('--install')) {
     fs.mkdirSync(path.dirname(profile), { recursive: true });
     const current = fs.existsSync(profile) ? fs.readFileSync(profile, 'utf8') : '';
