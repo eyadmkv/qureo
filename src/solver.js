@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { ROOT } from './paths.js';
 
@@ -118,31 +119,73 @@ async function waitForChapterCompletion(client, sectionId, chapterId, attempts =
   return false;
 }
 
+function openLecturePage(url) {
+  if (process.platform !== 'win32') {
+    throw new Error('Automatic lecture initialization currently requires Windows.');
+  }
+  const quotedUrl = url.replace(/'/g, "''");
+  const result = spawnSync('pwsh', [
+    '-NoProfile',
+    '-NonInteractive',
+    '-Command',
+    `Start-Process -FilePath '${quotedUrl}'`
+  ], { encoding: 'utf8', windowsHide: true });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error((result.stderr || 'Could not open the QUREO lesson in your default browser.').trim());
+  }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress) {
   const lessonId = lesson?.id ?? lesson?.lecture_id;
   if (lessonId === undefined || lessonId === null) return;
   const endpoint = `/students/lectures/${encodeURIComponent(lessonId)}/complete`;
   const referer = `${COURSE_ORIGIN}/chapter/${chapterId}/lecture/${lessonId}`;
+  const lectureUrl = referer;
   if (dryRun) {
     onProgress(`  [dry-run] complete lesson ${lessonId}`);
     return;
   }
-  const response = await client.request(`${API_BASE}${endpoint}`, {
+
+  const submitCompletion = () => client.request(`${API_BASE}${endpoint}`, {
     method: 'PUT',
     headers: { Accept: 'application/json, */*', Referer: referer }
   });
+
+  let response = await submitCompletion();
+  if (response.status === 404) {
+    onProgress(`  lesson ${lessonId}: API returned 404 before the lesson page initialized; opening it in your default browser`);
+    openLecturePage(lectureUrl);
+    onProgress(`  lesson ${lessonId}: waiting for QUREO to initialize`);
+    await wait(2500);
+
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      response = await submitCompletion();
+      if (response.status !== 404) break;
+      if (attempt < 4) {
+        onProgress(`  lesson ${lessonId}: still initializing; retry ${attempt}/4`);
+        await wait(1000);
+      }
+    }
+  }
+
   if (response.ok) {
     onProgress(`  lesson ${lessonId}: completed`);
     return;
   }
-  const body = await response.text().catch(() => '');
   if (response.status === 400 || response.status === 409) {
     onProgress(`  lesson ${lessonId}: already completed`);
     return;
   }
+
+  const body = await response.text().catch(() => '');
   if (response.status === 404) {
     const error = new Error(
-      `Lesson ${lessonId} could not be completed (HTTP 404). Stop here, finish this lesson in QUREO, then rerun the solver. Later lessons and the chapter assessment were not started.`
+      `Lesson ${lessonId} still returns HTTP 404 after opening its page. Check that your default browser is signed in to the same QUREO account, complete the lesson there, then rerun the solver. Later lessons and the chapter assessment were not started.`
     );
     error.code = 'LESSON_NOT_AVAILABLE';
     error.status = 404;
