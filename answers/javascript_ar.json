@@ -2,30 +2,826 @@
   "schema_version": 1,
   "course_id": "javascript_ar",
   "answers": {
+    "90001010": {
+      "type": "choice",
+      "choice_id": 900010101
+    },
+    "90001020": {
+      "type": "description",
+      "answer_code": "console.log(\"Good morning\");"
+    },
+    "90001030": {
+      "type": "description",
+      "answer_code": "console.log(\"Programming\");"
+    },
+    "90001040": {
+      "type": "description",
+      "answer_code": "console.log(\"Hello\");"
+    },
+    "90001050": {
+      "type": "choice",
+      "choice_id": 900010501
+    },
+    "90001060": {
+      "type": "description",
+      "answer_code": "console.log(\"Hello.\");\nconsole.log(\"My name is\");\n//console.log(\"Rick.\");\nconsole.log(\"Cody.\");"
+    },
+    "90002010": {
+      "type": "choice",
+      "choice_id": 900020101
+    },
+    "90002020": {
+      "type": "choice",
+      "choice_id": 900020201
+    },
+    "90002030": {
+      "type": "description",
+      "answer_code": "console.log(19 + 40);"
+    },
+    "90002040": {
+      "type": "description",
+      "answer_code": "console.log(7 - 2);"
+    },
+    "90002050": {
+      "type": "description",
+      "answer_code": "console.log(15 / 5);"
+    },
+    "90002060": {
+      "type": "choice",
+      "choice_id": 900020601
+    },
+    "90002070": {
+      "type": "description",
+      "answer_code": "console.log(\"The answer is \" + (2 * 5) + \".\");"
+    },
+    "90003010": {
+      "type": "choice",
+      "choice_id": 900030101
+    },
+    "90003020": {
+      "type": "choice",
+      "choice_id": 900030201
+    },
+    "90003030": {
+      "type": "description",
+      "answer_code": "let number;"
+    },
+    "90003040": {
+      "type": "description",
+      "answer_code": "let number;\nnumber = 100;"
+    },
+    "90003050": {
+      "type": "description",
+      "answer_code": "let number;\nnumber = 10;\nconsole.log(number);"
+    },
+    "90003060": {
+      "type": "description",
+      "answer_code": "let number;\nnumber = 3;\nnumber = number + 10;\nconsole.log(number);"
+    },
+    "90004010": {
+      "type": "choice",
+      "choice_id": 900040101
+    },
+    "90004020": {
+      "type": "description",
+      "answer_code": "console.log(\"Hello\");"
+    },
+    "90004030": {
+      "type": "description",
+      "answer_code": "//Leave this text.\nconsole.log(\"Make the first line a comment.\");"
+    },
+    "90004040": {
+      "type": "choice",
+      "choice_id": 900040401
+    },
+    "90004050": {
+      "type": "choice",
+      "choice_id": 900040501
+    },
+    "90004060": {
+      "type": "description",
+      "answer_code": "console.log(\"The answer is \" + (3 * 5) + \".\");"
+    },
+    "90004070": {
+      "type": "choice",
+      "choice_id": 900040701
+    },
+    "90004080": {
+      "type": "description",
+      "answer_code": "let num;\nnum = 5;\nconsole.log(num);"
+    },
+    "90005010": {
+      "type": "description",
+      "answer_code": "let num = 5;\nconsole.log(num);"
+    },
+    "90005020": {
+      "type": "choice",
+      "choice_id": 900050201
+    },
+    "90005030": {
+      "type": "choice",
+      "choice_id": 900050301
+    },
+    "90005040": {
+      "type": "description",
+      "answer_code": "let num = 100;\nif (num == 100) {\n  console.log(\"Correct\");\n}"
+    },
+    "90005050": {
+      "type": "choice",
+      "choice_id": 900050501
+    },
+    "90006010": {
+      "type": "choice",
+      "choice_id": 900060101
+    },
+    "90006020": {
+      "type": "description",
+      "answer_code": "let num = 5;\nif (num == 10) {\n  console.log(\"Win\");\n} else {\n  console.log(\"Lose\");\n}"
+    },
+    "90006030": {
+      "type": "choice",
+      "choice_id": 900060301
+    },
+    "90006040": {
+      "type": "choice",
+      "choice_id": 900060401
+    },
+    "90006050": {
+      "type": "description",
+      "answer_code": "let score = 80;\nif (score >= 60) {\n  console.log(\"Pass\");\n} else {\n  console.log(\"Fail\");\n}"
+    },
+    "90007010": {
+      "type": "choice",
+      "choice_id": 900070101
+    },
+    "90007020": {
+      "type": "description",
+      "answer_code": "let num = 2;\nif (num == 1) {\n  console.log(\"One\");\n} else if (num == 2) {\n  console.log(\"Two\");\n}"
+    },
+    "90007030": {
+      "type": "description",
+      "answer_code": "let score = 82;\nif (score == 100) {\n  console.log(\"Perfect score\");\n} else if (score >= 80) {\n  console.log(\"Pass\");\n}"
+    },
+    "90007040": {
+      "type": "choice",
+      "choice_id": 900070401
+    },
+    "90007050": {
+      "type": "description",
+      "answer_code": "let egg = 5;\nif (egg == 0) {\n  console.log(\"No stock\");\n} else if (egg <= 3) {\n  console.log(\"Low stock\");\n} else {\n  console.log(\"In stock\");\n}"
+    },
+    "90008010": {
+      "type": "description",
+      "answer_code": "let num = 7;\nif (num == 7) {\n  console.log(\"Correct\");\n}"
+    },
+    "90008020": {
+      "type": "choice",
+      "choice_id": 900080201
+    },
+    "90008030": {
+      "type": "description",
+      "answer_code": "let score = 70;\nif (score >= 60) {\n  console.log(\"Pass\");\n} else {\n  console.log(\"Fail\");\n}"
+    },
+    "90008040": {
+      "type": "choice",
+      "choice_id": 900080401
+    },
+    "90008050": {
+      "type": "description",
+      "answer_code": "let num = 100;\nif (num == 100) {\n  console.log(\"correct\");\n} else {\n  console.log(\"miss\");\n}"
+    },
+    "90008060": {
+      "type": "choice",
+      "choice_id": 900080601
+    },
+    "90008070": {
+      "type": "description",
+      "answer_code": "let num = 4;\nif (num <= 3) {\n  console.log(\"A\");\n} else if (num >= 6) {\n  console.log(\"B\");\n} else {\n  console.log(\"C\");\n}"
+    },
+    "90009010": {
+      "type": "choice",
+      "choice_id": 900090101
+    },
+    "90009020": {
+      "type": "choice",
+      "choice_id": 900090201
+    },
+    "90009030": {
+      "type": "choice",
+      "choice_id": 900090301
+    },
+    "90009040": {
+      "type": "description",
+      "answer_code": "let a = 5;\nlet b = 10;\nif (a == 5 || b == 10) {\n  console.log(\"Condition met\");\n}"
+    },
+    "90009050": {
+      "type": "description",
+      "answer_code": "let a = 4;\nlet b = 3;\nif (a >= 2 && b >= 3) {\n  console.log(\"Condition met\");\n}"
+    },
+    "90010010": {
+      "type": "choice",
+      "choice_id": 900100101
+    },
+    "90010020": {
+      "type": "choice",
+      "choice_id": 900100201
+    },
+    "90010030": {
+      "type": "choice",
+      "choice_id": 900100301
+    },
+    "90010040": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 5; i++) {\n  console.log(\"Hello\");\n}"
+    },
+    "90010050": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 7; i++) {\n  console.log(\"Hello\");\n}"
+    },
+    "90011010": {
+      "type": "choice",
+      "choice_id": 900110101
+    },
+    "90011020": {
+      "type": "choice",
+      "choice_id": 900110201
+    },
+    "90011030": {
+      "type": "choice",
+      "choice_id": 900110301
+    },
+    "90011040": {
+      "type": "choice",
+      "choice_id": 900110401
+    },
+    "90011050": {
+      "type": "choice",
+      "choice_id": 900110501
+    },
+    "90011060": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 10; i++) {\n  console.log(\"Good morning\");\n}"
+    },
+    "90011070": {
+      "type": "description",
+      "answer_code": "let a = 4;\nlet b = 3;\nif (a >= 2 && b >= 3) {\n  console.log(\"Condition met\");\n}"
+    },
+    "90011080": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 3; i++) {\n  console.log(\"Hello\");\n}"
+    },
+    "90012010": {
+      "type": "choice",
+      "choice_id": 900120101
+    },
+    "90012020": {
+      "type": "choice",
+      "choice_id": 900120201
+    },
+    "90012030": {
+      "type": "choice",
+      "choice_id": 900120301
+    },
+    "90012040": {
+      "type": "choice",
+      "choice_id": 900120401
+    },
+    "90012050": {
+      "type": "description",
+      "answer_code": "function calc(num) {\n  let result = num * 5;\n  return result;\n}\nconsole.log(calc(3));"
+    },
+    "90012060": {
+      "type": "description",
+      "answer_code": "function calc(num) {\n  let result = num * 7;\n  return result;\n}\nconsole.log(calc(10));"
+    },
+    "90013010": {
+      "type": "choice",
+      "choice_id": 900130101
+    },
+    "90013020": {
+      "type": "choice",
+      "choice_id": 900130201
+    },
+    "90013030": {
+      "type": "choice",
+      "choice_id": 900130301
+    },
+    "90013040": {
+      "type": "description",
+      "answer_code": "console.log(Math.round(5.5));\nconsole.log(Math.floor(8.8));"
+    },
+    "90013050": {
+      "type": "description",
+      "answer_code": "if (Math.random() >= 0.5) {\n  console.log(\"Excellent luck\");\n} else {\n  console.log(\"Bad luck\");\n}"
+    },
+    "90013060": {
+      "type": "description",
+      "answer_code": "console.log(Math.floor(Math.random() * 10));"
+    },
+    "90014010": {
+      "type": "choice",
+      "choice_id": 900140101
+    },
+    "90014020": {
+      "type": "choice",
+      "choice_id": 900140201
+    },
+    "90014030": {
+      "type": "choice",
+      "choice_id": 900140301
+    },
+    "90014040": {
+      "type": "choice",
+      "choice_id": 900140401
+    },
+    "90014050": {
+      "type": "description",
+      "answer_code": "console.log(Math.floor(Math.random() * 10));"
+    },
+    "90014060": {
+      "type": "choice",
+      "choice_id": 900140601
+    },
+    "90014070": {
+      "type": "description",
+      "answer_code": "function calc(num) {\n  let result = num * 7;\n  return result;\n}\nconsole.log(calc(10));"
+    },
+    "90014080": {
+      "type": "description",
+      "answer_code": "function calc(num) {\n  let result = num * 5;\n  return result;\n}\nconsole.log(calc(7));"
+    },
+    "90015010": {
+      "type": "choice",
+      "choice_id": 900150101
+    },
+    "90015020": {
+      "type": "choice",
+      "choice_id": 900150201
+    },
+    "90015030": {
+      "type": "choice",
+      "choice_id": 900150301
+    },
+    "90015040": {
+      "type": "choice",
+      "choice_id": 900150401
+    },
+    "90015050": {
+      "type": "description",
+      "answer_code": "console.log(typeof \"7\");"
+    },
+    "90016010": {
+      "type": "description",
+      "answer_code": "let num = [5, 10, 15];"
+    },
+    "90016020": {
+      "type": "choice",
+      "choice_id": 900160201
+    },
+    "90016030": {
+      "type": "description",
+      "answer_code": "let num = [5, 10, 15, 20, 25];\nconsole.log(num);"
+    },
+    "90016040": {
+      "type": "choice",
+      "choice_id": 900160401
+    },
+    "90016050": {
+      "type": "description",
+      "answer_code": "let num = [5, 10, 15, 20, 25];\nconsole.log(num.length);"
+    },
+    "90017010": {
+      "type": "choice",
+      "choice_id": 900170101
+    },
+    "90017020": {
+      "type": "choice",
+      "choice_id": 900170201
+    },
+    "90017030": {
+      "type": "choice",
+      "choice_id": 900170301
+    },
+    "90017040": {
+      "type": "choice",
+      "choice_id": 900170401
+    },
+    "90017050": {
+      "type": "description",
+      "answer_code": "console.log(typeof 100);"
+    },
+    "90017060": {
+      "type": "description",
+      "answer_code": "let num = [10, 50, 100, 150];"
+    },
+    "90017070": {
+      "type": "choice",
+      "choice_id": 900170701
+    },
+    "90017080": {
+      "type": "description",
+      "answer_code": "let num = [2, 4, 6, 8, 10];\nconsole.log(num);"
+    },
+    "90017090": {
+      "type": "choice",
+      "choice_id": 900170901
+    },
+    "90017100": {
+      "type": "description",
+      "answer_code": "let num = [2, 4, 6, 8, 10];\nconsole.log(num.length);"
+    },
+    "90018010": {
+      "type": "description",
+      "answer_code": "<h1>Hello</h1>"
+    },
+    "90018020": {
+      "type": "choice",
+      "choice_id": 900180201
+    },
+    "90018030": {
+      "type": "choice",
+      "choice_id": 900180301
+    },
+    "90018040": {
+      "type": "choice",
+      "choice_id": 900180401
+    },
+    "90018050": {
+      "type": "choice",
+      "choice_id": 900180501
+    },
+    "90018060": {
+      "type": "choice",
+      "choice_id": 900180601
+    },
+    "90018070": {
+      "type": "choice",
+      "choice_id": 900180701
+    },
+    "90018080": {
+      "type": "description",
+      "answer_code": "<!--The h1 tag is a heading.-->\n<h1>Hello</h1>"
+    },
+    "90019010": {
+      "type": "description",
+      "answer_code": "h1 {\n  color: red;\n}"
+    },
+    "90019020": {
+      "type": "description",
+      "answer_code": "h1 {\n  color: blue;\n}"
+    },
+    "90019030": {
+      "type": "choice",
+      "choice_id": 900190301
+    },
+    "90019040": {
+      "type": "choice",
+      "choice_id": 900190401
+    },
+    "90019050": {
+      "type": "choice",
+      "choice_id": 900190501
+    },
+    "90019060": {
+      "type": "choice",
+      "choice_id": 900190601
+    },
+    "90019070": {
+      "type": "description",
+      "answer_code": ".dog {\n  color: blue;\n}"
+    },
+    "90019080": {
+      "type": "description",
+      "answer_code": "/*Change the text color to navy.*/\np {\n  color: navy;\n}"
+    },
+    "90020010": {
+      "type": "description",
+      "answer_code": "<p>Good morning</p>"
+    },
+    "90020020": {
+      "type": "choice",
+      "choice_id": 900200201
+    },
+    "90020030": {
+      "type": "choice",
+      "choice_id": 900200301
+    },
+    "90020040": {
+      "type": "choice",
+      "choice_id": 900200401
+    },
+    "90020050": {
+      "type": "description",
+      "answer_code": "h1 {\n  color: yellow;\n}"
+    },
+    "90020060": {
+      "type": "choice",
+      "choice_id": 900200601
+    },
+    "90020070": {
+      "type": "choice",
+      "choice_id": 900200701
+    },
+    "90020080": {
+      "type": "description",
+      "answer_code": "h3 {\n  color: red;\n}"
+    },
+    "90020090": {
+      "type": "description",
+      "answer_code": ".fish {\n  color: blue;\n}"
+    },
+    "90021010": {
+      "type": "choice",
+      "choice_id": 900210101
+    },
+    "90021020": {
+      "type": "description",
+      "answer_code": "let A = 5;\nlet B = 10;\nif (A > B) {\n  console.log(\"A is larger\");\n} else if (A < B) {\n  console.log(\"B is larger\");\n}"
+    },
+    "90021030": {
+      "type": "choice",
+      "choice_id": 900210301
+    },
+    "90021040": {
+      "type": "choice",
+      "choice_id": 900210401
+    },
+    "90021050": {
+      "type": "choice",
+      "choice_id": 900210501
+    },
+    "90021060": {
+      "type": "choice",
+      "choice_id": 900210601
+    },
+    "90021070": {
+      "type": "description",
+      "answer_code": "let numberOfPeople = 8;\nlet weight = 400;\nif (numberOfPeople <= 10 || weight <= 800) {\n  console.log(\"You can ride the elevator\");\n}"
+    },
+    "90021080": {
+      "type": "choice",
+      "choice_id": 900210801
+    },
+    "90021090": {
+      "type": "description",
+      "answer_code": "let math = 100;\nlet science = 100;\nif (math == 100) {\n  console.log(\"Math is 100 points\");\n  if (science == 100) {\n    console.log(\"Math and science are 100 points\");\n  }\n}"
+    },
+    "90022010": {
+      "type": "choice",
+      "choice_id": 900220101
+    },
+    "90022020": {
+      "type": "choice",
+      "choice_id": 900220201
+    },
+    "90022030": {
+      "type": "choice",
+      "choice_id": 900220301
+    },
+    "90022040": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 3; i++) {\n  console.log(\"Programming\");\n}"
+    },
+    "90022050": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 7; i++) {\n  console.log(\"Good morning\");\n}"
+    },
+    "90022060": {
+      "type": "choice",
+      "choice_id": 900220601
+    },
+    "90022070": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 5; i++) {\n  console.log(\"sit-ups\");\n  if (i == 4) {\n    console.log(\"End\");\n  }\n}"
+    },
+    "90022080": {
+      "type": "choice",
+      "choice_id": 900220801
+    },
+    "90022090": {
+      "type": "choice",
+      "choice_id": 900220901
+    },
+    "90023010": {
+      "type": "choice",
+      "choice_id": 900230101
+    },
+    "90023020": {
+      "type": "choice",
+      "choice_id": 900230201
+    },
+    "90023030": {
+      "type": "choice",
+      "choice_id": 900230301
+    },
+    "90023040": {
+      "type": "description",
+      "answer_code": "function divide5(total) {\n  let num = total / 5;\n  return num;\n}\nconsole.log(divide5(35));"
+    },
+    "90023050": {
+      "type": "choice",
+      "choice_id": 900230501
+    },
+    "90023060": {
+      "type": "description",
+      "answer_code": "function goodNight() {\n  let greeting = \"Good night!\";\n  return greeting;\n}\nconsole.log(goodNight());"
+    },
+    "90023070": {
+      "type": "description",
+      "answer_code": "function mul(num1, num2) {\n  let answer = num1 * num2;\n  return answer;\n}\nconsole.log(mul(9, 7));"
+    },
+    "90024010": {
+      "type": "description",
+      "answer_code": "let A = 5;\nlet B = 10;\nif (A > B) {\n  console.log(\"A is larger\");\n} else if (A < B) {\n  console.log(\"B is larger\");\n}"
+    },
+    "90024020": {
+      "type": "choice",
+      "choice_id": 900240201
+    },
+    "90024030": {
+      "type": "description",
+      "answer_code": "let science = 100;\nlet math = 100;\nif (science == 100) {\n  console.log(\"Science is 100 points\");\n  if (math == 100) {\n    console.log(\"Science and Math are 100 points\");\n  }\n}"
+    },
+    "90024040": {
+      "type": "description",
+      "answer_code": "for (let i = 0; i < 7; i++) {\n  console.log(\"Good morning\");\n}"
+    },
+    "90024050": {
+      "type": "choice",
+      "choice_id": 900240501
+    },
+    "90024060": {
+      "type": "choice",
+      "choice_id": 900240601
+    },
+    "90024070": {
+      "type": "choice",
+      "choice_id": 900240701
+    },
+    "90024080": {
+      "type": "description",
+      "answer_code": "function divide3(num) {\n  let result = num / 3;\n  return result;\n}\nconsole.log(divide3(12345));"
+    },
+    "90024090": {
+      "type": "choice",
+      "choice_id": 900240901
+    },
+    "90024100": {
+      "type": "description",
+      "answer_code": "function mul(num1, num2) {\n  let result = num1 * num2;\n  return result;\n}\nconsole.log(mul(9, 7));"
+    },
+    "90025010": {
+      "type": "choice",
+      "choice_id": 900250101
+    },
+    "90025020": {
+      "type": "description",
+      "answer_code": "let num = 1;\nfor (let i = 0; i < 5; i++) {\n  num = num * 7;\n}\nconsole.log(num);"
+    },
+    "90025030": {
+      "type": "choice",
+      "choice_id": 900250301
+    },
+    "90025040": {
+      "type": "description",
+      "answer_code": "let num = 0;\nfor (let i = 0; i < 6; i++) {\n  num = num + i;\n}\nconsole.log(num);"
+    },
+    "90025050": {
+      "type": "description",
+      "answer_code": "let num = 5040;\nfor (let i = 1; i <= 5; i++) {\n  num = num / i;\n}\nconsole.log(num);"
+    },
+    "90026010": {
+      "type": "choice",
+      "choice_id": 900260101
+    },
+    "90026020": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];\nconsole.log(scoreList[5]);"
+    },
+    "90026030": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];\nlet sum = 0;\nfor (let i = 0; i < 7; i++) {\n  sum = sum + scoreList[i];\n}\nconsole.log(sum / 7);"
+    },
+    "90026040": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];\nconsole.log(scoreList.length);"
+    },
+    "90026050": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];\nfor (let i = 0; i < scoreList.length; i++) {\n  if (scoreList[i] >= 80) {\n    console.log(\"80 points or higher\");\n  }\n}"
+    },
+    "90027010": {
+      "type": "description",
+      "answer_code": "let num = 1;\nfor (let i = 0; i < 3; i++) {\n  num = num * 9;\n}\nconsole.log(num);"
+    },
+    "90027020": {
+      "type": "choice",
+      "choice_id": 900270201
+    },
+    "90027030": {
+      "type": "description",
+      "answer_code": "let num = 5040;\nfor (let i = 1; i <= 5; i++) {\n  num = num / i;\n}\nconsole.log(num);"
+    },
+    "90027040": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];\nconsole.log(scoreList[4]);"
+    },
+    "90027050": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];\nconsole.log(scoreList.length);"
+    },
+    "90027060": {
+      "type": "description",
+      "answer_code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];\nfor (let i = 0; i < scoreList.length; i++) {\n  if (scoreList[i] >= 80) {\n    console.log(\"Pass\");\n  }\n}"
+    },
+    "90028010": {
+      "type": "choice",
+      "choice_id": 900280101
+    },
+    "90028020": {
+      "type": "choice",
+      "choice_id": 900280201
+    },
+    "90028030": {
+      "type": "choice",
+      "choice_id": 900280301
+    },
+    "90028040": {
+      "type": "description",
+      "answer_code": "let numList = [2, 4, 6, 8];\nfor (let num of numList) {\n  console.log(num);\n}"
+    },
+    "90028050": {
+      "type": "description",
+      "answer_code": "let wordList = [\"Good morning\", \"Good night\", \"Hello\"];\nfor (let word of wordList) {\n  console.log(word);\n}"
+    },
+    "90029010": {
+      "type": "description",
+      "answer_code": "let A = 5;\nlet B = 10;\nif (A > B) {\n  console.log(\"A is bigger\");\n} else if (A < B) {\n  console.log(\"B is bigger\");\n}"
+    },
+    "90029020": {
+      "type": "choice",
+      "choice_id": 900290201
+    },
+    "90029030": {
+      "type": "choice",
+      "choice_id": 900290301
+    },
+    "90029040": {
+      "type": "description",
+      "answer_code": "let weather = \"sunny\";\nlet shop = \"OPEN\";\nif (weather == \"sunny\") {\n  if (shop == \"OPEN\") {\n    console.log(\"Go to the shop\");\n  }\n} else {\n  console.log(\"Staying at home\");\n}"
+    },
+    "90029050": {
+      "type": "description",
+      "answer_code": "let weather = \"rain\";\nlet time = \"morning\";\nif (weather == \"rain\") {\n  if (time == \"morning\") {\n    console.log(\"Let's go to the movie theater\");\n  } else if (time == \"noon\") {\n    console.log(\"Let's go to the library\");\n  } else {\n    console.log(\"Let's stay at home\");\n  }\n} else {\n  console.log(\"Let's go for a walk\");\n}"
+    },
+    "90030010": {
+      "type": "choice",
+      "choice_id": 900300101
+    },
+    "90030020": {
+      "type": "description",
+      "answer_code": "let numList = [2, 4, 6, 8];\nfor (let num of numList) {\n  console.log(num);\n}"
+    },
+    "90030030": {
+      "type": "description",
+      "answer_code": "let wordList = [\"Good morning\", \"Good night\", \"Hello\"];\nfor (let word of wordList) {\n  console.log(word);\n}"
+    },
+    "90030040": {
+      "type": "choice",
+      "choice_id": 900300401
+    },
+    "90030050": {
+      "type": "choice",
+      "choice_id": 900300501
+    },
+    "90030060": {
+      "type": "description",
+      "answer_code": "let weather = \"rain\";\nlet time = \"morning\";\nif (weather == \"rain\") {\n  if (time == \"morning\") {\n    console.log(\"Let's go to the movie theater\");\n  } else if (time == \"noon\") {\n    console.log(\"Let's go to the library\");\n  } else {\n    console.log(\"Let's stay at home\");\n  }\n} else {\n  console.log(\"Let's go for a walk\");\n}"
+    },
     "90043010": {
       "type": "choice",
       "choice_id": 900430101,
-      "explanation": "The selector span targets the span element, and green is a valid CSS color value."
+      "explanation": "The selector targets the span element and sets its text color to green."
     },
     "90043020": {
       "type": "choice",
       "choice_id": 900430201,
-      "explanation": "RGB 255, 255, 0 is full red plus full green and no blue, which produces yellow."
+      "explanation": "RGB (255, 255, 0) represents yellow."
     },
     "90043030": {
       "type": "choice",
       "choice_id": 900430301,
-      "explanation": "The hexadecimal equivalent of RGB 255, 255, 0 is #ffff00."
+      "explanation": "#ffff00 is the hexadecimal representation of yellow."
     },
     "90043040": {
       "type": "choice",
       "choice_id": 900430401,
-      "explanation": "The opacity property controls how opaque or transparent an element appears."
+      "explanation": "The opacity property controls an element's transparency."
     },
     "90043050": {
       "type": "choice",
       "choice_id": 900430501,
-      "explanation": "Opacity 0 means the element is fully transparent."
+      "explanation": "Opacity 0 makes the element fully transparent."
     }
   }
 }
