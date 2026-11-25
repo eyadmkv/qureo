@@ -142,9 +142,28 @@ export class QureoHttpClient {
 
   async json(path) {
     const response = await this.request(`${API_BASE}${path}`, { method: 'GET' });
-    if (response.status === 401 || response.status === 403) throw new Error(`QUREO API authentication expired (HTTP ${response.status}). Run qureo login again.`);
-    if (!response.ok) throw new Error(`QUREO API request failed: GET ${path} returned HTTP ${response.status}.`);
     const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const code = data?.not_fulfill_preconditions
+        ? 'PRECONDITION_NOT_FULFILLED'
+        : response.status === 401
+          ? 'AUTH_EXPIRED'
+          : response.status === 403
+            ? 'FORBIDDEN'
+            : 'HTTP_ERROR';
+      const message = code === 'PRECONDITION_NOT_FULFILLED'
+        ? `QUREO preconditions are not fulfilled for GET ${path} (HTTP 403).`
+        : code === 'AUTH_EXPIRED'
+          ? `QUREO API authentication expired (HTTP 401). Run qureo login again.`
+          : code === 'FORBIDDEN'
+            ? `QUREO denied access to GET ${path} (HTTP 403).`
+            : `QUREO API request failed: GET ${path} returned HTTP ${response.status}.`;
+      const error = new Error(message);
+      error.code = code;
+      error.status = response.status;
+      error.payload = data;
+      throw error;
+    }
     if (data === null) throw new Error(`QUREO returned a non-JSON response for ${path}.`);
     return data;
   }
