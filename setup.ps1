@@ -32,7 +32,7 @@ npm link
 if ($LASTEXITCODE -ne 0) { throw 'npm link failed.' }
 
 Write-Host ''
-Write-Host 'Setup complete. No browser or Playwright installation is required.' -ForegroundColor Green
+Write-Host 'Setup complete. No Playwright package or browser driver is installed.' -ForegroundColor Green
 Write-Host 'Next: qureo login'
 Write-Host 'Then: qureo sync'
 Write-Host 'Then: qureo export'
