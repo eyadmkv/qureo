@@ -11,3 +11,4 @@ data/
 *.dpapi
 .env
 .env.*
+qureo.config.json

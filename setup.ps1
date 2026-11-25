@@ -5,10 +5,10 @@ Set-Location $ProjectRoot
 Write-Host 'QUREO Personal CLI 0.3.0 setup' -ForegroundColor Cyan
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    throw 'Node.js is not installed. Install Node.js 22 or newer, reopen PowerShell, then retry.'
+    throw 'Node.js is not installed. Install Node.js 22.12 or newer, reopen PowerShell, then retry.'
 }
-$NodeMajor = [int](node -p "process.versions.node.split('.')[0]")
-if ($NodeMajor -lt 22) { throw "Node.js 22 or newer is required. Detected $(node --version)." }
+$NodeVersion = [version](node -p "process.versions.node")
+if ($NodeVersion -lt [version]'22.12.0') { throw "Node.js 22.12 or newer is required. Detected $(node --version)." }
 if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { throw 'npm was not found. Repair your Node.js installation and retry.' }
 if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) { throw 'PowerShell 7 (pwsh) is required for Windows DPAPI session encryption.' }
 

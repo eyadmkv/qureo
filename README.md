@@ -1,183 +1,120 @@
-# QUREO Personal CLI 0.3.0
+# QUREO Personal CLI
 
-A private, local-only, HTTP-based QUREO client for Windows and PowerShell 7. It uses direct HTTPS requests (`POST` for login and `GET` for account/course/question data), SQLite for a personal archive, and Windows DPAPI to encrypt the local session cookie jar.
+[![CI](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml/badge.svg)](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The CLI does not store the password or send credentials to a third-party service. When QUREO returns HTTP 404 for a lesson-completion request, the solver opens that lesson in your default browser so the QUREO lesson app can initialize, then retries the completion request. Keep the browser signed in to the same QUREO account. The solver submits only answers from the local answer bank and never probes for hidden answer keys.
+An unofficial, Windows-focused command-line client for working with your own QUREO account. It provides course and progress sync, local SQLite caching, JSON exports, question and answer search, and an optional progress-aware chapter solver.
+
+This project is independent and is not affiliated with, endorsed by, or supported by QUREO or its operators. It uses undocumented service endpoints that may change without notice.
+
+## Features
+
+- Authenticate with QUREO and store the session encrypted using Windows DPAPI.
+- Sync account, course, chapter and progress metadata.
+- Cache retrieved question data in a local SQLite database.
+- Export course metadata, lessons and available assessment questions to JSON.
+- Search locally stored questions, public guides and your own answer notes.
+- Run the chapter solver with sequential safeguards, checkpoints and configurable pauses.
+- View local progress with `dashboard`, `status` and `doctor`.
+- Configure terminal themes, compact dashboard output and PowerShell completion.
 
 ## Requirements
 
-- Windows 10/11
-- PowerShell 7 (`pwsh`)
-- Node.js 22 or newer
-- Internet access during `npm install` and use
+- Windows 10 or 11
+- PowerShell 7
+- Node.js 22.12 or newer
+- Internet access to reach QUREO
 
-## Install / update
+The CLI depends on Windows DPAPI for session encryption. Linux and macOS are not supported for authenticated use.
 
-From this folder:
+## Install from source
+
+Clone the repository, then run:
 
 ```powershell
+git clone https://github.com/eyadmkv/qureo.git
+cd qureo
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
-Your existing `data\qureo.db` is retained. No Chromium or Playwright installation is required.
+The setup script installs dependencies, runs the test suite and registers the `qureo` command with `npm link`.
 
-## Login
+To update an existing checkout:
+
+```powershell
+git pull --ff-only
+npm install
+npm run check
+npm link
+```
+
+## Quick start
 
 ```powershell
 qureo login
-```
-
-Enter your QUREO student ID. The password prompt is hidden. The CLI sends the login request to the QUREO portal, checks the authenticated user-info endpoint, and stores the returned cookies encrypted with Windows DPAPI for the current Windows account. The password is not written to disk, configuration, logs, or command history.
-
-```powershell
-qureo me       # show gems earned and completed chapters
-qureo check
-qureo logout
-```
-
-The `qureo me` command refreshes your available courses and chapter progress from QUREO. It lists completed chapters and sums the `diamond` rewards recorded for those chapters. The gem total is derived from chapter reward records returned by QUREO.
-
-## Sync your account and course data
-
-```powershell
 qureo sync
-qureo courses
-qureo progress
-qureo progress --course javascript_ar
-```
-
-Course and chapter metadata, question lists and existing test results are fetched with GET requests. QUREO's API may change, and the CLI reports HTTP errors rather than guessing undocumented response fields.
-
-## Fetch lesson questions
-
-```powershell
-qureo chapter 90013
-qureo lessons 90013
-qureo questions 90013
-qureo result 90013
-
-# Export the complete course index and all chapter assessment question sets
-qureo export
-
-# Export just one chapter (for example the mid-term chapter 17)
-qureo export --chapter 90017
-```
-
-`qureo questions` caches question IDs, types, prompt text and multiple-choice options in `data\qureo.db`. `qureo result` only reads a result already available for an existing attempt. When QUREO includes correct-choice/model-answer fields in that existing result, the CLI caches those fields as retrieved answers.
-
-
-## Export everything for bulk answering
-
-Run:
-
-```powershell
+qureo me
+qureo dashboard
 qureo export
 ```
 
-This iterates every course QUREO lists for your account, then retrieves each course's chapters, each chapter's lesson metadata (IDs, titles and URLs), and each chapter's test/review question payloads. It also updates the local SQLite cache. The export is written to `exports\qureo-export.json`.
+The login command prompts for your student ID and a hidden password. The password is sent to the QUREO login endpoint and is not saved by this CLI. The resulting session cookies are encrypted for the current Windows account.
 
-To export one course or one chapter:
+## Common commands
 
-```powershell
-qureo export --course javascript_ar
-qureo export --chapter 90017
-```
+| Command | Purpose |
+| --- | --- |
+| `qureo login` / `logout` | Create or remove the local authenticated session |
+| `qureo me` | Show account identity, completed chapters and reward totals |
+| `qureo check` | Check portal and learning API connectivity |
+| `qureo courses` / `sync` | List or refresh course metadata and progress |
+| `qureo progress` | Display cached course progress |
+| `qureo chapter <id>` / `lessons <id>` | Inspect chapter and lesson metadata |
+| `qureo questions <id>` | Fetch and cache available question data |
+| `qureo export` | Export course, chapter, lesson and assessment data |
+| `qureo search <query>` | Search local questions and answer sources |
+| `qureo answer save ...` | Save a personal answer or solution note |
+| `qureo solve [range]` | Run the sequential chapter solver |
+| `qureo dashboard` | Show local cache and progress summary |
+| `qureo status` / `doctor` | Inspect local setup and connectivity |
+| `qureo config show` | View terminal configuration |
+| `qureo history` | View recent command names and timestamps |
 
-Upload `exports\qureo-export.json` in ChatGPT. The question JSON includes choice IDs, visible choices and code-description templates when QUREO returns them. A returned lesson list is metadata, not the full rendered lesson content: QUREO builds interactive lesson screens in the client, and this HTTP-only export does not claim to capture every interactive step within each lesson.
+Run `qureo --help` for the complete command list. See the [usage guide](docs/usage.md), [solver guide](docs/solver.md) and [terminal experience guide](docs/terminal-experience.md) for detailed command examples and behavior.
 
-After an answer file is prepared with an `answers` array, import it with:
+## Solver safety
 
-```powershell
-qureo answers import .\answers.json
-qureo answers list
-```
+The solver processes chapters and lessons sequentially. It checks that required local answers exist before starting a chapter, waits for lesson completion to succeed before initializing the assessment, and requires QUREO to confirm chapter completion. It stops when a required operation fails.
 
-Each answer record should include `question_id` and `answer` (or `answer_text`), and can include `answer_type`, `question_text`, `explanation` and `source_url`. Imported answers are stored as locally supplied answers, not marked as QUREO-verified.
+The solver makes state-changing requests to QUREO when you explicitly run it. Review the selected range and answer bank before use. A local checkpoint is a record of the last observed state, not proof that QUREO accepted a request that timed out.
 
-## Solve from your current progress
+## Local data and privacy
 
-The solver reads your current account progress and starts at the first unfinished chapter. A numeric target preserves the existing behavior of solving through that chapter. A range selects an explicit inclusive chapter window, while still refusing to jump over an earlier unfinished chapter.
+The `data/` directory contains the SQLite database, encrypted session, command history and checkpoints. It is ignored by Git. Do not upload or commit it.
 
-```powershell
-qureo solve
-qureo solve 20
-qureo solve 90044
-qureo solve 18-30
-qureo solve --single
-qureo solve 21 --single
-qureo solve --max-chapters 5
-qureo solve 18-30 --max-chapters 5
-qureo solve 18-30 --interactive
-qureo solve --pause-between-chapters 5 --pause-between-questions 1
-qureo solve 18-30 --no-skip-completed
-qureo solve 44 --dry-run
-```
+- Session cookies are encrypted with Windows DPAPI and tied to the Windows user account.
+- Passwords are not stored in the database, configuration or command history.
+- Command history records command names and timestamps only. It omits arguments and search terms.
+- Course exports may contain account-related learning data. Review them before sharing.
 
-Available controls:
+This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO hosts and, when syncing public answer guides, to the documented public guide source.
 
-- `--single`: solve only the current unfinished chapter, or the explicitly selected chapter if it is the first unfinished chapter.
-- `--max-chapters <count>`: cap the number of chapters selected in this run.
-- `--pause-between-chapters <seconds>`: wait after each completed chapter.
-- `--pause-between-questions <seconds>`: wait between question submissions.
-- `--interactive`: ask before starting each selected chapter. Answering `n` pauses the run.
-- `--no-skip-completed`: when used with an explicit range, revisit completed chapters inside that range. QUREO may refuse a repeated assessment.
-- `--no-resume`: ignore the previous local checkpoint for the startup message. Server-reported QUREO progress remains authoritative.
+## Third-party content and redistribution
 
-Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser and immediately retries the completion request. While QUREO still returns 404, it polls every 1 second by default, proceeding as soon as the endpoint becomes available. Other transient network failures and HTTP errors use the normal 3-second retry interval. The retry window is up to 3 minutes. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
+The repository currently includes generated files under `exports/` containing course metadata and assessment material returned by QUREO's authenticated API, along with a course answer bank under `answers/`. These files are not original project code. The MIT license in this repository does not grant rights to redistribute QUREO-owned material, trademarks or other third-party content. Before making the repository public, review those files and remove any material you do not have permission to publish. Generated exports should generally remain local to your own checkout.
 
-The local checkpoint at `data\\solve-checkpoint.json` records the active chapter, lesson, question, and last known run state. On the next run, the CLI checks QUREO progress again before selecting work. Fine-grained reconciliation of a submission interrupted mid-request is part of the next recovery update; a checkpoint does not independently prove whether QUREO accepted a timed-out answer.
+## Limitations
 
-You can tune the retry behavior for slower connections in the current PowerShell session:
+- QUREO endpoints are undocumented and can change.
+- Some courses listed by QUREO may return HTTP 404 from the learning API.
+- Interactive lesson screens are not fully represented by the metadata export.
+- The solver can only use answers available in your local answer bank.
+- This project does not bypass paywalls or access controls.
 
-```powershell
-$env:QUREO_LESSON_INIT_POLL_INTERVAL_MS = '500'
-$env:QUREO_LESSON_RETRY_INTERVAL_MS = '5000'
-$env:QUREO_LESSON_RETRY_TIMEOUT_MS = '300000'
-$env:QUREO_LESSON_RETRY_ATTEMPTS = '60'
-```
+## Contributing
 
-The retry timeout is capped at 10 minutes. Request failures that indicate an expired login or a non-transient permission error are reported immediately.
+Bug reports, reproducible issue reports and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), the [Code of Conduct](CODE_OF_CONDUCT.md) and [Security Policy](SECURITY.md) first.
 
-The JavaScript answer bank contains locally prepared solutions for the exported questions in chapters 1–30 and 43. QUREO's live response remains the final check when answers are submitted.
+## License
 
-## Search answer references
-
-```powershell
-qureo answers sync
-qureo search "س127"
-qureo search "Math.floor"
-qureo search "function sum"
-```
-
-The public-guide sync reads the MI Academy QUREO solutions index and chapter pages that are publicly accessible. Some chapters show only previews and direct readers to paid/member content. The CLI stores only what the pages expose publicly; it does not bypass a paywall or access controls.
-
-## Save your own answers and notes
-
-```powershell
-qureo answer save --question-key "س127" --question "رقم صحيح من 0 لـ 9" --type code --answer 'console.log(Math.floor(Math.random() * 10));' --explanation "Generate a random number from 0 up to but excluding 10, then floor it."
-qureo answers list
-qureo answer show 1
-qureo search "س127"
-```
-
-## Other commands
-
-```powershell
-qureo stats
-qureo exercises
-qureo answer list-old
-qureo database
-qureo --help
-```
-
-## Storage and privacy
-
-- `data\qureo.db`: courses, chapters, questions, public guide cache and personal answer notes.
-- `data\session.dpapi`: encrypted cookies, decryptable only by the same Windows user on this PC.
-- The old `data\browser-profile` directory, if present from version 0.1.x, is no longer used.
-
-Do not share the `data` directory. It contains your authenticated session and personal answer archive.
-
-## Network behavior
-
-The login endpoint currently used by QUREO integrations is `POST https://me-portal.qureo.education/oauth2/password-login` with a JSON body containing `student_id` and `password`. The learning API is under `https://me-tp.qureo.education/api/study`. These are service endpoints rather than a documented public API, so QUREO can change them at any time. Requests are restricted in this client to the two HTTPS QUREO hosts.
+MIT. See [LICENSE](LICENSE).

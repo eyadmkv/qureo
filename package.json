@@ -1,19 +1,19 @@
 {
   "name": "qureo-personal-cli",
   "version": "0.3.0",
-  "private": true,
+  "description": "Unofficial local QUREO CLI for course metadata, progress, exports and answer notes",
+  "license": "MIT",
   "type": "module",
-  "description": "Private QUREO HTTP client, progress-aware chapter solver and local course archive",
   "bin": {
-    "qureo": "src/cli.js"
+    "qureo": "src/entry.js"
   },
   "scripts": {
-    "start": "node src/cli.js",
-    "check": "node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --test",
+    "start": "node src/entry.js",
+    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --test",
     "test": "node --test"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "dependencies": {
     "better-sqlite3": "13.2.0",
