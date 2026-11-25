@@ -159,7 +159,7 @@ async function main() {
   if (config.progressBars && process.stdout.isTTY) {
     console.log = (...values) => {
       const line = values.map(value => String(value)).join(' ');
-      const match = line.match(/submitted (\\d+)\\/(\\d+)/);
+      const match = line.match(/submitted (\d+)\/(\d+)/);
       if (match) {
         originalLog('  Questions ' + progressBar(Number(match[1]), Number(match[2]), 22, config) + '  ' + line.trim());
       } else originalLog(...values);
