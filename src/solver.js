@@ -452,7 +452,6 @@ export async function solveCourse(client, {
 
   if (!plan.chapters.length) {
     const summary = plan.summary || 'No chapters selected.';
-    onProgress(summary);
     writeSolveCheckpoint({
       schema_version: 1,
       course_id: courseId,
@@ -524,7 +523,6 @@ export async function solveCourse(client, {
           questions_submitted: questionsSubmitted
         });
         const summary = `Paused before chapter ${chapterSequence}. Completed ${chaptersCompleted} chapter(s) and submitted ${questionsSubmitted} answer(s) in this run.`;
-        onProgress(summary);
         return {
           summary,
           startChapter: startLabel,
