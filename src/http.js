@@ -109,17 +109,23 @@ export class QureoHttpClient {
       ...(options.headers || {})
     };
 
+    const timeoutMs = Number.isFinite(Number(options.timeoutMs))
+      ? Math.min(120000, Math.max(1000, Number(options.timeoutMs)))
+      : 30000;
+    const fetchOptions = { ...options };
+    delete fetchOptions.timeoutMs;
+
     for (let hop = 0; hop <= 5; hop++) {
       const headers = { ...baseHeaders };
       const cookie = this.jar.header(currentUrl);
       if (cookie) headers.Cookie = cookie;
       const response = await fetch(currentUrl, {
-        ...options,
+        ...fetchOptions,
         method,
         body,
         headers,
         redirect: 'manual',
-        signal: AbortSignal.timeout(30000)
+        signal: AbortSignal.timeout(timeoutMs)
       });
       this.jar.absorb(response, currentUrl);
 
