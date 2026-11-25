@@ -99,6 +99,10 @@ The `data/` directory contains the SQLite database, encrypted session, command h
 
 This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO hosts and, when syncing public answer guides, to the documented public guide source.
 
+## Third-party content and redistribution
+
+The repository currently includes generated files under `exports/` containing course metadata and assessment material returned by QUREO's authenticated API, along with a course answer bank under `answers/`. These files are not original project code. The MIT license in this repository does not grant rights to redistribute QUREO-owned material, trademarks or other third-party content. Before making the repository public, review those files and remove any material you do not have permission to publish. Generated exports should generally remain local to your own checkout.
+
 ## Limitations
 
 - QUREO endpoints are undocumented and can change.
