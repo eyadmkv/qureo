@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { QureoHttpClient } from './http.js';
 import { getStats, listApiCourses, listApiChapters } from './db.js';
@@ -28,7 +29,7 @@ function writeConfig(value) {
   fs.renameSync(tmp, CONFIG_PATH);
 }
 function paint(value, tone, config) {
-  const colors = THEMES[config.theme] ?? THEMES.auto;
+  const colors = config.theme === 'none' ? null : (THEMES[config.theme] || THEMES.auto);
   if (!process.stdout.isTTY || process.env.NO_COLOR !== undefined || !colors) return String(value);
   const code = colors[{ primary: 0, success: 1, warning: 2, muted: 3 }[tone] ?? 0];
   return '\x1b[' + code + 'm' + value + '\x1b[0m';
@@ -106,6 +107,7 @@ async function doctor(config) {
   const checks = [
     ['Node.js >= 22', Number(process.versions.node.split('.')[0]) >= 22],
     ['Windows DPAPI platform', process.platform === 'win32'],
+    ['PowerShell 7', process.platform !== 'win32' || spawnSync('pwsh', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { encoding: 'utf8', windowsHide: true }).status === 0],
     ['SQLite database', fs.existsSync(DB_PATH)],
     ['Encrypted session', fs.existsSync(path.join(DATA, 'session.dpapi'))],
     ['Configuration file', fs.existsSync(CONFIG_PATH)]
