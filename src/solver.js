@@ -560,7 +560,7 @@ export async function solveCourse(client, {
           chapter_sequence: chapterSequence,
           chapter_title: chapterTitle,
           completed_chapters: chaptersCompleted,
-          questions_submitted: questionsSubmitted
+          questions_submitted: questionsSubmitted + Number(patch.questions_submitted_in_chapter || 0)
         })
       });
 
@@ -608,7 +608,7 @@ export async function solveCourse(client, {
       stage: lastCheckpoint.stage || 'unknown',
       last_error: error.message,
       completed_chapters: chaptersCompleted,
-      questions_submitted: questionsSubmitted
+      questions_submitted: Math.max(questionsSubmitted, Number(lastCheckpoint.questions_submitted || 0))
     });
     throw error;
   }
