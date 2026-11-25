@@ -132,7 +132,7 @@ function completion() {
     "Register-ArgumentCompleter -CommandName qureo -Native -ScriptBlock {",
     "  param($wordToComplete, $commandAst, $cursorPosition)",
     "  $commands = @('login','logout','me','check','courses','sync','export','solve','lessons','progress','chapter','questions','result','answers','answer','search','exercises','stats','database','dashboard','doctor','status','config','history','completion')",
-    "  $commands | Where-Object { $_ -like \\"$wordToComplete*\\" } | ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, 'Command', $_) }",
+    '  $commands | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, "Command", $_) }',
     "}"
   ].join('\n') + '\n';
   const profile = path.join(os.homedir(), 'Documents', 'PowerShell', 'Microsoft.PowerShell_profile.ps1');
@@ -150,6 +150,16 @@ async function main() {
   const args = process.argv.slice(2);
   const config = readConfig();
   recordHistory(args, config);
+  const originalLog = console.log.bind(console);
+  if (config.progressBars && process.stdout.isTTY) {
+    console.log = (...values) => {
+      const line = values.map(value => String(value)).join(' ');
+      const match = line.match(/submitted (\\d+)\\/(\\d+)/);
+      if (match) {
+        originalLog('  Questions ' + progressBar(Number(match[1]), Number(match[2]), 22, config) + '  ' + line.trim());
+      } else originalLog(...values);
+    };
+  }
   const command = args[0];
   if (!command || command === '--help' || command === '-h' || command === '--version' || command === '-V') return import('./cli.js');
   if (command === 'dashboard') return dashboard(config);
