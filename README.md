@@ -105,9 +105,20 @@ qureo solve 90044
 qureo solve 44 --dry-run
 ```
 
-Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser, waits, and retries. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
+Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser, waits 10 seconds by default, then retries every 3 seconds for up to 3 minutes. Temporary network failures and transient HTTP errors are retried too. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
 
-The current JavaScript answer bank contains the five questions in Chapter 43. Add reviewed answers as further chapters become available.
+You can tune the retry behavior for slower connections in the current PowerShell session:
+
+```powershell
+$env:QUREO_LESSON_INIT_WAIT_MS = '15000'
+$env:QUREO_LESSON_RETRY_INTERVAL_MS = '5000'
+$env:QUREO_LESSON_RETRY_TIMEOUT_MS = '300000'
+$env:QUREO_LESSON_RETRY_ATTEMPTS = '60'
+```
+
+The retry timeout is capped at 10 minutes. Request failures that indicate an expired login or a non-transient permission error are reported immediately.
+
+The JavaScript answer bank contains locally prepared solutions for the exported questions in chapters 1–30 and 43. QUREO's live response remains the final check when answers are submitted.
 
 ## Search answer references
 
