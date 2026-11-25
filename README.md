@@ -30,10 +30,12 @@ qureo login
 Enter your QUREO student ID. The password prompt is hidden. The CLI sends the login request to the QUREO portal, checks the authenticated user-info endpoint, and stores the returned cookies encrypted with Windows DPAPI for the current Windows account. The password is not written to disk, configuration, logs, or command history.
 
 ```powershell
-qureo me
+qureo me       # show gems earned and completed chapters
 qureo check
 qureo logout
 ```
+
+The `qureo me` command refreshes your available courses and chapter progress from QUREO. It lists completed chapters and sums the `diamond` rewards recorded for those chapters. The gem total is derived from chapter reward records returned by QUREO.
 
 ## Sync your account and course data
 

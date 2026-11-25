@@ -37,6 +37,18 @@ function extractQuestion(item) {
   return { id: q.id, type: q.type || 'unknown', prompt: prompt || snippets.join('\n'), choices, snippets };
 }
 
+function isChapterCompleted(progress) {
+  return Boolean(progress?.completed_at || progress?.is_completed === true ||
+    progress?.completed === true || progress?.completed === 1);
+}
+
+function getChapterGemReward(progress) {
+  const raw = progress?.diamond ?? progress?.diamonds ?? progress?.gem ?? progress?.gems;
+  if (raw === null || raw === undefined || raw === '') return null;
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+
 function asArray(value) {
   if (Array.isArray(value)) return value;
   if (Array.isArray(value?.data)) return value.data;
@@ -87,12 +99,111 @@ program.command('logout')
   });
 
 program.command('me')
-  .description('Check the saved session and display your account information')
-  .action(async () => withClient(async (_client, user) => {
-    console.log(`Account: ${user?.name || user?.student?.name || '(name not provided)'}`);
-    console.log(`Available courses: ${(user?.available_courses || []).length}`);
-    for (const course of (user?.available_courses || [])) {
-      console.log(`  ${course.content_id || course.id || 'unknown'} | ${course.name || course.title || ''}`);
+  .description('Show your account, earned gems and completed chapters')
+  .action(async () => withClient(async (client, user) => {
+    const accountName = user?.name || user?.student?.name || '(name not provided)';
+    const courses = [...new Map((user?.available_courses || [])
+      .map(course => ({
+        id: String(course.content_id || course.id || ''),
+        name: course.name || course.title || ''
+      }))
+      .filter(course => course.id)
+      .map(course => [course.id, course])).values()];
+
+    console.log(`Account: ${accountName}`);
+    console.log(`Available courses: ${courses.length}`);
+
+    const totals = {
+      courses: 0,
+      chapters: 0,
+      completed: 0,
+      gems: 0,
+      completedWithGemData: 0,
+      errors: 0
+    };
+
+    for (const accountCourse of courses) {
+      try {
+        await client.request(`${COURSE_ORIGIN}/?content_id=${encodeURIComponent(accountCourse.id)}`, { method: 'GET' });
+        const courseRaw = await client.json(`/courses/${encodeURIComponent(accountCourse.id)}`);
+        const sectionId = courseRaw?.basic_section?.id || courseRaw?.course?.basic_section?.id;
+        if (!sectionId) throw new Error('Course response did not contain basic_section.id.');
+
+        const [sectionRaw, progressRaw] = await Promise.all([
+          client.json(`/sections/${encodeURIComponent(sectionId)}`),
+          client.json(`/students/sections/${encodeURIComponent(sectionId)}/chapters`)
+        ]);
+
+        const chapters = asArray(sectionRaw).sort((a, b) =>
+          Number(a.seq ?? a.sequence ?? 0) - Number(b.seq ?? b.sequence ?? 0)
+        );
+        const progressRows = asArray(progressRaw);
+        const progressById = new Map(progressRows.map(row => [String(row.chapter_id), row]));
+        const completed = chapters.filter(chapter =>
+          isChapterCompleted(progressById.get(String(chapter.id)))
+        );
+        const inProgress = chapters.filter(chapter => {
+          const row = progressById.get(String(chapter.id));
+          return !isChapterCompleted(row) && Boolean(row?.started_at || row?.started === true);
+        });
+        const knownGemRewards = completed
+          .map(chapter => getChapterGemReward(progressById.get(String(chapter.id))))
+          .filter(value => value !== null);
+        const courseGems = knownGemRewards.reduce((sum, value) => sum + value, 0);
+        const courseName = courseRaw?.course?.name || courseRaw?.name || accountCourse.name || accountCourse.id;
+        const percentage = chapters.length ? Math.round(completed.length / chapters.length * 100) : 0;
+
+        console.log(`\\n${courseName} (${accountCourse.id})`);
+        console.log(`  Chapters completed: ${completed.length}/${chapters.length} (${percentage}%)`);
+        if (knownGemRewards.length) {
+          const rewardNote = knownGemRewards.length === completed.length
+            ? ''
+            : `; reward value available for ${knownGemRewards.length}/${completed.length} completed chapters`;
+          console.log(`  Gems earned from chapter rewards: ${courseGems.toLocaleString('en-US')}${rewardNote}`);
+        } else {
+          console.log('  Gems earned from chapter rewards: unavailable');
+        }
+        console.log(`  In progress: ${inProgress.length} | Not started: ${Math.max(0, chapters.length - completed.length - inProgress.length)}`);
+        console.log('  Finished chapters:');
+        if (!completed.length) {
+          console.log('    None');
+        } else {
+          for (const [index, chapter] of completed.entries()) {
+            const row = progressById.get(String(chapter.id));
+            const sequence = chapter.seq ?? chapter.sequence ?? index + 1;
+            const title = chapter.name || chapter.title || `Chapter ${sequence}`;
+            const reward = getChapterGemReward(row);
+            console.log(`    ${String(sequence).padStart(2, '0')}. ${title}${reward === null ? '' : ` (+${reward} gems)`}`);
+          }
+        }
+
+        totals.courses++;
+        totals.chapters += chapters.length;
+        totals.completed += completed.length;
+        totals.gems += courseGems;
+        totals.completedWithGemData += knownGemRewards.length;
+      } catch (error) {
+        totals.errors++;
+        console.log(`\\n${accountCourse.name || accountCourse.id}: progress unavailable (${error.message})`);
+      }
+    }
+
+    if (!courses.length) {
+      console.log('QUREO did not return any available courses.');
+      return;
+    }
+
+    if (totals.courses) {
+      const percentage = totals.chapters ? Math.round(totals.completed / totals.chapters * 100) : 0;
+      console.log(`\\nOverall: ${totals.completed}/${totals.chapters} chapters completed (${percentage}%) across ${totals.courses} course(s).`);
+      if (totals.completedWithGemData) {
+        console.log(`Total gems from completed-chapter rewards: ${totals.gems.toLocaleString('en-US')} (${totals.completedWithGemData} reward records).`);
+      } else {
+        console.log('Total gems: unavailable in the progress records returned by QUREO.');
+      }
+    }
+    if (totals.errors) {
+      console.log(`Progress could not be loaded for ${totals.errors} course(s).`);
     }
   }));
 
