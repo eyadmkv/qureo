@@ -103,7 +103,7 @@ function getQuestionAnswer(item, answers) {
 }
 
 async function getProgress(client, sectionId) {
-  const raw = await client.json(`/students/sections/${encodeURIComponent(sectionId)}/chapters`).catch(() => []);
+  const raw = await client.json(`/students/sections/${encodeURIComponent(sectionId)}/chapters`);
   return new Map(asArray(raw).map(row => [String(row.chapter_id), row]));
 }
 
@@ -195,8 +195,11 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, { 
     // The per-question submission responses remain the available verification source.
   }
   const result = resultPayload?.result || resultPayload;
-  const correctCount = Number.isFinite(Number(result?.correct_count)) ? Number(result.correct_count) : correct;
-  const verifiedAll = correctCount === prepared.length && (correct === prepared.length || Number.isFinite(Number(result?.correct_count)));
+  const resultCount = result?.correct_count === undefined || result?.correct_count === null || result?.correct_count === ''
+    ? null
+    : Number(result.correct_count);
+  const verifiedAll = correct === prepared.length || resultCount === prepared.length;
+  const correctCount = verifiedAll ? prepared.length : Number.isFinite(resultCount) ? resultCount : correct;
   if (!verifiedAll) {
     throw new Error(`Submitted ${submitted}/${prepared.length} answers, but QUREO did not confirm a complete correct result. Stopping here.`);
   }

@@ -273,7 +273,7 @@ program.command('export')
               chapterOut.raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
               const lessons = asArray(chapterOut.raw?.lectures || chapterOut.raw?.chapter?.lectures || chapterOut.raw?.data?.lectures);
               const expectedCount = chapterOut.raw?.chapter?.question_count ?? chapterOut.raw?.question_count ?? null;
-              chapterOut.expected_question_count = Number.isFinite(Number(expectedCount)) ? Number(expectedCount) : null;
+              chapterOut.expected_question_count = expectedCount === null || expectedCount === undefined ? null : Number.isFinite(Number(expectedCount)) ? Number(expectedCount) : null;
               chapterOut.lessons = lessons.map((lesson, index) => ({
                 id: String(lesson.id ?? lesson.lecture_id ?? ''),
                 title: lesson.title || lesson.name || '',
