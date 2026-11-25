@@ -23,6 +23,36 @@ program
 
 function outputJson(value) { console.log(JSON.stringify(value, null, 2)); }
 
+function parsePositiveInteger(value, label) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`${label} must be a positive integer.`);
+  }
+  return parsed;
+}
+
+function parsePauseDuration(value, label) {
+  if (value === undefined) return 0;
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0 || seconds > 3600) {
+    throw new Error(`${label} must be between 0 and 3600 seconds.`);
+  }
+  return Math.round(seconds * 1000);
+}
+
+async function confirmChapter({ chapter, position, total }) {
+  if (!input.isTTY) throw new Error('--interactive requires an interactive terminal.');
+  const sequence = chapter.seq ?? chapter.sequence ?? chapter.id;
+  const title = chapter.name || chapter.title || 'Untitled';
+  const rl = readline.createInterface({ input, output });
+  try {
+    const answer = await rl.question(`Start chapter ${sequence} (${position}/${total}) - ${title}? [Y/n] `);
+    return !/^(n|no)$/i.test(answer.trim());
+  } finally {
+    rl.close();
+  }
+}
+
 function textOf(value) {
   if (typeof value === 'string') return value.replace(/\[\[(?:\/?(?:bdi|bold|code|italic|underline)|br)\]\]/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
   return '';
@@ -463,15 +493,32 @@ program.command('export')
     console.log('Upload this JSON file here so the question sets can be solved in bulk.');
   }));
 
-program.command('solve [toChapter]')
-  .description('Solve chapters starting at the first unfinished chapter in your QUREO account')
+program.command('solve [chapterRange]')
+  .description('Solve from your first unfinished chapter, with optional chapter ranges and run limits')
   .option('--course <id>', 'Course ID to solve', 'javascript_ar')
-  .option('--dry-run', 'Preview the selected chapters without submitting answers')
-  .action(async (toChapter, options) => withClient(async client => {
+  .option('--dry-run', 'Preview selected chapters without submitting answers')
+  .option('--single', 'Solve only the current or explicitly selected chapter')
+  .option('--max-chapters <count>', 'Stop after this many chapters')
+  .option('--pause-between-chapters <seconds>', 'Wait between completed chapters')
+  .option('--pause-between-questions <seconds>', 'Wait between submitted questions')
+  .option('--interactive', 'Ask before starting each chapter')
+  .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
+  .option('--no-resume', 'Ignore the previous local checkpoint')
+  .action(async (chapterRange, options) => withClient(async client => {
     const result = await solveCourse(client, {
       courseId: options.course,
-      targetChapter: toChapter || null,
+      targetChapter: chapterRange || null,
       dryRun: Boolean(options.dryRun),
+      single: Boolean(options.single),
+      maxChapters: options.maxChapters === undefined
+        ? null
+        : parsePositiveInteger(options.maxChapters, 'Maximum chapter count'),
+      chapterDelayMs: parsePauseDuration(options.pauseBetweenChapters, 'Chapter pause'),
+      questionDelayMs: parsePauseDuration(options.pauseBetweenQuestions, 'Question pause'),
+      interactive: Boolean(options.interactive),
+      shouldContinue: confirmChapter,
+      skipCompleted: options.skipCompleted !== false,
+      resume: options.resume !== false,
       onProgress: message => console.log(message)
     });
     console.log(result.summary);
