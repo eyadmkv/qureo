@@ -140,6 +140,10 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     onProgress(`  lesson ${lessonId}: already completed`);
     return;
   }
+  if (response.status === 404) {
+    onProgress(`  lesson ${lessonId}: completion endpoint returned 404; skipped`);
+    return;
+  }
   const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
   throw error;
 }
