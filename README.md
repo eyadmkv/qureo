@@ -2,7 +2,7 @@
 
 A private, local-only, HTTP-based QUREO client for Windows and PowerShell 7. It uses direct HTTPS requests (`POST` for login and `GET` for account/course/question data), SQLite for a personal archive, and Windows DPAPI to encrypt the local session cookie jar.
 
-The CLI does not open a browser, does not store the password, and does not send credentials to a third-party service. It does not submit answers or probe QUREO's answer endpoints. It retrieves questions and existing result data, searches public answer guides, and stores your own answer notes locally.
+The CLI does not store the password or send credentials to a third-party service. When QUREO returns HTTP 404 for a lesson-completion request, the solver opens that lesson in your default browser so the QUREO lesson app can initialize, then retries the completion request. Keep the browser signed in to the same QUREO account. The solver submits only answers from the local answer bank and never probes for hidden answer keys.
 
 ## Requirements
 
@@ -105,7 +105,7 @@ qureo solve 90044
 qureo solve 44 --dry-run
 ```
 
-Before making changes, the solver checks that every question in a chapter has a matching local answer. It submits only reviewed answers in `answers/<course_id>.json`, checks QUREO's response, and stops if an answer is missing, rejected, or not confirmed correct. It does not probe for answer keys or bypass locked chapter preconditions.
+Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser, waits, and retries. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
 
 The current JavaScript answer bank contains the five questions in Chapter 43. Add reviewed answers as further chapters become available.
 
