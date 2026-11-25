@@ -1,0 +1,21 @@
+{
+  "name": "qureo-personal-cli",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "description": "Private HTTP-only QUREO course exporter and local answer archive",
+  "bin": {
+    "qureo": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "check": "node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.2.0",
+    "commander": "15.1.0"
+  }
+}
