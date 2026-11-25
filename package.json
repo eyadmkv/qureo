@@ -5,11 +5,11 @@
   "type": "module",
   "description": "Private QUREO HTTP client, progress-aware chapter solver and local course archive",
   "bin": {
-    "qureo": "src/cli.js"
+    "qureo": "src/entry.js"
   },
   "scripts": {
-    "start": "node src/cli.js",
-    "check": "node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --test",
+    "start": "node src/entry.js",
+    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --test",
     "test": "node --test"
   },
   "engines": {
