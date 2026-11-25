@@ -153,7 +153,7 @@ program.command('me')
         const courseName = courseRaw?.course?.name || courseRaw?.name || accountCourse.name || accountCourse.id;
         const percentage = chapters.length ? Math.round(completed.length / chapters.length * 100) : 0;
 
-        console.log(`\\n${courseName} (${accountCourse.id})`);
+        console.log(`\n${courseName} (${accountCourse.id})`);
         console.log(`  Chapters completed: ${completed.length}/${chapters.length} (${percentage}%)`);
         if (knownGemRewards.length) {
           const rewardNote = knownGemRewards.length === completed.length
@@ -184,7 +184,7 @@ program.command('me')
         totals.completedWithGemData += knownGemRewards.length;
       } catch (error) {
         totals.errors++;
-        console.log(`\\n${accountCourse.name || accountCourse.id}: progress unavailable (${error.message})`);
+        console.log(`\n${accountCourse.name || accountCourse.id}: progress unavailable (${error.message})`);
       }
     }
 
@@ -195,7 +195,7 @@ program.command('me')
 
     if (totals.courses) {
       const percentage = totals.chapters ? Math.round(totals.completed / totals.chapters * 100) : 0;
-      console.log(`\\nOverall: ${totals.completed}/${totals.chapters} chapters completed (${percentage}%) across ${totals.courses} course(s).`);
+      console.log(`\nOverall: ${totals.completed}/${totals.chapters} chapters completed (${percentage}%) across ${totals.courses} course(s).`);
       if (totals.completedWithGemData) {
         console.log(`Total gems from completed-chapter rewards: ${totals.gems.toLocaleString('en-US')} (${totals.completedWithGemData} reward records).`);
       } else {
