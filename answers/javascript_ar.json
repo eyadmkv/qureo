@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "course_id": "javascript_ar",
+  "answers": {
+    "90043010": {
+      "type": "choice",
+      "choice_id": 900430101,
+      "explanation": "The selector span targets the span element, and green is a valid CSS color value."
+    },
+    "90043020": {
+      "type": "choice",
+      "choice_id": 900430201,
+      "explanation": "RGB 255, 255, 0 is full red plus full green and no blue, which produces yellow."
+    },
+    "90043030": {
+      "type": "choice",
+      "choice_id": 900430301,
+      "explanation": "The hexadecimal equivalent of RGB 255, 255, 0 is #ffff00."
+    },
+    "90043040": {
+      "type": "choice",
+      "choice_id": 900430401,
+      "explanation": "The opacity property controls how opaque or transparent an element appears."
+    },
+    "90043050": {
+      "type": "choice",
+      "choice_id": 900430501,
+      "explanation": "Opacity 0 means the element is fully transparent."
+    }
+  }
+}
