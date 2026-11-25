@@ -1,0 +1,260 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:27:04.832Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90028",
+      "title": "for of",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نتعلم كيفية دمج حلقات for مع المصفوفات لإخراج جميع القيم الموجودة في المصفوفة!\n",
+          "id": 90028,
+          "name": "for of",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 28,
+          "test_range": "for of",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90028,
+            "id": 90028010,
+            "seq": 1,
+            "title": "مراجعة الحلقات التكرارية"
+          },
+          {
+            "chapter_id": 90028,
+            "id": 90028020,
+            "seq": 2,
+            "title": "for of"
+          },
+          {
+            "chapter_id": 90028,
+            "id": 90028030,
+            "seq": 3,
+            "title": "التدرب على for...of"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90028010",
+          "title": "مراجعة الحلقات التكرارية",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90028/lecture/90028010",
+          "raw": {
+            "chapter_id": 90028,
+            "id": 90028010,
+            "seq": 1,
+            "title": "مراجعة الحلقات التكرارية"
+          }
+        },
+        {
+          "id": "90028020",
+          "title": "for of",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90028/lecture/90028020",
+          "raw": {
+            "chapter_id": 90028,
+            "id": 90028020,
+            "seq": 2,
+            "title": "for of"
+          }
+        },
+        {
+          "id": "90028030",
+          "title": "التدرب على for...of",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90028/lecture/90028030",
+          "raw": {
+            "chapter_id": 90028,
+            "id": 90028030,
+            "seq": 3,
+            "title": "التدرب على for...of"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "10",
+              "id": 900280103,
+              "question_id": 90028010
+            },
+            {
+              "content": "6",
+              "id": 900280102,
+              "question_id": 90028010
+            },
+            {
+              "content": "numList[2]",
+              "id": 900280104,
+              "question_id": 90028010
+            },
+            {
+              "content": "11",
+              "id": 900280101,
+              "question_id": 90028010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90028,
+            "content": "يرجى تحديد نتيجة تنفيذ البرنامج التالي.\n\n\n[[code]]let numList = [8, 6, 11, 10, 9, 7, 12];\nconsole.log(numList[2]);[[/code]]",
+            "hints": [
+              "يرجى الانتباه إلى كيفية عدّ قيم المصفوفة."
+            ],
+            "id": 90028010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "10",
+              "id": 900280203,
+              "question_id": 90028020
+            },
+            {
+              "content": "12\n11\n10",
+              "id": 900280202,
+              "question_id": 90028020
+            },
+            {
+              "content": "10\n11\n12",
+              "id": 900280201,
+              "question_id": 90028020
+            },
+            {
+              "content": "numList[i]",
+              "id": 900280204,
+              "question_id": 90028020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90028,
+            "content": "يرجى تحديد نتيجة تنفيذ البرنامج التالي.\n\n\n[[code]]let numList = [10, 11, 12];\nfor (let i = 0; i < 3; i++) {\n  console.log(numList[i]);\n}[[/code]]",
+            "hints": [
+              "يرجى الانتباه إلى كيفية عدّ قيم المصفوفة."
+            ],
+            "id": 90028020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "7\n6\n5",
+              "id": 900280302,
+              "question_id": 90028030
+            },
+            {
+              "content": "5\n6\n7",
+              "id": 900280301,
+              "question_id": 90028030
+            },
+            {
+              "content": "5",
+              "id": 900280303,
+              "question_id": 90028030
+            },
+            {
+              "content": "numList[i]",
+              "id": 900280304,
+              "question_id": 90028030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90028,
+            "content": "يرجى تحديد نتيجة تنفيذ البرنامج التالي.\n\n\n[[code]]let numList = [5, 6, 7];\nfor (let i = 0; i < numList.length; i++) {\n  console.log(numList[i]);\n}[[/code]]",
+            "hints": [
+              "[[bdi]]numList.length [[/bdi]]يجلب عدد القيم في المتغيّر[[bdi]] numList.[[/bdi]]"
+            ],
+            "id": 90028030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let numList = [2, 4, 6, 8];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90028040
+            }
+          ],
+          "question": {
+            "chapter_id": 90028,
+            "content": "سننشئ برنامجًا يطبع جميع قيم المتغيّر[[bdi]] numList [[/bdi]]على وحدة التحكم.\n\nأنشئ برنامجًا كما يلي:\n① استخدم[[bdi]] for...of [[/bdi]]لطباعة جميع قيم المتغيّر[[bdi]] numList[[/bdi]]\nولكن، يجب أن يكون المتغيّر الذي تسند إليه القيم المجتلبة من المتغيّر[[bdi]] numList [[/bdi]]هو[[bdi]] num.[[/bdi]]",
+            "hints": [
+              "تُكتب[[bdi]] for...of [[/bdi]]على الصورة[[bdi]] for (let newVariableName of variableNumList)[[/bdi]]."
+            ],
+            "id": 90028040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let wordList = [\"Good morning\", \"Good night\", \"Hello\"];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90028050
+            }
+          ],
+          "question": {
+            "chapter_id": 90028,
+            "content": "سننشئ برنامجًا يطبع جميع قيم المتغيّر[[bdi]] wordList [[/bdi]]على وحدة التحكم.\nنحن نضيف سلاسل نصية إلى[[bdi]] wordList.[[/bdi]]\n\nاستخدم[[bdi]] for...of [[/bdi]]لطباعة جميع قيم المتغيّر[[bdi]] wordList[[/bdi]]\nولكن، يجب أن يكون المتغيّر الذي تسند إليه القيم المجتلبة من المتغيّر[[bdi]] wordList [[/bdi]]هو[[bdi]] word.[[/bdi]]",
+            "hints": [
+              "لإدخال سلاسل نصية إلى مصفوفة، تحتاج إلى إحاطتها بعلامات اقتباس."
+            ],
+            "id": 90028050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

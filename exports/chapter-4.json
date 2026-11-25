@@ -1,0 +1,287 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:01.215Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90004",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 1 إلى 3 للتأكد من أنك تفهمه!",
+          "id": 90004,
+          "name": "مراجعة الفهم",
+          "question_count": 8,
+          "section_id": 5,
+          "seq": 4,
+          "test_range": "console,Variables",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90004,
+            "id": 90004010,
+            "seq": 1,
+            "title": "مراجعة من 1 إلى 3"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90004010",
+          "title": "مراجعة من 1 إلى 3",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90004/lecture/90004010",
+          "raw": {
+            "chapter_id": 90004,
+            "id": 90004010,
+            "seq": 1,
+            "title": "مراجعة من 1 إلى 3"
+          }
+        }
+      ],
+      "question_count": 8,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(\"Hello\");[[/bdi]]",
+              "id": 900040101,
+              "question_id": 90004010
+            },
+            {
+              "content": "[[bdi]]log.console(\"Hello\");[[/bdi]]",
+              "id": 900040102,
+              "question_id": 90004010
+            },
+            {
+              "content": "[[bdi]]consolelog(\"Hello\")[[/bdi]]",
+              "id": 900040104,
+              "question_id": 90004010
+            },
+            {
+              "content": "[[bdi]]console.logHello;[[/bdi]]",
+              "id": 900040103,
+              "question_id": 90004010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90004,
+            "content": "اختر البرنامج الصحيح لإخراج[[bdi]] \"Hello\" [[/bdi]]على الـ[[bdi]] console.[[/bdi]]\n",
+            "hints": null,
+            "id": 90004010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90004020
+            }
+          ],
+          "question": {
+            "chapter_id": 90004,
+            "content": "لإخراج[[bdi]] \"Hello\" [[/bdi]]على الـ[[bdi]] console.[[/bdi]]\n\n\nالنص المطلوب: [[copy]]Hello[[/copy]]",
+            "hints": null,
+            "id": 90004020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "Leave this text.\nconsole.log(\"Make the first line a comment.\");",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90004030
+            }
+          ],
+          "question": {
+            "chapter_id": 90004,
+            "content": "أنشئ برنامجك كما يلي\n\nغيّر[[bdi]] \"Leave this text.\" [[/bdi]]إلى تعليق.\n*عند تنفيذ البرنامج سيُخرج[[bdi]] \"Make the first line a comment.[[/bdi]]",
+            "hints": null,
+            "id": 90004030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(\"5 + 7\");[[/bdi]]",
+              "id": 900040402,
+              "question_id": 90004040
+            },
+            {
+              "content": "[[bdi]]console.log(5 + 7);[[/bdi]]",
+              "id": 900040401,
+              "question_id": 90004040
+            },
+            {
+              "content": "[[bdi]]console.log(\"5\" + \"7\");[[/bdi]]",
+              "id": 900040403,
+              "question_id": 90004040
+            },
+            {
+              "content": "[[bdi]]console.log(5\" + \"7);[[/bdi]]",
+              "id": 900040404,
+              "question_id": 90004040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90004,
+            "content": "اختر البرنامج الصحيح الذي يجعل الحاسوب يحسب[[bdi]] \"5+7\" [[/bdi]]ويُخرج نتيجة العملية الحسابية على الـ[[bdi]] console.[[/bdi]]",
+            "hints": null,
+            "id": 90004040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "*",
+              "id": 900040501,
+              "question_id": 90004050
+            },
+            {
+              "content": "/",
+              "id": 900040504,
+              "question_id": 90004050
+            },
+            {
+              "content": "-",
+              "id": 900040503,
+              "question_id": 90004050
+            },
+            {
+              "content": "+",
+              "id": 900040502,
+              "question_id": 90004050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90004,
+            "content": "اختر الرمز الصحيح للضرب المستخدم في البرنامج.",
+            "hints": null,
+            "id": 90004050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log(\"The answer is 3 * 5.\");",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90004060
+            }
+          ],
+          "question": {
+            "chapter_id": 90004,
+            "content": "دع الحاسوب يحسب[[bdi]] \"3*5\" [[/bdi]]ويُخرج[[bdi]] \"The answer is 15.\" [[/bdi]]على الـ[[bdi]] console.[[/bdi]]",
+            "hints": null,
+            "id": 90004060,
+            "seq": 6,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]let = number;[[/bdi]]",
+              "id": 900040704,
+              "question_id": 90004070
+            },
+            {
+              "content": "[[bdi]]let number;[[/bdi]]",
+              "id": 900040701,
+              "question_id": 90004070
+            },
+            {
+              "content": "number;",
+              "id": 900040702,
+              "question_id": 90004070
+            },
+            {
+              "content": "[[bdi]]number let;[[/bdi]]",
+              "id": 900040703,
+              "question_id": 90004070
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90004,
+            "content": "اختر التصريح الصحيح[[bdi]] (declaration) [[/bdi]]للمتغير[[bdi]] number.[[/bdi]]",
+            "hints": null,
+            "id": 90004070,
+            "seq": 7,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90004080
+            }
+          ],
+          "question": {
+            "chapter_id": 90004,
+            "content": "\"أنشئ برنامجك كما يلي\n\n1 صرّح عن المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]].\n2 أسند القيمة 5 إلى [[bold]][[bdi]]num[[/bdi]][[/bold]]\n3 أخرج قيمة [[bold]][[bdi]]num[[/bdi]][[/bold]] على الـ[[bdi]] console\"[[/bdi]]",
+            "hints": null,
+            "id": 90004080,
+            "seq": 8,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:27:00.875Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90026",
+      "title": "المصفوفات (2)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع الحلقات.",
+          "id": 90026,
+          "name": "المصفوفات (2)",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 26,
+          "test_range": "arrays",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90026,
+            "id": 90026010,
+            "seq": 1,
+            "title": "مراجعة المصفوفات"
+          },
+          {
+            "chapter_id": 90026,
+            "id": 90026020,
+            "seq": 2,
+            "title": "دمج الحلقات مع المصفوفات"
+          },
+          {
+            "chapter_id": 90026,
+            "id": 90026030,
+            "seq": 3,
+            "title": "استخدام طول المصفوفة"
+          },
+          {
+            "chapter_id": 90026,
+            "id": 90026040,
+            "seq": 4,
+            "title": "المصفوفات مع الحلقات و If"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90026010",
+          "title": "مراجعة المصفوفات",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90026/lecture/90026010",
+          "raw": {
+            "chapter_id": 90026,
+            "id": 90026010,
+            "seq": 1,
+            "title": "مراجعة المصفوفات"
+          }
+        },
+        {
+          "id": "90026020",
+          "title": "دمج الحلقات مع المصفوفات",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90026/lecture/90026020",
+          "raw": {
+            "chapter_id": 90026,
+            "id": 90026020,
+            "seq": 2,
+            "title": "دمج الحلقات مع المصفوفات"
+          }
+        },
+        {
+          "id": "90026030",
+          "title": "استخدام طول المصفوفة",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90026/lecture/90026030",
+          "raw": {
+            "chapter_id": 90026,
+            "id": 90026030,
+            "seq": 3,
+            "title": "استخدام طول المصفوفة"
+          }
+        },
+        {
+          "id": "90026040",
+          "title": "المصفوفات مع الحلقات و If",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90026/lecture/90026040",
+          "raw": {
+            "chapter_id": 90026,
+            "id": 90026040,
+            "seq": 4,
+            "title": "المصفوفات مع الحلقات و If"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "60",
+              "id": 900260102,
+              "question_id": 90026010
+            },
+            {
+              "content": "79",
+              "id": 900260101,
+              "question_id": 90026010
+            },
+            {
+              "content": "82",
+              "id": 900260103,
+              "question_id": 90026010
+            },
+            {
+              "content": "scoreList[2]",
+              "id": 900260104,
+              "question_id": 90026010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90026,
+            "content": "اختر نتيجة الإخراج عند تنفيذ البرنامج التالي:\n\n[[code]]let scoreList = [52, 60, 79, 82, 66, 59, 88];\nconsole.log(scoreList[2]);[[/code]]",
+            "hints": [
+              "يُرجى الانتباه إلى طريقة عدّ قيم المصفوفة."
+            ],
+            "id": 90026010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90026020
+            }
+          ],
+          "question": {
+            "chapter_id": 90026,
+            "content": "اكتب برنامجًا يُخرج القيمة \"59\" من المتغيّر[[bdi]] scoreList [[/bdi]]إلى وحدة التحكم[[bdi]] (console)[[/bdi]].\nولكن، يُرجى عدم إدخال \"59\" مباشرةً.",
+            "hints": [
+              "يُرجى الانتباه إلى طريقة عدّ قيم المصفوفة."
+            ],
+            "id": 90026020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90026030
+            }
+          ],
+          "question": {
+            "chapter_id": 90026,
+            "content": "اكتب برنامجًا يُخرج متوسط الدرجات لعدد 7 أشخاص.\n\nابتداءً من السطر الثاني، أنشئ البرنامج كما يلي:\n\t1.\tأعلن عن متغيّر باسم[[bdi]] sum [[/bdi]]وأسنِد له القيمة 0.\n\t2.\tكرّر العملية[[bdi]] sum = sum + scoreList[i] [[/bdi]]سبع مرات.\n لكن استخدم المتغيّر[[bdi]] i[[/bdi]]، ويُرجى عدم استخدام[[bdi]] length [[/bdi]]هنا.\n\t3.\tأخرِج إلى وحدة التحكم[[bdi]] (console) [[/bdi]]قيمة المتغيّر[[bdi]] sum [[/bdi]]مقسومة على عدد الأشخاص (7).",
+            "hints": [
+              "شرط عدد التكرارات في حلقة[[bdi]] for [[/bdi]]هو:\n[[bdi]]\"let i = 0; i < 7; i++\"[[/bdi]]"
+            ],
+            "id": 90026030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90026040
+            }
+          ],
+          "question": {
+            "chapter_id": 90026,
+            "content": "اكتب برنامجًا يُخرج عدد القيم الموجودة في المتغيّر[[bdi]] scoreList [[/bdi]]إلى وحدة التحكم[[bdi]] (console)[[/bdi]].",
+            "hints": [
+              "استخدم[[bdi]] \"length\" [[/bdi]]لمعرفة عدد القيم."
+            ],
+            "id": 90026040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 60, 79, 82, 66, 59, 88];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90026050
+            }
+          ],
+          "question": {
+            "chapter_id": 90026,
+            "content": "سننشئ برنامجًا يُخرج العبارة[[bdi]] \"80 points or higher\" [[/bdi]]إذا كانت الدرجة 80 أو أكثر.\n\nأنشئ البرنامج كما يلي:\n        1.        استخدم حلقة[[bdi]] for [[/bdi]]تتكرّر بعدد القيم الموجودة في المتغيّر[[bdi]] scoreList.[[/bdi]]\n        2.        داخل عملية التكرار، إذا كانت القيمة[[bdi]] i [[/bdi]]في المتغيّر[[bdi]] scoreList [[/bdi]]أكبر من أو تساوي 80، أخرِج إلى وحدة التحكم[[bdi]] (console) [[/bdi]]العبارة[[bdi]] \"80 points or higher\"[[/bdi]].\n\nنص النسخ: [[copy]]80 points or higher[[/copy]]",
+            "hints": [
+              "اكتب جملة[[bdi]] if [[/bdi]]داخل جزء المعالجة في حلقة[[bdi]] for.[[/bdi]]",
+              "الشرط هو: القيمة[[bdi]] i [[/bdi]]من المتغيّر[[bdi]] scoreList [[/bdi]]أكبر من أو تساوي 80."
+            ],
+            "id": 90026050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:25:56.023Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90003",
+      "title": "المتغيرات",
+      "raw": {
+        "chapter": {
+          "description": "سنتعلم عن “التعريف”، و”الإسناد”، و”إعادة الإسناد” للمتغيرات.",
+          "id": 90003,
+          "name": "المتغيرات",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 3,
+          "test_range": "Variables",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90003,
+            "id": 90003010,
+            "seq": 1,
+            "title": "الإعلانات والإسنادات"
+          },
+          {
+            "chapter_id": 90003,
+            "id": 90003020,
+            "seq": 2,
+            "title": "تدريب على المتغيّرات"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90003010",
+          "title": "الإعلانات والإسنادات",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90003/lecture/90003010",
+          "raw": {
+            "chapter_id": 90003,
+            "id": 90003010,
+            "seq": 1,
+            "title": "الإعلانات والإسنادات"
+          }
+        },
+        {
+          "id": "90003020",
+          "title": "تدريب على المتغيّرات",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90003/lecture/90003020",
+          "raw": {
+            "chapter_id": 90003,
+            "id": 90003020,
+            "seq": 2,
+            "title": "تدريب على المتغيّرات"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "score;",
+              "id": 900030102,
+              "question_id": 90003010
+            },
+            {
+              "content": "[[bdi]]score let;[[/bdi]]",
+              "id": 900030104,
+              "question_id": 90003010
+            },
+            {
+              "content": "[[bdi]]let score;[[/bdi]]",
+              "id": 900030101,
+              "question_id": 90003010
+            },
+            {
+              "content": "score =;",
+              "id": 900030103,
+              "question_id": 90003010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90003,
+            "content": "اختر البرنامج الصحيح لإعلان المتغيّر [[bold]][[bdi]]score[[/bdi]][[/bold]].",
+            "hints": [
+              "تُعلن المتغيّرات باستخدام[[bdi]] let.[[/bdi]]"
+            ],
+            "id": 90003010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log = score;[[/bdi]]",
+              "id": 900030203,
+              "question_id": 90003020
+            },
+            {
+              "content": "[[bdi]]console.log(\"score\");[[/bdi]]",
+              "id": 900030202,
+              "question_id": 90003020
+            },
+            {
+              "content": "[[bdi]]console.log(score);[[/bdi]]",
+              "id": 900030201,
+              "question_id": 90003020
+            },
+            {
+              "content": "[[bdi]]console.log score;[[/bdi]]",
+              "id": 900030204,
+              "question_id": 90003020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90003,
+            "content": "اختر البرنامج الصحيح لعرض قيمة المتغيّر [[bold]][[bdi]]score[[/bdi]][[/bold]] في وحدة التحكم.\nتم بالفعل إعلان المتغيّر[[bdi]] score [[/bdi]]وإسناد قيمة له.",
+            "hints": [
+              "لنتذكّر كيف تُكتب[[bdi]] console.log.[[/bdi]]",
+              "علامات الاقتباس المزدوجة غير مطلوبة عند عرض قيمة متغيّر في وحدة التحكم."
+            ],
+            "id": 90003020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90003030
+            }
+          ],
+          "question": {
+            "chapter_id": 90003,
+            "content": "أنشئ برنامجك كما يلي:\n\n1. أعلن المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]]\n   \\*إذا ضغطت على[[bdi]] \"Run Code\"[[/bdi]]، فلن يكون هناك أي مخرجات في وحدة التحكم.\n   لذلك، بعد الإعلان، اضغط على[[bdi]] \"Answer\"[[/bdi]].",
+            "hints": [
+              "استخدم[[bdi]] let [[/bdi]]لإعلان المتغيّرات."
+            ],
+            "id": 90003030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let number;",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90003040
+            }
+          ],
+          "question": {
+            "chapter_id": 90003,
+            "content": "في السطر الثاني، أدخل البرنامج الذي أنشأته كما يلي:\n\n1. أسند 100 إلى المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]]\n   \\*إذا ضغطت على[[bdi]] \"Run Code\"[[/bdi]]، فلن يكون هناك أي مخرجات في وحدة التحكم.\n   لذلك، بعد الإسناد، اضغط على[[bdi]] \"Answer\"[[/bdi]].",
+            "hints": [
+              "لإسناد قيمة، استخدم[[bdi]] variable = value;[[/bdi]]."
+            ],
+            "id": 90003040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let number;\nnumber = 10;",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90003050
+            }
+          ],
+          "question": {
+            "chapter_id": 90003,
+            "content": "في السطر الثالث، أدخل البرنامج الذي أنشأته كما يلي:\n\n1. اعرض قيمة المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]] في وحدة التحكم\n   أنشئ برنامجًا لعرض قيمة [[bold]][[bdi]]number[[/bdi]][[/bold]] في وحدة التحكم.",
+            "hints": [
+              "استخدم[[bdi]] console.log [[/bdi]]للعرض في وحدة التحكم.",
+              "ما تريد عرضه في[[bdi]] console.log [[/bdi]]هو قيمة [[bold]][[bdi]]number[[/bdi]][[/bold]]."
+            ],
+            "id": 90003050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let number;\nnumber = 3;",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90003060
+            }
+          ],
+          "question": {
+            "chapter_id": 90003,
+            "content": "بعد السطر الثالث، أدخل البرنامج الذي أنشأته كما يلي:\n\n1. أسند قيمة المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]] مضافًا إليها 10\n2. اعرض قيمة المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]] في وحدة التحكم.\n",
+            "hints": [
+              "استخدم[[bdi]] console.log [[/bdi]]للعرض في وحدة التحكم.",
+              "ما تريد عرضه في[[bdi]] console.log [[/bdi]]هو المتغيّر [[bold]][[bdi]]number[[/bdi]][[/bold]]."
+            ],
+            "id": 90003060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:40.946Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90020",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 18 إلى 19 للتأكد من أنك تفهمه!",
+          "id": 90020,
+          "name": "مراجعة الفهم",
+          "question_count": 9,
+          "section_id": 5,
+          "seq": 20,
+          "test_range": "HTML, CSS",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90020,
+            "id": 90020010,
+            "seq": 1,
+            "title": "مراجعة من 18 إلى 19"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90020010",
+          "title": "مراجعة من 18 إلى 19",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90020/lecture/90020010",
+          "raw": {
+            "chapter_id": 90020,
+            "id": 90020010,
+            "seq": 1,
+            "title": "مراجعة من 18 إلى 19"
+          }
+        }
+      ],
+      "question_count": 9,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "Good morning",
+              "editable": true,
+              "lang": "html",
+              "placeholders": [],
+              "question_id": 90020010
+            }
+          ],
+          "question": {
+            "chapter_id": 90020,
+            "content": "من فضلك ضع النص المكتوب داخل[[bold]] وسم[[/bold]][[bold]][[bdi]] p.[[/bdi]][[/bold]]",
+            "hints": null,
+            "id": 90020010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "b tag",
+              "id": 900200202,
+              "question_id": 90020020
+            },
+            {
+              "content": "p tag",
+              "id": 900200203,
+              "question_id": 90020020
+            },
+            {
+              "content": "h5 tag",
+              "id": 900200204,
+              "question_id": 90020020
+            },
+            {
+              "content": "br tag",
+              "id": 900200201,
+              "question_id": 90020020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90020,
+            "content": "اختر الوسم المناسب لاستخدامه عند كسر السطر.",
+            "hints": null,
+            "id": 90020020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]<src=\"image.png\">[[/bdi]]",
+              "id": 900200302,
+              "question_id": 90020030
+            },
+            {
+              "content": "[[bdi]]<img><\"image.png\">[[/bdi]]",
+              "id": 900200304,
+              "question_id": 90020030
+            },
+            {
+              "content": "[[bdi]]<img src=\"image.png\">[[/bdi]]",
+              "id": 900200301,
+              "question_id": 90020030
+            },
+            {
+              "content": "[[bdi]]<img=\"image.png\">[[/bdi]]",
+              "id": 900200303,
+              "question_id": 90020030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90020,
+            "content": "اختر الوسم المناسب لعرض صورة باسم[[bdi]] \"image.png\"[[/bdi]].",
+            "hints": null,
+            "id": 90020030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "（strawberry）\n（cherry）\n（orange）",
+              "id": 900200403,
+              "question_id": 90020040
+            },
+            {
+              "content": "strawberry\ncherry\norange",
+              "id": 900200404,
+              "question_id": 90020040
+            },
+            {
+              "content": "1.strawberry\n2.cherry\n3.orange",
+              "id": 900200402,
+              "question_id": 90020040
+            },
+            {
+              "content": "・strawberry\n・cherry\n・orange",
+              "id": 900200401,
+              "question_id": 90020040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90020,
+            "content": "يرجى اختيار نوع العرض الذي تريده.\n\n[[code]]<ul>\n  <li>strawberry</li>\n  <li>cherry</li>\n  <li>orange</li>\n</ul>[[/code]]",
+            "hints": null,
+            "id": 90020040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "h1 {\n  color:\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90020050
+            }
+          ],
+          "question": {
+            "chapter_id": 90020,
+            "content": "حدد القيمة[[bdi]] \"yellow\"[[/bdi]].\n\nلن يتم عرض أي شيء في المتصفح.",
+            "hints": null,
+            "id": 90020050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "تغيير سمك الخط",
+              "id": 900200602,
+              "question_id": 90020060
+            },
+            {
+              "content": "تغيير لون الخلفية",
+              "id": 900200601,
+              "question_id": 90020060
+            },
+            {
+              "content": "تغيير لون الخط",
+              "id": 900200603,
+              "question_id": 90020060
+            },
+            {
+              "content": "تغيير لون الصورة",
+              "id": 900200604,
+              "question_id": 90020060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90020,
+            "content": "اختر الوصف الصحيح لخاصية[[bdi]] \"background-color\"[[/bdi]].",
+            "hints": null,
+            "id": 90020060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "يصبح الخط رفيعًا",
+              "id": 900200702,
+              "question_id": 90020070
+            },
+            {
+              "content": "يصبح حجم الخط أصغر",
+              "id": 900200703,
+              "question_id": 90020070
+            },
+            {
+              "content": "يتغير لون الخط إلى ذهبي",
+              "id": 900200704,
+              "question_id": 90020070
+            },
+            {
+              "content": "يصبح الخط عريضًا",
+              "id": 900200701,
+              "question_id": 90020070
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90020,
+            "content": "اختر الوصف الصحيح لقيمة خاصية[[bdi]] \"font-weight\" [[/bdi]]عندما تكون[[bdi]] \"bold\"[[/bdi]].",
+            "hints": null,
+            "id": 90020070,
+            "seq": 7,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "{\n  color: red;\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90020080
+            }
+          ],
+          "question": {
+            "chapter_id": 90020,
+            "content": "حدد المُنتقِي[[bdi]] (selector) [[/bdi]]كـ[[bdi]] h3[[/bdi]].\n\nلن يتم عرض أي شيء في المتصفح.",
+            "hints": null,
+            "id": 90020080,
+            "seq": 8,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "{\n  color: blue;\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90020090
+            }
+          ],
+          "question": {
+            "chapter_id": 90020,
+            "content": "تم تحديد اسم الصنف كما يلي. من فضلك اكتب[[bdi]] CSS [[/bdi]]لجعل كلمة[[bdi]] \"fish\" [[/bdi]]باللون الأزرق.\n\n[[bdi]]HTML[[/bdi]]\n[[code]]<p class=\"fish\">Fish</p>\n<p class=\"meat\">Meat</p>[[/code]]\n\nلن يتم عرض أي شيء في المتصفح عند التنفيذ.",
+            "hints": null,
+            "id": 90020090,
+            "seq": 9,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

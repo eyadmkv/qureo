@@ -1,0 +1,314 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:17.743Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90011",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 9 إلى 10 للتأكد من أنك تفهمه!",
+          "id": 90011,
+          "name": "مراجعة الفهم",
+          "question_count": 8,
+          "section_id": 5,
+          "seq": 11,
+          "test_range": "Operators,Repetition",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90011,
+            "id": 90011010,
+            "seq": 1,
+            "title": "مراجعة من 9 إلى 10"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90011010",
+          "title": "مراجعة من 9 إلى 10",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90011/lecture/90011010",
+          "raw": {
+            "chapter_id": 90011,
+            "id": 90011010,
+            "seq": 1,
+            "title": "مراجعة من 9 إلى 10"
+          }
+        }
+      ],
+      "question_count": 8,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "A || B",
+              "id": 900110101,
+              "question_id": 90011010
+            },
+            {
+              "content": "[[bdi]]A == B[[/bdi]]",
+              "id": 900110103,
+              "question_id": 90011010
+            },
+            {
+              "content": "A < B",
+              "id": 900110102,
+              "question_id": 90011010
+            },
+            {
+              "content": "A && B",
+              "id": 900110104,
+              "question_id": 90011010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90011,
+            "content": "اختر البرنامج الذي يعني[[bdi]] \"A [[/bdi]]أو[[bdi]] B\"[[/bdi]].",
+            "hints": null,
+            "id": 90011010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "A",
+              "id": 900110201,
+              "question_id": 90011020
+            },
+            {
+              "content": "No output",
+              "id": 900110204,
+              "question_id": 90011020
+            },
+            {
+              "content": "9",
+              "id": 900110203,
+              "question_id": 90011020
+            },
+            {
+              "content": "B",
+              "id": 900110202,
+              "question_id": 90011020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90011,
+            "content": "الرجاء اختيار ناتج تشغيل البرنامج أقل من أو يساوي\n\n[[code]]let num = 9;\nif (num <= 3 || num >= 7) {console.log(\"A\");}\nelse{console.log(\"B\");}[[/code]]",
+            "hints": null,
+            "id": 90011020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "1+1",
+              "id": 900110302,
+              "question_id": 90011030
+            },
+            {
+              "content": "i+",
+              "id": 900110304,
+              "question_id": 90011030
+            },
+            {
+              "content": "[[bdi]]i++[[/bdi]]",
+              "id": 900110301,
+              "question_id": 90011030
+            },
+            {
+              "content": "[[bdi]]i++1[[/bdi]]",
+              "id": 900110303,
+              "question_id": 90011030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90011,
+            "content": "اختر البرنامج الصحيح لإضافة 1 إلى المتغير[[bdi]] i.[[/bdi]]",
+            "hints": null,
+            "id": 90011030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "for (let i=0; i<10; i++) {\n　Process \n}",
+              "id": 900110401,
+              "question_id": 90011040
+            },
+            {
+              "content": "for (i<10; let i=0; i++) {\n　Process \n}",
+              "id": 900110403,
+              "question_id": 90011040
+            },
+            {
+              "content": "for (let i=0; i++; i<10) {\n　Process \n}",
+              "id": 900110402,
+              "question_id": 90011040
+            },
+            {
+              "content": "for { Process } (\n　let i=0; i<10; i++\n)",
+              "id": 900110404,
+              "question_id": 90011040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90011,
+            "content": "اختر الإجابة الصحيحة للبرنامج الذي يكرر المعالجة 10 مرات.",
+            "hints": null,
+            "id": 90011040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "Hello",
+              "id": 900110502,
+              "question_id": 90011050
+            },
+            {
+              "content": "Hello\nHello\nHello",
+              "id": 900110503,
+              "question_id": 90011050
+            },
+            {
+              "content": "No output",
+              "id": 900110504,
+              "question_id": 90011050
+            },
+            {
+              "content": "Hello\nHello",
+              "id": 900110501,
+              "question_id": 90011050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90011,
+            "content": "الرجاء اختيار ناتج تشغيل البرنامج أقل من أو يساوي\n\n[[code]]for (let i = 0; i < 2; i++) {\n console.log(\"Hello\");\n};[[/code]]",
+            "hints": null,
+            "id": 90011050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90011060
+            }
+          ],
+          "question": {
+            "chapter_id": 90011,
+            "content": "اكتب برنامجك كما يلي أقل من أو يساوي\n\t1.\tاطبع[[bdi]] \"Good morning\" [[/bdi]]عشر مرات في وحدة التحكم.\n*اسم المتغير هو[[bdi]] i [[/bdi]]وعيّن له القيمة 0 في البداية.\n*استخدم معامل الزيادة[[bdi]] (increment operator)[[/bdi]].\n\nالنص المنسوخ: [[copy]]Good morning[[/copy]]",
+            "hints": null,
+            "id": 90011060,
+            "seq": 6,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let a = 4;\nlet b = 3;\nif (fitbBlock1) {\nconsole.log(\"Condition met\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 15,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90011070
+            }
+          ],
+          "question": {
+            "chapter_id": 90011,
+            "content": "اكتب برنامجك كما يلي أقل من أو يساوي\n\t1.\tإذا كان المتغير [[bold]][[bdi]]a[[/bdi]][[/bold]] أكبر من أو يساوي 2 و [[bold]][[bdi]]b [[/bdi]][[/bold]]أكبر من أو يساوي 3، اطبع[[bdi]] \"Condition met\"[[/bdi]].\n*أدخل التعبير الشرطي فقط.",
+            "hints": null,
+            "id": 90011070,
+            "seq": 7,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "fitbBlock1 (fitbBlock2) {\n console.log(\"Hello\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 3,
+                  "name": "fitbBlock1"
+                },
+                {
+                  "col_size": 21,
+                  "name": "fitbBlock2"
+                }
+              ],
+              "question_id": 90011080
+            }
+          ],
+          "question": {
+            "chapter_id": 90011,
+            "content": "اكتب برنامجك كما يلي أقل من أو يساوي\n\t1.\tاطبع[[bdi]] \"Hello\" [[/bdi]]ثلاث مرات على وحدة التحكم.\n*اسم المتغير يجب أن يكون[[bdi]] i [[/bdi]]وقم بإسناد 0 له في البداية.\nاستخدم عامل الزيادة[[bdi]] (increment operator)[[/bdi]].",
+            "hints": null,
+            "id": 90011080,
+            "seq": 8,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

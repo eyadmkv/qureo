@@ -1,0 +1,315 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:26.233Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90014",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 12 إلى 13 للتأكد من أنك تفهمه!",
+          "id": 90014,
+          "name": "مراجعة الفهم",
+          "question_count": 8,
+          "section_id": 5,
+          "seq": 14,
+          "test_range": "Function",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90014,
+            "id": 90014010,
+            "seq": 1,
+            "title": "مراجعة من الفصلين 12 إلى 13"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90014010",
+          "title": "مراجعة من الفصلين 12 إلى 13",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90014/lecture/90014010",
+          "raw": {
+            "chapter_id": 90014,
+            "id": 90014010,
+            "seq": 1,
+            "title": "مراجعة من الفصلين 12 إلى 13"
+          }
+        }
+      ],
+      "question_count": 8,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]Math.round(1.8)[[/bdi]]",
+              "id": 900140101,
+              "question_id": 90014010
+            },
+            {
+              "content": "[[bdi]]round.Math(1.8)[[/bdi]]",
+              "id": 900140104,
+              "question_id": 90014010
+            },
+            {
+              "content": "[[bdi]]round(1.8)[[/bdi]]",
+              "id": 900140103,
+              "question_id": 90014010
+            },
+            {
+              "content": "[[bdi]]Math.roundoff(1.8)[[/bdi]]",
+              "id": 900140102,
+              "question_id": 90014010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90014,
+            "content": "اختر الدالة الصحيحة للتقريب.",
+            "hints": null,
+            "id": 90014010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "100",
+              "id": 900140201,
+              "question_id": 90014020
+            },
+            {
+              "content": "10",
+              "id": 900140202,
+              "question_id": 90014020
+            },
+            {
+              "content": "160",
+              "id": 900140204,
+              "question_id": 90014020
+            },
+            {
+              "content": "50",
+              "id": 900140203,
+              "question_id": 90014020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90014,
+            "content": "\"اختر ناتج تشغيل البرنامج التالي.\n\n[[code]]console.log(Math.max(10,50,100));[[/code]]",
+            "hints": null,
+            "id": 90014020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(random());[[/bdi]]",
+              "id": 900140304,
+              "question_id": 90014030
+            },
+            {
+              "content": "[[bdi]]console.log(Math.max());[[/bdi]]",
+              "id": 900140303,
+              "question_id": 90014030
+            },
+            {
+              "content": "[[bdi]]console.log(Math.min());[[/bdi]]",
+              "id": 900140302,
+              "question_id": 90014030
+            },
+            {
+              "content": "[[bdi]]console.log(Math.random());[[/bdi]]",
+              "id": 900140301,
+              "question_id": 90014030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90014,
+            "content": "اختر البرنامج الصحيح لإخراج القيم العددية العشوائية.",
+            "hints": null,
+            "id": 90014030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "12",
+              "id": 900140401,
+              "question_id": 90014040
+            },
+            {
+              "content": "13",
+              "id": 900140402,
+              "question_id": 90014040
+            },
+            {
+              "content": "No output",
+              "id": 900140404,
+              "question_id": 90014040
+            },
+            {
+              "content": "11",
+              "id": 900140403,
+              "question_id": 90014040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90014,
+            "content": "\"اختر ناتج تشغيل البرنامج التالي.\n\n[[code]]console.log(Math.floor(12.8));[[/code]]",
+            "hints": null,
+            "id": 90014040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 30,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90014050
+            }
+          ],
+          "question": {
+            "chapter_id": 90014,
+            "content": "أنشئ برنامجًا يعيد عددًا صحيحًا عشوائيًا كما يلي.  \n\n(1) استخدم الدالة [[bold]][[bdi]]Math.random[[/bdi]][[/bold]] لإرجاع قيمة عددية عشوائية.  \n(2) اضرب القيمة العددية العشوائية المُعادة في 10.  \n(3) استخدم الدالة [[bold]][[bdi]]Math.floor[[/bdi]][[/bold]] لإرجاع عدد صحيح.  \n*البرنامج في سطر واحد.",
+            "hints": null,
+            "id": 90014050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]][[code]]function (num) sum {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900140604,
+              "question_id": 90014060
+            },
+            {
+              "content": "[[bdi]][[code]]function sum(num) {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900140601,
+              "question_id": 90014060
+            },
+            {
+              "content": "[[bdi]][[code]](num)sum function {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900140603,
+              "question_id": 90014060
+            },
+            {
+              "content": "[[bdi]][[code]](num)function sum{\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900140602,
+              "question_id": 90014060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90014,
+            "content": "اختر البرنامج الصحيح لإنشاء دالة يكون اسمها [[bold]][[bdi]]sum[[/bdi]][[/bold]] واسم الوسيط [[bold]][[bdi]]num[[/bdi]][[/bold]].",
+            "hints": null,
+            "id": 90014060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function calc(num) { \n　let result = num * 7;\n　fitbBlock1\n}\nconsole.log(calc(10));",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 14,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90014070
+            }
+          ],
+          "question": {
+            "chapter_id": 90014,
+            "content": "أضف برنامجًا يُرجع قيمة المتغيّر [[bold]][[bdi]]result[[/bdi]][[/bold]] إلى البرنامج الموصوف.",
+            "hints": null,
+            "id": 90014070,
+            "seq": 7,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function calc(num) { \n　let result = num * 5;\n　return result;\n}\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 7,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90014080
+            }
+          ],
+          "question": {
+            "chapter_id": 90014,
+            "content": "أضف برنامجًا يستدعي الدالة [[bold]][[bdi]]calc[[/bdi]][[/bold]].  \nأدخل [[bold]]7[[/bold]] كوسيط.",
+            "hints": null,
+            "id": 90014080,
+            "seq": 8,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

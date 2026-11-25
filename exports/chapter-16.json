@@ -1,0 +1,293 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:31.344Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90016",
+      "title": "المصفوفة",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع التكرار.",
+          "id": 90016,
+          "name": "المصفوفة",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 16,
+          "test_range": "Array",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90016,
+            "id": 90016010,
+            "seq": 1,
+            "title": "ما هي المصفوفة؟"
+          },
+          {
+            "chapter_id": 90016,
+            "id": 90016020,
+            "seq": 2,
+            "title": "ممارسة المصفوفات (1)"
+          },
+          {
+            "chapter_id": 90016,
+            "id": 90016030,
+            "seq": 3,
+            "title": "المصفوفات وجمل for"
+          },
+          {
+            "chapter_id": 90016,
+            "id": 90016040,
+            "seq": 4,
+            "title": "ممارسة المصفوفات (2)"
+          },
+          {
+            "chapter_id": 90016,
+            "id": 90016050,
+            "seq": 5,
+            "title": "طول المصفوفة"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90016010",
+          "title": "ما هي المصفوفة؟",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90016/lecture/90016010",
+          "raw": {
+            "chapter_id": 90016,
+            "id": 90016010,
+            "seq": 1,
+            "title": "ما هي المصفوفة؟"
+          }
+        },
+        {
+          "id": "90016020",
+          "title": "ممارسة المصفوفات (1)",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90016/lecture/90016020",
+          "raw": {
+            "chapter_id": 90016,
+            "id": 90016020,
+            "seq": 2,
+            "title": "ممارسة المصفوفات (1)"
+          }
+        },
+        {
+          "id": "90016030",
+          "title": "المصفوفات وجمل for",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90016/lecture/90016030",
+          "raw": {
+            "chapter_id": 90016,
+            "id": 90016030,
+            "seq": 3,
+            "title": "المصفوفات وجمل for"
+          }
+        },
+        {
+          "id": "90016040",
+          "title": "ممارسة المصفوفات (2)",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90016/lecture/90016040",
+          "raw": {
+            "chapter_id": 90016,
+            "id": 90016040,
+            "seq": 4,
+            "title": "ممارسة المصفوفات (2)"
+          }
+        },
+        {
+          "id": "90016050",
+          "title": "طول المصفوفة",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90016/lecture/90016050",
+          "raw": {
+            "chapter_id": 90016,
+            "id": 90016050,
+            "seq": 5,
+            "title": "طول المصفوفة"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [ ];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90016010
+            }
+          ],
+          "question": {
+            "chapter_id": 90016,
+            "content": "ضع القيم التالية في المصفوفة.\n5، 10، 15\n\n*لن يتم إخراج أي شيء عند التنفيذ.",
+            "hints": [
+              "أدخل القيم العددية مفصولة بمسافة."
+            ],
+            "id": 90016010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "15",
+              "id": 900160201,
+              "question_id": 90016020
+            },
+            {
+              "content": "10",
+              "id": 900160202,
+              "question_id": 90016020
+            },
+            {
+              "content": "20",
+              "id": 900160203,
+              "question_id": 90016020
+            },
+            {
+              "content": "2",
+              "id": 900160204,
+              "question_id": 90016020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90016,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]let num = [5, 10, 15, 20, 25];\nconsole.log(num[2]);[[/code]]",
+            "hints": [
+              "[[bdi]]num[2] [[/bdi]]تعني استخراج القيمة الثانية في المصفوفة."
+            ],
+            "id": 90016020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [5, 10, 15, 20, 25];\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 3,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90016030
+            }
+          ],
+          "question": {
+            "chapter_id": 90016,
+            "content": "اطبع جميع القيم في المصفوفة على وحدة التحكم.  \n*لا تدخل القيم مباشرة.  \n*لا تحذف البرنامج المكتوب، بل أضف البرنامج داخل[[bdi]] console.log.[[/bdi]]",
+            "hints": [
+              "عند طباعة القيم المخزنة في المصفوفة، تُستخدم نفس طريقة الكتابة عند طباعة قيم المتغيرات."
+            ],
+            "id": 90016030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "1",
+              "id": 900160404,
+              "question_id": 90016040
+            },
+            {
+              "content": "3",
+              "id": 900160403,
+              "question_id": 90016040
+            },
+            {
+              "content": "2",
+              "id": 900160402,
+              "question_id": 90016040
+            },
+            {
+              "content": "6",
+              "id": 900160401,
+              "question_id": 90016040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90016,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.  \n\n[[code]]let num = [1, 2, 3];\nlet sum = 0;\nfor (let i = 0; i < 3; i++) {\n  sum = sum + num[i];\n}\nconsole.log(sum);[[/code]]",
+            "hints": [
+              "هذا البرنامج يقوم بجمع القيم في المصفوفة."
+            ],
+            "id": 90016040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [5, 10, 15, 20, 25];\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 10,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90016050
+            }
+          ],
+          "question": {
+            "chapter_id": 90016,
+            "content": "اطبع طول المصفوفة على وحدة التحكم.  \n*لا تدخل القيمة العددية للطول مباشرة.",
+            "hints": [
+              "يمكنك معرفة طول المصفوفة باستخدام[[bdi]] \"length\"[[/bdi]]."
+            ],
+            "id": 90016050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

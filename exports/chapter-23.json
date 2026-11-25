@@ -1,0 +1,338 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:47.724Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90023",
+      "title": "الدوال (3)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عملية معينة، وتعيد النتيجة!\n",
+          "id": 90023,
+          "name": "الدوال (3)",
+          "question_count": 7,
+          "section_id": 5,
+          "seq": 23,
+          "test_range": "Functions",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90023,
+            "id": 90023010,
+            "seq": 1,
+            "title": "مراجعة الدوال"
+          },
+          {
+            "chapter_id": 90023,
+            "id": 90023020,
+            "seq": 2,
+            "title": "نطاق في الدوال"
+          },
+          {
+            "chapter_id": 90023,
+            "id": 90023030,
+            "seq": 3,
+            "title": "الدوال بدون معاملات"
+          },
+          {
+            "chapter_id": 90023,
+            "id": 90023040,
+            "seq": 4,
+            "title": "الوظائف ذات المعاملات المتعددة"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90023010",
+          "title": "مراجعة الدوال",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90023/lecture/90023010",
+          "raw": {
+            "chapter_id": 90023,
+            "id": 90023010,
+            "seq": 1,
+            "title": "مراجعة الدوال"
+          }
+        },
+        {
+          "id": "90023020",
+          "title": "نطاق في الدوال",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90023/lecture/90023020",
+          "raw": {
+            "chapter_id": 90023,
+            "id": 90023020,
+            "seq": 2,
+            "title": "نطاق في الدوال"
+          }
+        },
+        {
+          "id": "90023030",
+          "title": "الدوال بدون معاملات",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90023/lecture/90023030",
+          "raw": {
+            "chapter_id": 90023,
+            "id": 90023030,
+            "seq": 3,
+            "title": "الدوال بدون معاملات"
+          }
+        },
+        {
+          "id": "90023040",
+          "title": "الوظائف ذات المعاملات المتعددة",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90023/lecture/90023040",
+          "raw": {
+            "chapter_id": 90023,
+            "id": 90023040,
+            "seq": 4,
+            "title": "الوظائف ذات المعاملات المتعددة"
+          }
+        }
+      ],
+      "question_count": 7,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]][[code]]move function {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900230103,
+              "question_id": 90023010
+            },
+            {
+              "content": "[[bdi]][[code]]function move {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900230102,
+              "question_id": 90023010
+            },
+            {
+              "content": "[[bdi]][[code]]function move() {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900230101,
+              "question_id": 90023010
+            },
+            {
+              "content": "[[bdi]][[code]]move() function {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900230104,
+              "question_id": 90023010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90023,
+            "content": "اختر البرنامج الصحيح لإنشاء دالة باسم[[bdi]] move [[/bdi]]بدون معاملات.",
+            "hints": [
+              "عند إنشاء دالة، اكتب[[bdi]] function [[/bdi]]أولًا.",
+              "بعد اسم الدالة، أضف ()."
+            ],
+            "id": 90023010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "55",
+              "id": 900230201,
+              "question_id": 90023020
+            },
+            {
+              "content": "45",
+              "id": 900230203,
+              "question_id": 90023020
+            },
+            {
+              "content": "50",
+              "id": 900230202,
+              "question_id": 90023020
+            },
+            {
+              "content": "Nothing is output",
+              "id": 900230204,
+              "question_id": 90023020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90023,
+            "content": "اختر المخرجات الصحيحة عند تنفيذ البرنامج التالي:\n\n[[code]]function calc(num) {\n  let result = num + 5;\n  return result;\n}\nconsole.log(calc(50));[[/code]]",
+            "hints": [
+              "لنراجع ما هي العملية التي تنفذها الدالة[[bdi]] \"calc\"[[/bdi]].",
+              "لنراجع ما هو الوسيط[[bdi]] (argument) [[/bdi]]في الدالة[[bdi]] \"calc\"[[/bdi]].",
+              "العملية (المعالجة) في الدالة[[bdi]] \"calc\" [[/bdi]]هي ‎[[bdi]]num + 5[[/bdi]]."
+            ],
+            "id": 90023020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "3",
+              "id": 900230304,
+              "question_id": 90023030
+            },
+            {
+              "content": "10",
+              "id": 900230302,
+              "question_id": 90023030
+            },
+            {
+              "content": "0",
+              "id": 900230303,
+              "question_id": 90023030
+            },
+            {
+              "content": "30",
+              "id": 900230301,
+              "question_id": 90023030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90023,
+            "content": "اختر المخرجات الصحيحة عند تنفيذ البرنامج التالي:\n\n[[code]]function calc( number ){\n  let answer = number * 10;\n  return answer;\n}\nconsole.log( calc(3) );[[/code]]",
+            "hints": [
+              "لنراجع ما هي العملية التي تنفذها الدالة[[bdi]] \"calc\"[[/bdi]].",
+              "لنراجع ما هو الوسيط[[bdi]] (argument) [[/bdi]]في الدالة[[bdi]] \"calc\"[[/bdi]].",
+              "العملية (المعالجة) في الدالة[[bdi]] \"calc\" [[/bdi]]هي ‎[[bdi]]number * 10[[/bdi]]."
+            ],
+            "id": 90023030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function divide5(total) {\n    let num = total / 5;\n    return num;\n}\nconsole.log( );",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90023040
+            }
+          ],
+          "question": {
+            "chapter_id": 90023,
+            "content": "تم إنشاء دالة باسم[[bdi]] divide5 [[/bdi]]تقوم بالقسمة على 5، لذا يرجى الإخراج إلى وحدة التحكم بتمرير القيمة 35 إلى الدالة[[bdi]] divide5[[/bdi]].",
+            "hints": [
+              "لنراجع ما إذا كان اسم الدالة قد تم إنشاؤه.",
+              "لنراجع ما إذا كانت العملية هي معادلة تقسم على 5.",
+              "يمكنك استدعاء الدالة بكتابة ‎[[bdi]]divide5(35)[[/bdi]]."
+            ],
+            "id": 90023040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "لا ينتج عنه خطأ",
+              "id": 900230502,
+              "question_id": 90023050
+            },
+            {
+              "content": "ينتج عنه خطأ",
+              "id": 900230501,
+              "question_id": 90023050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90023,
+            "content": "اختر نتيجة تنفيذ البرنامج التالي من الخيارات أدناه:\n\n[[code]]function calc(num) {\n    let answer = num * 3;\n    return answer;\n}\nconsole.log(answer);[[/code]]",
+            "hints": [
+              "لنراجع أين تم التصريح عن المتغير[[bdi]] answer.[[/bdi]]"
+            ],
+            "id": 90023050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log(goodNight());",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90023060
+            }
+          ],
+          "question": {
+            "chapter_id": 90023,
+            "content": "أنشئ برنامجًا كما يلي يقوم بإخراج[[bdi]] **Good night!** [[/bdi]]عند استدعاء الدالة[[bdi]] goodNight:  [[/bdi]]\n\n① أنشئ دالة باسم[[bdi]] goodNight [[/bdi]]بدون معاملات  \n② أسند النص[[bdi]] \"Good night!\" [[/bdi]]إلى المتغير[[bdi]] greeting  [[/bdi]]\n③ أرجع قيمة المتغير[[bdi]] greeting  [[/bdi]]\n④ استدعِ الدالة[[bdi]] goodNight [[/bdi]]وقم بالإخراج إلى وحدة التحكم  \n\nنص النسخ: [[copy]]Good night![[/copy]]",
+            "hints": [
+              "عند إنشاء دالة، اكتب[[bdi]] function.[[/bdi]]",
+              "عندما لا تكون هناك معاملات، أضف \"()\" بعد اسم الدالة التي تنشئها."
+            ],
+            "id": 90023060,
+            "seq": 6,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function mul(num1, num2) {\n  let answer = num1 * num2;\n  return answer;\n}\nfitbBlock1",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 23,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90023070
+            }
+          ],
+          "question": {
+            "chapter_id": 90023,
+            "content": "يوجد برنامج مكتوب لدالة تقوم بالضرب عند تمرير معاملين.  \n\nأدخل برنامجًا يستدعي الدالة[[bdi]] mul[[/bdi]]، ويمرر المعاملين **9** و **7**، ويخرج النتيجة إلى وحدة التحكم.",
+            "hints": [
+              "لتمرير عدة معاملات، افصل القيم باستخدام \",\" (فاصلة)."
+            ],
+            "id": 90023070,
+            "seq": 7,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

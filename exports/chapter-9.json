@@ -1,0 +1,254 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:13.015Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90009",
+      "title": "العامل المنطقي",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية كتابة واستخدام العوامل المنطقية “و” (and) و”أو” (or).",
+          "id": 90009,
+          "name": "العامل المنطقي",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 9,
+          "test_range": "logical operator",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90009,
+            "id": 90009010,
+            "seq": 1,
+            "title": "المعاملات المنطقية"
+          },
+          {
+            "chapter_id": 90009,
+            "id": 90009020,
+            "seq": 2,
+            "title": "استخدام العوامل المنطقية"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90009010",
+          "title": "المعاملات المنطقية",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90009/lecture/90009010",
+          "raw": {
+            "chapter_id": 90009,
+            "id": 90009010,
+            "seq": 1,
+            "title": "المعاملات المنطقية"
+          }
+        },
+        {
+          "id": "90009020",
+          "title": "استخدام العوامل المنطقية",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90009/lecture/90009020",
+          "raw": {
+            "chapter_id": 90009,
+            "id": 90009020,
+            "seq": 2,
+            "title": "استخدام العوامل المنطقية"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "A && B",
+              "id": 900090101,
+              "question_id": 90009010
+            },
+            {
+              "content": "A || B",
+              "id": 900090103,
+              "question_id": 90009010
+            },
+            {
+              "content": "A & B",
+              "id": 900090102,
+              "question_id": 90009010
+            },
+            {
+              "content": "A // B",
+              "id": 900090104,
+              "question_id": 90009010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90009,
+            "content": "اختر برنامجًا يعني[[bdi]] \"A and B\"[[/bdi]].\n",
+            "hints": [
+              "استخدم رمز[[bdi]] \"ampersand\"[[/bdi]].\n"
+            ],
+            "id": 90009010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "A < B",
+              "id": 900090202,
+              "question_id": 90009020
+            },
+            {
+              "content": "[[bdi]]A == B[[/bdi]]",
+              "id": 900090203,
+              "question_id": 90009020
+            },
+            {
+              "content": "A && B",
+              "id": 900090204,
+              "question_id": 90009020
+            },
+            {
+              "content": "A || B",
+              "id": 900090201,
+              "question_id": 90009020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90009,
+            "content": "اختر برنامجًا يعني[[bdi]] \"A or B\"[[/bdi]].\n",
+            "hints": [
+              "استخدم رمز[[bdi]] \"vertical bar\"[[/bdi]].\n"
+            ],
+            "id": 90009020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "السعر العادي",
+              "id": 900090301,
+              "question_id": 90009030
+            },
+            {
+              "content": "خصم 20%",
+              "id": 900090302,
+              "question_id": 90009030
+            },
+            {
+              "content": "لا يوجد إخراج",
+              "id": 900090304,
+              "question_id": 90009030
+            },
+            {
+              "content": "خطأ",
+              "id": 900090303,
+              "question_id": 90009030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90009,
+            "content": "الرجاء اختيار نتيجة الإخراج عند تنفيذ البرنامج التالي.\n\n[[code]]let age = 20;\nif (age <= 18 || age >= 60){console.log(\"20% OFF\");}\nelse{console.log(\"Regular Price\");}[[/code]]",
+            "hints": [
+              "تحقق مما إذا كانت قيمة المتغيّر [[bold]][[bdi]]age[[/bdi]][[/bold]] تنطبق على العبارة الشرطية.\n"
+            ],
+            "id": 90009030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let a = 5;\nlet b = 10;\nif (fitbBlock1){console.log(\"Condition met\");}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 17,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90009040
+            }
+          ],
+          "question": {
+            "chapter_id": 90009,
+            "content": "الرجاء إنشاء برنامج كما يلي.\n\t1.\tإذا كان المتغيّر [[bold]][[bdi]]a[[/bdi]][[/bold]] يساوي 5 أو [[bold]][[bdi]]b[[/bdi]][[/bold]] يساوي 10، اطبع[[bdi]] \"Condition met\"[[/bdi]].\n*أدخل التعبير الشرطي فقط.",
+            "hints": [
+              "المتغيّر في العبارة الشرطية \"[[bold]][[bdi]]a[[/bdi]][[/bold]] يساوي 5\" يُكتب: [[bdi]]\"a == 5\"[[/bdi]].\n",
+              "المتغيّر في العبارة الشرطية \"[[bold]][[bdi]]b[[/bdi]][[/bold]] يساوي 10\" يُكتب: [[bdi]]\"b == 10\"[[/bdi]].\n"
+            ],
+            "id": 90009040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let a = 4;\nlet b = 3;\nif (fitbBlock1){console.log(\"Condition met\");}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 15,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90009050
+            }
+          ],
+          "question": {
+            "chapter_id": 90009,
+            "content": "الرجاء إنشاء برنامج كما يلي.\n\t1.\tإذا كان المتغيّر [[bold]][[bdi]]a[[/bdi]][[/bold]] أكبر من أو يساوي 2 و [[bold]][[bdi]]b[[/bdi]][[/bold]] أكبر من أو يساوي 3، اطبع[[bdi]] \"Condition met\"[[/bdi]].\n*أدخل التعبير الشرطي فقط.",
+            "hints": [
+              "إذا كان المتغيّر في العبارة الشرطية \"[[bold]][[bdi]]a[[/bdi]][[/bold]] أكبر من أو يساوي 2\"، فاكتب: [[bdi]]\"a >= 2\"[[/bdi]].",
+              "إذا كان المتغيّر في العبارة الشرطية \"[[bold]][[bdi]]b[[/bdi]][[/bold]] أكبر من أو يساوي 3\"، فاكتب: [[bdi]]\"b >= 3\"[[/bdi]]."
+            ],
+            "id": 90009050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

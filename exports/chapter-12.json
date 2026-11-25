@@ -1,0 +1,344 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:19.665Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90012",
+      "title": "الدالة (1)",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+          "id": 90012,
+          "name": "الدالة (1)",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 12,
+          "test_range": "Function",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90012,
+            "id": 90012010,
+            "seq": 1,
+            "title": "ما هي الدالة؟"
+          },
+          {
+            "chapter_id": 90012,
+            "id": 90012020,
+            "seq": 2,
+            "title": "ممارسة استخدام الدوال"
+          },
+          {
+            "chapter_id": 90012,
+            "id": 90012030,
+            "seq": 3,
+            "title": "ما هي الدالة؟"
+          },
+          {
+            "chapter_id": 90012,
+            "id": 90012040,
+            "seq": 4,
+            "title": "ممارسة استخدام الدوال (2)"
+          },
+          {
+            "chapter_id": 90012,
+            "id": 90012050,
+            "seq": 5,
+            "title": "ممارسة استخدام الدوال (٣)"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90012010",
+          "title": "ما هي الدالة؟",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90012/lecture/90012010",
+          "raw": {
+            "chapter_id": 90012,
+            "id": 90012010,
+            "seq": 1,
+            "title": "ما هي الدالة؟"
+          }
+        },
+        {
+          "id": "90012020",
+          "title": "ممارسة استخدام الدوال",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90012/lecture/90012020",
+          "raw": {
+            "chapter_id": 90012,
+            "id": 90012020,
+            "seq": 2,
+            "title": "ممارسة استخدام الدوال"
+          }
+        },
+        {
+          "id": "90012030",
+          "title": "ما هي الدالة؟",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90012/lecture/90012030",
+          "raw": {
+            "chapter_id": 90012,
+            "id": 90012030,
+            "seq": 3,
+            "title": "ما هي الدالة؟"
+          }
+        },
+        {
+          "id": "90012040",
+          "title": "ممارسة استخدام الدوال (2)",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90012/lecture/90012040",
+          "raw": {
+            "chapter_id": 90012,
+            "id": 90012040,
+            "seq": 4,
+            "title": "ممارسة استخدام الدوال (2)"
+          }
+        },
+        {
+          "id": "90012050",
+          "title": "ممارسة استخدام الدوال (٣)",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90012/lecture/90012050",
+          "raw": {
+            "chapter_id": 90012,
+            "id": 90012050,
+            "seq": 5,
+            "title": "ممارسة استخدام الدوال (٣)"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]][[code]]function (num) calc {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900120104,
+              "question_id": 90012010
+            },
+            {
+              "content": "[[bdi]][[code]](num)function calc{\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900120102,
+              "question_id": 90012010
+            },
+            {
+              "content": "[[bdi]][[code]]function calc(num) {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900120101,
+              "question_id": 90012010
+            },
+            {
+              "content": "[[bdi]][[code]](num)calc function {\n　　processing\n}[[/code]][[/bdi]]",
+              "id": 900120103,
+              "question_id": 90012010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90012,
+            "content": "اختر البرنامج الصحيح لإنشاء دالة يكون اسمها [[bold]][[bdi]]calc[[/bdi]][[/bold]] واسم معاملها [[bold]][[bdi]]num[[/bdi]][[/bold]].",
+            "hints": [
+              "لإنشاء دالة، يجب كتابة[[bdi]] function [[/bdi]]في البداية."
+            ],
+            "id": 90012010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]Math.round(1.8)[[/bdi]]",
+              "id": 900120201,
+              "question_id": 90012020
+            },
+            {
+              "content": "[[bdi]]round.Math(1.8)[[/bdi]]",
+              "id": 900120204,
+              "question_id": 90012020
+            },
+            {
+              "content": "[[bdi]]Math.roundoff(1.8)[[/bdi]]",
+              "id": 900120202,
+              "question_id": 90012020
+            },
+            {
+              "content": "[[bdi]]round(1.8)[[/bdi]]",
+              "id": 900120203,
+              "question_id": 90012020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90012,
+            "content": "اختر الدالة الصحيحة للتقريب.",
+            "hints": [
+              "لإجراء الحساب، استخدم[[bdi]] \"Math\"[[/bdi]]."
+            ],
+            "id": 90012020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "40",
+              "id": 900120302,
+              "question_id": 90012030
+            },
+            {
+              "content": "120",
+              "id": 900120304,
+              "question_id": 90012030
+            },
+            {
+              "content": "60",
+              "id": 900120301,
+              "question_id": 90012030
+            },
+            {
+              "content": "20",
+              "id": 900120303,
+              "question_id": 90012030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90012,
+            "content": "يرجى تحديد ناتج تشغيل البرنامج التالي:\n\n[[code]]console.log(Math.max(20,40,60));[[/code]]",
+            "hints": [
+              "[[bdi]]max [[/bdi]]تعني القيمة العظمى."
+            ],
+            "id": 90012030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "15",
+              "id": 900120401,
+              "question_id": 90012040
+            },
+            {
+              "content": "0",
+              "id": 900120403,
+              "question_id": 90012040
+            },
+            {
+              "content": "5",
+              "id": 900120404,
+              "question_id": 90012040
+            },
+            {
+              "content": "3",
+              "id": 900120402,
+              "question_id": 90012040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90012,
+            "content": "يرجى تحديد الإجابة الصحيحة التي ستُعرض في وحدة التحكم نتيجة تشغيل البرنامج التالي:\n\n[[code]]function calc(num) {\n  let result = num * 3;\n  return result;\n}\nconsole.log(calc(5));[[/code]]",
+            "hints": [
+              "دعنا نرَ كيف تعمل الدالة [[bold]][[bdi]]calc[[/bdi]][[/bold]].",
+              "تحقق مما إذا كان معامل الدالة [[bold]][[bdi]]calc[[/bdi]][[/bold]] هو.",
+              "حركة (معالجة) الدالة [[bold]][[bdi]]calc[[/bdi]][[/bold]] هي ‎[[bdi]]num * 3[[/bdi]]‎."
+            ],
+            "id": 90012040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function calc(num) {\n  let result = num * 5;\n  return result;\n}\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 7,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90012050
+            }
+          ],
+          "question": {
+            "chapter_id": 90012,
+            "content": "الرجاء إضافة برنامج يستدعي الدالة [[bold]][[bdi]]calc[[/bdi]][[/bold]].\nضع 3 كقيمة للمعامل.",
+            "hints": [
+              "اسم الدالة هو [[bold]][[bdi]]calc[[/bdi]][[/bold]].",
+              "المعامل هو [[bold]]3.[[/bold]]"
+            ],
+            "id": 90012050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function calc(num) {\n  let result = num * 7;\n  fitbBlock1\n}\nconsole.log(calc(10));",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 14,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90012060
+            }
+          ],
+          "question": {
+            "chapter_id": 90012,
+            "content": "الرجاء إضافة برنامج يعيد قيمة المتغيّر [[bold]][[bdi]]result[[/bdi]][[/bold]] إلى البرنامج الموصوف.",
+            "hints": [
+              "استخدم[[bdi]] \"return\" [[/bdi]]لإرجاع قيمة."
+            ],
+            "id": 90012060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

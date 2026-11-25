@@ -1,0 +1,329 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:25:54.082Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90002",
+      "title": "الحسابات والنصوص",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية إخراج النصوص والأرقام والمعادلات إلى وحدة التحكم (console).",
+          "id": 90002,
+          "name": "الحسابات والنصوص",
+          "question_count": 7,
+          "section_id": 5,
+          "seq": 2,
+          "test_range": "Calculation, String",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90002,
+            "id": 90002010,
+            "seq": 1,
+            "title": "كيف نعرض في وحدة التحكم"
+          },
+          {
+            "chapter_id": 90002,
+            "id": 90002020,
+            "seq": 2,
+            "title": "طرق الحساب"
+          },
+          {
+            "chapter_id": 90002,
+            "id": 90002030,
+            "seq": 3,
+            "title": "التجميع (١)"
+          },
+          {
+            "chapter_id": 90002,
+            "id": 90002040,
+            "seq": 4,
+            "title": "التجميع (٢)"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90002010",
+          "title": "كيف نعرض في وحدة التحكم",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90002/lecture/90002010",
+          "raw": {
+            "chapter_id": 90002,
+            "id": 90002010,
+            "seq": 1,
+            "title": "كيف نعرض في وحدة التحكم"
+          }
+        },
+        {
+          "id": "90002020",
+          "title": "طرق الحساب",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90002/lecture/90002020",
+          "raw": {
+            "chapter_id": 90002,
+            "id": 90002020,
+            "seq": 2,
+            "title": "طرق الحساب"
+          }
+        },
+        {
+          "id": "90002030",
+          "title": "التجميع (١)",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90002/lecture/90002030",
+          "raw": {
+            "chapter_id": 90002,
+            "id": 90002030,
+            "seq": 3,
+            "title": "التجميع (١)"
+          }
+        },
+        {
+          "id": "90002040",
+          "title": "التجميع (٢)",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90002/lecture/90002040",
+          "raw": {
+            "chapter_id": 90002,
+            "id": 90002040,
+            "seq": 4,
+            "title": "التجميع (٢)"
+          }
+        }
+      ],
+      "question_count": 7,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(50 + 100);[[/bdi]]",
+              "id": 900020101,
+              "question_id": 90002010
+            },
+            {
+              "content": "[[bdi]]console.log(\"50 + 100\");[[/bdi]]",
+              "id": 900020102,
+              "question_id": 90002010
+            },
+            {
+              "content": "[[bdi]]console.log(50\" + \"100);[[/bdi]]",
+              "id": 900020104,
+              "question_id": 90002010
+            },
+            {
+              "content": "[[bdi]]console.log(\"50\" + \"100\");[[/bdi]]",
+              "id": 900020103,
+              "question_id": 90002010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90002,
+            "content": "اختر البرنامج الصحيح لعرض نتيجة حساب[[bdi]] 50+100 [[/bdi]]في وحدة التحكم.",
+            "hints": [
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية."
+            ],
+            "id": 90002010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "/",
+              "id": 900020201,
+              "question_id": 90002020
+            },
+            {
+              "content": "*",
+              "id": 900020204,
+              "question_id": 90002020
+            },
+            {
+              "content": "-",
+              "id": 900020203,
+              "question_id": 90002020
+            },
+            {
+              "content": "÷",
+              "id": 900020202,
+              "question_id": 90002020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90002,
+            "content": "اختر الرمز الصحيح للقسمة المستخدم في البرنامج.",
+            "hints": [
+              "رموز القسمة في البرامج تختلف عن تلك المستخدمة في الحسابات العادية."
+            ],
+            "id": 90002020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log();",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90002030
+            }
+          ],
+          "question": {
+            "chapter_id": 90002,
+            "content": "اجعل الكمبيوتر يحسب[[bdi]] 19+40 [[/bdi]]ويعرض نتيجة الحساب في وحدة التحكم.",
+            "hints": [
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية."
+            ],
+            "id": 90002030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90002040
+            }
+          ],
+          "question": {
+            "chapter_id": 90002,
+            "content": "اجعل الكمبيوتر يحسب[[bdi]] 7-2 [[/bdi]]ويعرض نتيجة الحساب في وحدة التحكم.",
+            "hints": [
+              "للعرض في وحدة التحكم، استخدم[[bdi]] console.log.[[/bdi]]",
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية."
+            ],
+            "id": 90002040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90002050
+            }
+          ],
+          "question": {
+            "chapter_id": 90002,
+            "content": "اجعل الكمبيوتر يحسب[[bdi]]  15 ÷ 5 [[/bdi]]ويعرض نتيجة الحساب في وحدة التحكم.",
+            "hints": [
+              "للعرض في وحدة التحكم، استخدم[[bdi]] console.log.[[/bdi]]",
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية.",
+              "رمز القسمة هو \"/\"."
+            ],
+            "id": 90002050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(\"Today is the 17th.7 days ago was the (17 - 7)th.\");[[/bdi]]",
+              "id": 900020603,
+              "question_id": 90002060
+            },
+            {
+              "content": "[[bdi]]console.log(\"Today is the 17th.7 days ago was the \" + \"17 - 7\" + \"th.\");[[/bdi]]",
+              "id": 900020604,
+              "question_id": 90002060
+            },
+            {
+              "content": "[[bdi]]console.log(\"Today is the 17th.7 days ago was the \" + (17 - 7) + \"th.\");[[/bdi]]",
+              "id": 900020601,
+              "question_id": 90002060
+            },
+            {
+              "content": "[[bdi]]console.log(\"Today is the 17th.7 days ago was the  + 17 - 7 + th.\");[[/bdi]]",
+              "id": 900020602,
+              "question_id": 90002060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90002,
+            "content": "اختر البرنامج الصحيح لعرض[[bdi]] \"Today is the 17th. 7 days ago was the 10th.\" [[/bdi]]في وحدة التحكم.",
+            "hints": [
+              "النصوص تُحاط بعلامتي اقتباس مزدوجتين.",
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية.",
+              "لدمج صيغة حسابية مع نص، اربط النص مع صيغة الحساب باستخدام \"+\"."
+            ],
+            "id": 90002060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log(\"The answer is 2 * 5.\");",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90002070
+            }
+          ],
+          "question": {
+            "chapter_id": 90002,
+            "content": "اجعل الكمبيوتر يحسب[[bdi]] 2*5 [[/bdi]]ويعرض[[bdi]] \"The answer is 10.\" [[/bdi]]في وحدة التحكم.",
+            "hints": [
+              "النصوص تُحاط بعلامتي اقتباس مزدوجتين.",
+              "علامات الاقتباس المزدوجة غير مطلوبة لعرض نتائج العمليات الحسابية.",
+              "لدمج صيغة حسابية مع نص، اربط النص مع صيغة الحساب باستخدام \"+\"."
+            ],
+            "id": 90002070,
+            "seq": 7,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

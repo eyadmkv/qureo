@@ -1,0 +1,269 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:27:06.715Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90029",
+      "title": "الشروط (5)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع تداخل فروع الشروط عبر دمج جمل if!\n",
+          "id": 90029,
+          "name": "الشروط (5)",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 29,
+          "test_range": "Conditional",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90029,
+            "id": 90029010,
+            "seq": 1,
+            "title": "مراجعة التفرع الشرطي"
+          },
+          {
+            "chapter_id": 90029,
+            "id": 90029020,
+            "seq": 2,
+            "title": "الرياضيات في التفرعات الشرطية"
+          },
+          {
+            "chapter_id": 90029,
+            "id": 90029030,
+            "seq": 3,
+            "title": "تطبيق الشروط المتداخلة"
+          },
+          {
+            "chapter_id": 90029,
+            "id": 90029040,
+            "seq": 4,
+            "title": "التدرب على الشروط المتداخلة"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90029010",
+          "title": "مراجعة التفرع الشرطي",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90029/lecture/90029010",
+          "raw": {
+            "chapter_id": 90029,
+            "id": 90029010,
+            "seq": 1,
+            "title": "مراجعة التفرع الشرطي"
+          }
+        },
+        {
+          "id": "90029020",
+          "title": "الرياضيات في التفرعات الشرطية",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90029/lecture/90029020",
+          "raw": {
+            "chapter_id": 90029,
+            "id": 90029020,
+            "seq": 2,
+            "title": "الرياضيات في التفرعات الشرطية"
+          }
+        },
+        {
+          "id": "90029030",
+          "title": "تطبيق الشروط المتداخلة",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90029/lecture/90029030",
+          "raw": {
+            "chapter_id": 90029,
+            "id": 90029030,
+            "seq": 3,
+            "title": "تطبيق الشروط المتداخلة"
+          }
+        },
+        {
+          "id": "90029040",
+          "title": "التدرب على الشروط المتداخلة",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90029/lecture/90029040",
+          "raw": {
+            "chapter_id": 90029,
+            "id": 90029040,
+            "seq": 4,
+            "title": "التدرب على الشروط المتداخلة"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let A = 5;\nlet B = 10;\nif (A > B) {\n  console.log(\"A is bigger\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90029010
+            }
+          ],
+          "question": {
+            "chapter_id": 90029,
+            "content": "أضف شرطًا ثانيًا إلى البرنامج المكتوب:\nإذا كانت[[bdi]] A [[/bdi]]أصغر من[[bdi]] B[[/bdi]]، اطبع[[bdi]] 'B is bigger' [[/bdi]]على وحدة التحكم.\nتعبير الشرط الثاني هو[[bdi]] 'A < B'[[/bdi]].\n\nنص للنسخ: [[copy]]B is bigger[[/copy]]",
+            "hints": [
+              "لإضافة شرط إلى برنامج مكتوبة فيه جملة[[bdi]] if [[/bdi]]بالفعل، استخدم[[bdi]] \"else if\"[[/bdi]].",
+              "[[bdi]]If [[/bdi]]تعني \"إذا\"."
+            ],
+            "id": 90029010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "500",
+              "id": 900290202,
+              "question_id": 90029020
+            },
+            {
+              "content": "Nothing is output.",
+              "id": 900290204,
+              "question_id": 90029020
+            },
+            {
+              "content": "B",
+              "id": 900290203,
+              "question_id": 90029020
+            },
+            {
+              "content": "100",
+              "id": 900290201,
+              "question_id": 90029020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90029,
+            "content": "حدد نتيجة الإخراج من تنفيذ البرنامج التالي:\n\n\n[[code]]let A = 500;\nlet B = 0;\nif (A >= 1) {\n  B = B + 100;\n  console.log(B);\n}[[/code]]",
+            "hints": [
+              "لنتحقق مما إذا كان الشرط قد تحقق."
+            ],
+            "id": 90029020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "لا يتم طباعة أي شيء.",
+              "id": 900290304,
+              "question_id": 90029030
+            },
+            {
+              "content": "Destination is the amusement park",
+              "id": 900290301,
+              "question_id": 90029030
+            },
+            {
+              "content": "Destination is the park",
+              "id": 900290302,
+              "question_id": 90029030
+            },
+            {
+              "content": "Destination is the aquarium",
+              "id": 900290303,
+              "question_id": 90029030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90029,
+            "content": "حدد نتيجة الإخراج من تنفيذ البرنامج التالي:\n\n\n[[code]]let weather = \"sunny\";\nlet group = \"B group\";\n\nif (weather == \"sunny\") {\n  if (group == \"A group\") {\n    console.log(\"Destination is the park\");\n  } else {\n    console.log(\"Destination is the amusement park\");\n  }\n} else {\n  console.log(\"Destination is the aquarium\");\n}[[/code]]",
+            "hints": [
+              "الشرط الأول يتحقق مما إذا كان الجو[[bdi]] \"sunny\"[[/bdi]].",
+              "الشرط الثاني يتحقق مما إذا كانت[[bdi]] \"A group\"[[/bdi]]."
+            ],
+            "id": 90029030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let weather = \"sunny\";\nlet shop = \"OPEN\";\n\nif (weather == \"sunny\") {\n \n} else {\n  console.log(\"Staying at home\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90029040
+            }
+          ],
+          "question": {
+            "chapter_id": 90029,
+            "content": "أنشئ برنامجًا يتحقق مما إذا كان المتغيّر[[bdi]] weather [[/bdi]]مشمسًا، ثم يتحقق مما إذا كان المتجر مفتوحًا[[bdi]] (OPEN)[[/bdi]]، وإذا كان مفتوحًا، يطبع[[bdi]] 'Go to the shop'[[/bdi]].\n\nأنشئ برنامجًا كما يلي:\n① إذا كان الجو مشمسًا، وإذا كان المتجر مفتوحًا[[bdi]] (OPEN)[[/bdi]]، اطبع[[bdi]] 'Go to the shop' [[/bdi]]على وحدة التحكم\n※أنشئ برنامجًا متداخلاً.\n\nنص للنسخ: [[copy]]OPEN[[/copy]]　[[copy]]Go to the shop[[/copy]]",
+            "hints": [
+              "بما أنها لحالة الجو المشمس، اكتب جملة[[bdi]] if [[/bdi]]بعد[[bdi]] (weather == \"sunny\")[[/bdi]]."
+            ],
+            "id": 90029040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let weather = \"rain\";\nlet time = \"morning\";\n\nif (weather == \"rain\") {\n\n} else {\n  \n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90029050
+            }
+          ],
+          "question": {
+            "chapter_id": 90029,
+            "content": "لِنُنشئ برنامجًا يغير الوجهة بناءً على الوقت من اليوم إذا كان الطقس ممطرًا[[bdi]] (rain)[[/bdi]]، ويذهب في نزهة إذا لم يكن ممطرًا.\nبالنسبة للطقس الممطر، الوجهات هي: السينما في الصباح، والمكتبة في الظهيرة، والبقاء في المنزل في الحالات الأخرى.\n\nأكمل البرنامج باتباع هذه الخطوات:\n① معالجة متفرعة بناءً على ما إذا كان المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain [[/bdi]]أو شيء آخر\n② أنشئ برنامجًا للحالة التي يكون فيها الطقس[[bdi]] rain[[/bdi]]\n　・إذا كان المتغيّر[[bdi]] time [[/bdi]]هو[[bdi]] morning[[/bdi]]، اطبع[[bdi]] \"Let's go to the movie theater\"[[/bdi]]\n　・إذا كان المتغيّر[[bdi]] time [[/bdi]]هو[[bdi]] noon[[/bdi]]، اطبع[[bdi]] \"Let's go to the library\"[[/bdi]]\n　・في الحالات الأخرى، اطبع[[bdi]] \"Let's stay at home\"[[/bdi]]\n③ إذا لم يكن المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain[[/bdi]]، اطبع[[bdi]] \"Let's go for a walk\"[[/bdi]]",
+            "hints": [
+              "نحن نكتب جملة[[bdi]] if [[/bdi]]داخل جملة[[bdi]] if [[/bdi]]أخرى.",
+              "أولاً، لننشئ برنامجًا لـ ① و ③، والذي يطبع إذا كان المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain[[/bdi]]، وفي الحالات الأخرى يطبع[[bdi]] \"Let's go for a walk\"[[/bdi]].",
+              "لنضف البرنامج من ② بعد \"إذا كان المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain\"[[/bdi]]."
+            ],
+            "id": 90029050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

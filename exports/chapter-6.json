@@ -1,0 +1,284 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:05.982Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90006",
+      "title": "جمل if - else",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية كتابة برنامج تفرع شرطي يقول: “إذا تحقق الشرط A، نفذ العملية A. وإلا، نفذ العملية B”.",
+          "id": 90006,
+          "name": "جمل if - else",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 6,
+          "test_range": "if - else",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90006,
+            "id": 90006010,
+            "seq": 1,
+            "title": "جملة if-else"
+          },
+          {
+            "chapter_id": 90006,
+            "id": 90006020,
+            "seq": 2,
+            "title": "تدريب على جمل if-else"
+          },
+          {
+            "chapter_id": 90006,
+            "id": 90006030,
+            "seq": 3,
+            "title": "المعامل (١)"
+          },
+          {
+            "chapter_id": 90006,
+            "id": 90006040,
+            "seq": 4,
+            "title": "المعامل (٢)"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90006010",
+          "title": "جملة if-else",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90006/lecture/90006010",
+          "raw": {
+            "chapter_id": 90006,
+            "id": 90006010,
+            "seq": 1,
+            "title": "جملة if-else"
+          }
+        },
+        {
+          "id": "90006020",
+          "title": "تدريب على جمل if-else",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90006/lecture/90006020",
+          "raw": {
+            "chapter_id": 90006,
+            "id": 90006020,
+            "seq": 2,
+            "title": "تدريب على جمل if-else"
+          }
+        },
+        {
+          "id": "90006030",
+          "title": "المعامل (١)",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90006/lecture/90006030",
+          "raw": {
+            "chapter_id": 90006,
+            "id": 90006030,
+            "seq": 3,
+            "title": "المعامل (١)"
+          }
+        },
+        {
+          "id": "90006040",
+          "title": "المعامل (٢)",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90006/lecture/90006040",
+          "raw": {
+            "chapter_id": 90006,
+            "id": 90006040,
+            "seq": 4,
+            "title": "المعامل (٢)"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "else (conditional){A}\nif {B}",
+              "id": 900060103,
+              "question_id": 90006010
+            },
+            {
+              "content": "else{B}\nif (conditional){A}",
+              "id": 900060104,
+              "question_id": 90006010
+            },
+            {
+              "content": "if (conditional) else{B}\n{A}",
+              "id": 900060102,
+              "question_id": 90006010
+            },
+            {
+              "content": "if (conditional){A}\nelse{B}",
+              "id": 900060101,
+              "question_id": 90006010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90006,
+            "content": "اختر برنامجًا يقول إذا كان الشرط ~ فافعل[[bdi]] A[[/bdi]]، وإلا فافعل[[bdi]] B.[[/bdi]]",
+            "hints": [
+              "تُكتب كلمة[[bdi]] \"otherwise\" [[/bdi]]على شكل[[bdi]] else.[[/bdi]]"
+            ],
+            "id": 90006010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90006020
+            }
+          ],
+          "question": {
+            "chapter_id": 90006,
+            "content": "أنشئ برنامجك كما يلي.\n\n١) صرّح عن المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] وأسنِد له القيمة 5.\n٢) إذا كان المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] يساوي 10، أخرج[[bdi]] \"Win\"[[/bdi]].\n٣) وإلا، أخرج[[bdi]] \"Lose\"[[/bdi]].\nالنص للنسخ: [[copy]]Win[[/copy]] [[copy]]Lose[[/copy]]",
+            "hints": [
+              "البرامج التي تُصرّح وتُسنِد القيم للمتغيّرات يجب أن تُكتب في سطر واحد.",
+              "التعبير الشرطي[[bdi]] \"A [[/bdi]]يساوي[[bdi]] B\" [[/bdi]]يُكتب هكذا: [[bdi]]\"A == B\"[[/bdi]]."
+            ],
+            "id": 90006020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]num == 80[[/bdi]]",
+              "id": 900060302,
+              "question_id": 90006030
+            },
+            {
+              "content": "num > 80",
+              "id": 900060303,
+              "question_id": 90006030
+            },
+            {
+              "content": "[[bdi]]num <= 80[[/bdi]]",
+              "id": 900060301,
+              "question_id": 90006030
+            },
+            {
+              "content": "num < 80",
+              "id": 900060304,
+              "question_id": 90006030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90006,
+            "content": "اختر برنامجًا يحتوي على التعبير الشرطي \"قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] أصغر من أو تساوي 80\".",
+            "hints": [
+              "[[bdi]]\"A [[/bdi]]أصغر من أو يساوي[[bdi]] B\" [[/bdi]]يشمل[[bdi]] B.[[/bdi]]"
+            ],
+            "id": 90006030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]num == 30[[/bdi]]",
+              "id": 900060402,
+              "question_id": 90006040
+            },
+            {
+              "content": "[[bdi]]num >= 30[[/bdi]]",
+              "id": 900060404,
+              "question_id": 90006040
+            },
+            {
+              "content": "num > 30",
+              "id": 900060401,
+              "question_id": 90006040
+            },
+            {
+              "content": "num < 30",
+              "id": 900060403,
+              "question_id": 90006040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90006,
+            "content": "اختر برنامجًا يحتوي على الشرط \"قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] أكبر من 30\".",
+            "hints": [
+              "[[bdi]]\"A [[/bdi]]أكبر من[[bdi]] B\" [[/bdi]]لا يشمل[[bdi]] B.[[/bdi]]"
+            ],
+            "id": 90006040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let score = 80;\nif (fitbBlock1){console.log(\"Pass\");}\nelse {console.log(\"Fail\");}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 11,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90006050
+            }
+          ],
+          "question": {
+            "chapter_id": 90006,
+            "content": "أنشئ برنامجك كما يلي.\n\n١) إذا كانت قيمة المتغيّر [[bold]][[bdi]]score[[/bdi]][[/bold]] أكبر من أو تساوي 60، أخرج[[bdi]] \"Pass\"[[/bdi]]؛ وإلا أخرج[[bdi]] \"Fail\"[[/bdi]].\nرجاءً لا تحذف البرنامج المكتوب مسبقًا، وأدخل فقط جزء التعبير الشرطي.",
+            "hints": [
+              "أدخل التعبير الشرطي[[bdi]] \"A >= B\"[[/bdi]]."
+            ],
+            "id": 90006050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

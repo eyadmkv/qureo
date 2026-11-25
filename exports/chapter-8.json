@@ -1,0 +1,272 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:10.633Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90008",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 5 إلى 7 للتأكد من أنك تفهمه!",
+          "id": 90008,
+          "name": "مراجعة الفهم",
+          "question_count": 7,
+          "section_id": 5,
+          "seq": 8,
+          "test_range": "if,if - else,else if",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90008,
+            "id": 90008010,
+            "seq": 1,
+            "title": "مراجعة من الفصل 5 إلى 7"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90008010",
+          "title": "مراجعة من الفصل 5 إلى 7",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90008/lecture/90008010",
+          "raw": {
+            "chapter_id": 90008,
+            "id": 90008010,
+            "seq": 1,
+            "title": "مراجعة من الفصل 5 إلى 7"
+          }
+        }
+      ],
+      "question_count": 7,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90008010
+            }
+          ],
+          "question": {
+            "chapter_id": 90008,
+            "content": "أنشئ برنامجك كما يلي:\n\n(1) صرّح عن المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] وأعطه القيمة 7.\n(2) إذا كان المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] يساوي 7، اطبع[[bdi]] \"Correct\"[[/bdi]].\n\nنسخ النص: [[copy]]Correct[[/copy]]",
+            "hints": null,
+            "id": 90008010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "true",
+              "id": 900080201,
+              "question_id": 90008020
+            },
+            {
+              "content": "false",
+              "id": 900080202,
+              "question_id": 90008020
+            },
+            {
+              "content": "100",
+              "id": 900080204,
+              "question_id": 90008020
+            },
+            {
+              "content": "10",
+              "id": 900080203,
+              "question_id": 90008020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90008,
+            "content": "اختر نتيجة الإخراج للبرنامج التالي:\n\n[[code]]let num = 10;\nconsole.log(num == 10);[[/code]]",
+            "hints": null,
+            "id": 90008020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let score = 70;\nif(fitbBlock1){console.log(\"Pass\");}\nelse{console.log(\"Fail\");}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 11,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90008030
+            }
+          ],
+          "question": {
+            "chapter_id": 90008,
+            "content": "في السطر الثاني، أدخل البرنامج الذي أنشأته كما يلي:  \n\n(1) إذا كانت قيمة المتغيّر [[bold]][[bdi]]score[[/bdi]][[/bold]] أكبر من أو تساوي 60، اطبع[[bdi]] \"Pass\"[[/bdi]]، وإلا اطبع[[bdi]] \"Fail\"[[/bdi]].  \n*أدخل فقط العبارة الشرطية.",
+            "hints": null,
+            "id": 90008030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "num < 20",
+              "id": 900080401,
+              "question_id": 90008040
+            },
+            {
+              "content": "[[bdi]]num == 20[[/bdi]]",
+              "id": 900080402,
+              "question_id": 90008040
+            },
+            {
+              "content": "[[bdi]]num >= 20[[/bdi]]",
+              "id": 900080404,
+              "question_id": 90008040
+            },
+            {
+              "content": "[[bdi]]num <= 20[[/bdi]]",
+              "id": 900080403,
+              "question_id": 90008040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90008,
+            "content": "اختر برنامجًا بالعبارة الشرطية: \"قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] أصغر من 20\".",
+            "hints": null,
+            "id": 90008040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90008050
+            }
+          ],
+          "question": {
+            "chapter_id": 90008,
+            "content": "أنشئ برنامجك كما يلي:  \n\n(1) صرّح عن المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] وأعطه القيمة 100.  \n(2) إذا كان المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] يساوي 100، اطبع[[bdi]] \"correct\"[[/bdi]].  \n(3) إذا لم يكن كذلك، اطبع[[bdi]] \"miss\"[[/bdi]].  \n\nنسخ النص: [[copy]]correct[[/copy]] [[copy]]miss[[/copy]]",
+            "hints": null,
+            "id": 90008050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "So close",
+              "id": 900080601,
+              "question_id": 90008060
+            },
+            {
+              "content": "لا يوجد ناتج",
+              "id": 900080604,
+              "question_id": 90008060
+            },
+            {
+              "content": "Pass",
+              "id": 900080603,
+              "question_id": 90008060
+            },
+            {
+              "content": "Perfect score",
+              "id": 900080602,
+              "question_id": 90008060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90008,
+            "content": "اختر نتيجة الإخراج للبرنامج التالي:  \n\n[[code]]let score = 92;\nif (score == 100){console.log(\"Perfect score\");}\nelse if (score >= 80){console.log(\"So close\");}\nelse if (score >= 60){console.log(\"Pass\");}[[/code]]",
+            "hints": null,
+            "id": 90008060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = 4;\nif (fitbBlock1){console.log(\"A\");}\nelse if (fitbBlock2){console.log(\"B\");}\nfitbBlock3{console.log(\"C\");}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 8,
+                  "name": "fitbBlock1"
+                },
+                {
+                  "col_size": 8,
+                  "name": "fitbBlock2"
+                },
+                {
+                  "col_size": 4,
+                  "name": "fitbBlock3"
+                }
+              ],
+              "question_id": 90008070
+            }
+          ],
+          "question": {
+            "chapter_id": 90008,
+            "content": "أنشئ برنامجًا كما يلي:  \n\n(1) إذا كان المتغيّر[[bdi]] num [[/bdi]]أصغر من أو يساوي 3، اطبع[[bdi]] \"A\"[[/bdi]].  \n(2) إذا لم يكن كذلك، وإذا كان[[bdi]] num [[/bdi]]أكبر من أو يساوي 6، اطبع[[bdi]] \"B\"[[/bdi]].  \n(3) إذا لم يكن كذلك، اطبع[[bdi]] \"C\"[[/bdi]].",
+            "hints": null,
+            "id": 90008070,
+            "seq": 7,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

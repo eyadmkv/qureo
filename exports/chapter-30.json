@@ -1,0 +1,234 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:27:08.775Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90030",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع للتأكد من فهمك لمحتوى الفصول من 28 إلى 29!\n",
+          "id": 90030,
+          "name": "مراجعة الفهم",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 30,
+          "test_range": "loops,arrays",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90030,
+            "id": 90030010,
+            "seq": 1,
+            "title": "مراجعة 28-29"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90030010",
+          "title": "مراجعة 28-29",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90030/lecture/90030010",
+          "raw": {
+            "chapter_id": 90030,
+            "id": 90030010,
+            "seq": 1,
+            "title": "مراجعة 28-29"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "5",
+              "id": 900300103,
+              "question_id": 90030010
+            },
+            {
+              "content": "5\n6\n7",
+              "id": 900300101,
+              "question_id": 90030010
+            },
+            {
+              "content": "7\n6\n5",
+              "id": 900300102,
+              "question_id": 90030010
+            },
+            {
+              "content": "numList[i]",
+              "id": 900300104,
+              "question_id": 90030010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90030,
+            "content": "يرجى تحديد نتيجة تنفيذ البرنامج التالي.\n\n\n[[code]]let numList = [5, 6, 7];\nfor (let i = 0; i < numList.length; i++) {\n  console.log(numList[i]);\n}[[/code]]",
+            "hints": null,
+            "id": 90030010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let numList = [2, 4, 6, 8];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90030020
+            }
+          ],
+          "question": {
+            "chapter_id": 90030,
+            "content": "سننشئ برنامجًا يطبع جميع قيم المتغيّر[[bdi]] numList [[/bdi]]على وحدة التحكم.\n\nأنشئ برنامجًا كما يلي:\n① استخدم[[bdi]] for...of [[/bdi]]لطباعة جميع قيم المتغيّر[[bdi]] numList[[/bdi]]\nولكن، يجب أن يكون المتغيّر الذي تسند إليه القيم المجتلبة من المتغيّر[[bdi]] numList [[/bdi]]هو[[bdi]] num.[[/bdi]]",
+            "hints": null,
+            "id": 90030020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let wordList = [\"Good morning\", \"Good night\", \"Hello\"];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90030030
+            }
+          ],
+          "question": {
+            "chapter_id": 90030,
+            "content": "سننشئ برنامجًا يطبع جميع قيم المتغيّر[[bdi]] wordList [[/bdi]]على وحدة التحكم.\nنحن نضيف سلاسل نصية إلى[[bdi]] wordList.[[/bdi]]\n\nاستخدم[[bdi]] for...of [[/bdi]]لطباعة جميع قيم المتغيّر[[bdi]] wordList[[/bdi]]\nولكن، يجب أن يكون المتغيّر الذي تسند إليه القيم المجتلبة من المتغيّر[[bdi]] wordList [[/bdi]]هو[[bdi]] word.[[/bdi]]",
+            "hints": null,
+            "id": 90030030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "500",
+              "id": 900300402,
+              "question_id": 90030040
+            },
+            {
+              "content": "Nothing is output.",
+              "id": 900300404,
+              "question_id": 90030040
+            },
+            {
+              "content": "100",
+              "id": 900300401,
+              "question_id": 90030040
+            },
+            {
+              "content": "B",
+              "id": 900300403,
+              "question_id": 90030040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90030,
+            "content": "حدد نتيجة الإخراج من تنفيذ البرنامج التالي:\n\n\n[[code]]let A = 500;\nlet B = 0;\nif (A >= 1) {\n  B = B + 100;\n  console.log(B);\n}[[/code]]",
+            "hints": null,
+            "id": 90030040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "Destination is the park",
+              "id": 900300502,
+              "question_id": 90030050
+            },
+            {
+              "content": "لا يتم طباعة أي شيء.",
+              "id": 900300504,
+              "question_id": 90030050
+            },
+            {
+              "content": "Destination is the amusement park",
+              "id": 900300501,
+              "question_id": 90030050
+            },
+            {
+              "content": "Destination is the aquarium",
+              "id": 900300503,
+              "question_id": 90030050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90030,
+            "content": "حدد نتيجة الإخراج من تنفيذ البرنامج التالي:\n\n\n[[code]]let weather = \"sunny\";\nlet group = \"B group\";\n\nif (weather == \"sunny\") {\n  if (group == \"A group\") {\n    console.log(\"Destination is the park\");\n  } else {\n    console.log(\"Destination is the amusement park\");\n  }\n} else {\n  console.log(\"Destination is the aquarium\");\n}[[/code]]",
+            "hints": null,
+            "id": 90030050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let weather = \"rain\";\nlet time = \"morning\";\n\nif (weather == \"rain\") {\n\n} else {\n  \n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90030060
+            }
+          ],
+          "question": {
+            "chapter_id": 90030,
+            "content": "لِنُنشئ برنامجًا يغير الوجهة بناءً على الوقت من اليوم إذا كان الطقس ممطرًا[[bdi]] (rain)[[/bdi]]، ويذهب في نزهة إذا لم يكن ممطرًا.\nبالنسبة للطقس الممطر، الوجهات هي: السينما في الصباح، والمكتبة في الظهيرة، والبقاء في المنزل في الحالات الأخرى.\n\nأكمل البرنامج باتباع هذه الخطوات:\n① معالجة متفرعة بناءً على ما إذا كان المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain [[/bdi]]أو شيء آخر\n② أنشئ برنامجًا للحالة التي يكون فيها الطقس[[bdi]] rain[[/bdi]]\n　・إذا كان المتغيّر[[bdi]] time [[/bdi]]هو[[bdi]] morning[[/bdi]]، اطبع[[bdi]] \"Let's go to the movie theater\"[[/bdi]]\n　・إذا كان المتغيّر[[bdi]] time [[/bdi]]هو[[bdi]] noon[[/bdi]]، اطبع[[bdi]] \"Let's go to the library\"[[/bdi]]\n　・في الحالات الأخرى، اطبع[[bdi]] \"Let's stay at home\"[[/bdi]]\n③ إذا لم يكن المتغيّر[[bdi]] weather [[/bdi]]هو[[bdi]] rain[[/bdi]]، اطبع[[bdi]] \"Let's go for a walk\"[[/bdi]]\n",
+            "hints": null,
+            "id": 90030060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

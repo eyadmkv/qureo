@@ -1,0 +1,411 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:36.364Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90018",
+      "title": "HTML(1)",
+      "raw": {
+        "chapter": {
+          "description": "تعلم كيفية عرض النصوص والصور في المتصفح باستخدام HTML!",
+          "id": 90018,
+          "name": "HTML(1)",
+          "question_count": 8,
+          "section_id": 5,
+          "seq": 18,
+          "test_range": "HTML",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90018,
+            "id": 90018010,
+            "seq": 1,
+            "title": "ما هو HTML؟"
+          },
+          {
+            "chapter_id": 90018,
+            "id": 90018020,
+            "seq": 2,
+            "title": "عرض النص"
+          },
+          {
+            "chapter_id": 90018,
+            "id": 90018030,
+            "seq": 3,
+            "title": "القوائم"
+          },
+          {
+            "chapter_id": 90018,
+            "id": 90018040,
+            "seq": 4,
+            "title": "عرض الصور"
+          },
+          {
+            "chapter_id": 90018,
+            "id": 90018050,
+            "seq": 5,
+            "title": "تعليق"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90018010",
+          "title": "ما هو HTML؟",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90018/lecture/90018010",
+          "raw": {
+            "chapter_id": 90018,
+            "id": 90018010,
+            "seq": 1,
+            "title": "ما هو HTML؟"
+          }
+        },
+        {
+          "id": "90018020",
+          "title": "عرض النص",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90018/lecture/90018020",
+          "raw": {
+            "chapter_id": 90018,
+            "id": 90018020,
+            "seq": 2,
+            "title": "عرض النص"
+          }
+        },
+        {
+          "id": "90018030",
+          "title": "القوائم",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90018/lecture/90018030",
+          "raw": {
+            "chapter_id": 90018,
+            "id": 90018030,
+            "seq": 3,
+            "title": "القوائم"
+          }
+        },
+        {
+          "id": "90018040",
+          "title": "عرض الصور",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90018/lecture/90018040",
+          "raw": {
+            "chapter_id": 90018,
+            "id": 90018040,
+            "seq": 4,
+            "title": "عرض الصور"
+          }
+        },
+        {
+          "id": "90018050",
+          "title": "تعليق",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90018/lecture/90018050",
+          "raw": {
+            "chapter_id": 90018,
+            "id": 90018050,
+            "seq": 5,
+            "title": "تعليق"
+          }
+        }
+      ],
+      "question_count": 8,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "Hello",
+              "editable": true,
+              "lang": "html",
+              "placeholders": [],
+              "question_id": 90018010
+            }
+          ],
+          "question": {
+            "chapter_id": 90018,
+            "content": "الرجاء إحاطة النص المكتوب بوسم[[bdi]] h1[[/bdi]].",
+            "hints": [
+              "الوسوم تُستخدم في أزواج: وسم بداية ووسم نهاية.",
+              "\"/\" مطلوب في وسم الإغلاق."
+            ],
+            "id": 90018010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]<p>Hello</p>[[/bdi]]",
+              "id": 900180201,
+              "question_id": 90018020
+            },
+            {
+              "content": "[[bdi]]<p>Hello<p>/[[/bdi]]",
+              "id": 900180203,
+              "question_id": 90018020
+            },
+            {
+              "content": "[[bdi]]</p>Hello<p>[[/bdi]]",
+              "id": 900180204,
+              "question_id": 90018020
+            },
+            {
+              "content": "[[bdi]]<p>/Hello<p>[[/bdi]]",
+              "id": 900180202,
+              "question_id": 90018020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر الطريقة الصحيحة لكتابة وسم[[bdi]] p.[[/bdi]]",
+            "hints": [
+              "\"/\" مطلوب في وسم الإغلاق."
+            ],
+            "id": 90018020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "br tag",
+              "id": 900180301,
+              "question_id": 90018030
+            },
+            {
+              "content": "h5 tag",
+              "id": 900180304,
+              "question_id": 90018030
+            },
+            {
+              "content": "b tag",
+              "id": 900180302,
+              "question_id": 90018030
+            },
+            {
+              "content": "p tag",
+              "id": 900180303,
+              "question_id": 90018030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر الوسم المناسب لاستخدامه في كسر السطر.",
+            "hints": [
+              "أصل تسمية الوسم الذي يكسر السطر هو[[bdi]] \"break\"[[/bdi]]."
+            ],
+            "id": 90018030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "br tag",
+              "id": 900180403,
+              "question_id": 90018040
+            },
+            {
+              "content": "p tag",
+              "id": 900180404,
+              "question_id": 90018040
+            },
+            {
+              "content": "ol tag",
+              "id": 900180402,
+              "question_id": 90018040
+            },
+            {
+              "content": "ul tag",
+              "id": 900180401,
+              "question_id": 90018040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر الوسم المناسب لإنشاء قائمة منقّطة مثل الآتي:\n・[[bdi]]Bananas[[/bdi]]\n・[[bdi]]Oranges[[/bdi]]\n・[[bdi]]Apples[[/bdi]]",
+            "hints": [
+              "أصل تسمية الوسم لإنشاء قائمة منقطة هو[[bdi]] \"Unordered List\"[[/bdi]]."
+            ],
+            "id": 90018040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "1.Cut ingredients\n2.Stir-fry\n3.Add seasonings",
+              "id": 900180501,
+              "question_id": 90018050
+            },
+            {
+              "content": "（Cut ingredients）\n（Stir-fry）\n（Add seasonings）",
+              "id": 900180503,
+              "question_id": 90018050
+            },
+            {
+              "content": "Cut ingredients\nStir-fry\nAdd seasonings",
+              "id": 900180504,
+              "question_id": 90018050
+            },
+            {
+              "content": "・Cut ingredients\n・Stir-fry\n・Add seasonings",
+              "id": 900180502,
+              "question_id": 90018050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر ما سيتم عرضه:\n\n[[code]]<ol>\n  <li>Cut ingredients</li>\n  <li>Stir-fry</li>\n  <li>Add seasonings</li>\n</ol>[[/code]]",
+            "hints": [
+              "وسم[[bdi]] \"ol\" [[/bdi]]اختصار لـ[[bdi]] \"Ordered List\"[[/bdi]]."
+            ],
+            "id": 90018050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]<src=\"image.png\">[[/bdi]]",
+              "id": 900180602,
+              "question_id": 90018060
+            },
+            {
+              "content": "[[bdi]]<img src=\"image.png\">[[/bdi]]",
+              "id": 900180601,
+              "question_id": 90018060
+            },
+            {
+              "content": "[[bdi]]<img><\"image.png\">[[/bdi]]",
+              "id": 900180604,
+              "question_id": 90018060
+            },
+            {
+              "content": "[[bdi]]<img=\"image.png\">[[/bdi]]",
+              "id": 900180603,
+              "question_id": 90018060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر الوسم لعرض صورة باسم الصورة[[bdi]] image.png.[[/bdi]]",
+            "hints": [
+              "ملف الصورة الذي يتم عرضه يُحدد باستخدام السمة[[bdi]] \"src\"[[/bdi]]."
+            ],
+            "id": 90018060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]<img alt=\"This is an image.\">[[/bdi]]",
+              "id": 900180701,
+              "question_id": 90018070
+            },
+            {
+              "content": "[[bdi]]<img><\"This is an image.\">[[/bdi]]",
+              "id": 900180704,
+              "question_id": 90018070
+            },
+            {
+              "content": "[[bdi]]<alt=\"This is an image.\">[[/bdi]]",
+              "id": 900180702,
+              "question_id": 90018070
+            },
+            {
+              "content": "[[bdi]]<img=\"This is an image.\">[[/bdi]]",
+              "id": 900180703,
+              "question_id": 90018070
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90018,
+            "content": "اختر الطريقة الصحيحة لكتابة الخاصية[[bdi]] alt [[/bdi]]التي تسمح لك بإضافة وصف للصورة.",
+            "hints": [
+              "السمة[[bdi]] \"alt\" [[/bdi]]تُكتب داخل وسم[[bdi]] \"img\"[[/bdi]]."
+            ],
+            "id": 90018070,
+            "seq": 7,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "fitbBlock1The h1 tag is a heading.fitbBlock2\n<h1>Hello</h1>",
+              "editable": true,
+              "lang": "html",
+              "placeholders": [
+                {
+                  "col_size": 4,
+                  "name": "fitbBlock1"
+                },
+                {
+                  "col_size": 3,
+                  "name": "fitbBlock2"
+                }
+              ],
+              "question_id": 90018080
+            }
+          ],
+          "question": {
+            "chapter_id": 90018,
+            "content": "الرجاء كتابة تعليق على السطر الأول من النص.",
+            "hints": [
+              "لكي تترك تعليقًا، اكتب[[bdi]] <! -- comment --> [[/bdi]]لترك تعليق."
+            ],
+            "id": 90018080,
+            "seq": 8,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

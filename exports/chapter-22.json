@@ -1,0 +1,423 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:45.683Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90022",
+      "title": "التكرار (2)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع كيفية استخدام وكتابة حلقات for التي تكرر عملية معينة عددًا محددًا من المرات!\n",
+          "id": 90022,
+          "name": "التكرار (2)",
+          "question_count": 9,
+          "section_id": 5,
+          "seq": 22,
+          "test_range": "loops",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90022,
+            "id": 90022010,
+            "seq": 1,
+            "title": "مراجعة الحلقات"
+          },
+          {
+            "chapter_id": 90022,
+            "id": 90022020,
+            "seq": 2,
+            "title": "نطاق جملة for"
+          },
+          {
+            "chapter_id": 90022,
+            "id": 90022030,
+            "seq": 3,
+            "title": "الحلقات المتداخلة والشرطية"
+          },
+          {
+            "chapter_id": 90022,
+            "id": 90022040,
+            "seq": 4,
+            "title": "ممارسة التداخل"
+          },
+          {
+            "chapter_id": 90022,
+            "id": 90022050,
+            "seq": 5,
+            "title": "كيفية كتابة العوامل"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90022010",
+          "title": "مراجعة الحلقات",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90022/lecture/90022010",
+          "raw": {
+            "chapter_id": 90022,
+            "id": 90022010,
+            "seq": 1,
+            "title": "مراجعة الحلقات"
+          }
+        },
+        {
+          "id": "90022020",
+          "title": "نطاق جملة for",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90022/lecture/90022020",
+          "raw": {
+            "chapter_id": 90022,
+            "id": 90022020,
+            "seq": 2,
+            "title": "نطاق جملة for"
+          }
+        },
+        {
+          "id": "90022030",
+          "title": "الحلقات المتداخلة والشرطية",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90022/lecture/90022030",
+          "raw": {
+            "chapter_id": 90022,
+            "id": 90022030,
+            "seq": 3,
+            "title": "الحلقات المتداخلة والشرطية"
+          }
+        },
+        {
+          "id": "90022040",
+          "title": "ممارسة التداخل",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90022/lecture/90022040",
+          "raw": {
+            "chapter_id": 90022,
+            "id": 90022040,
+            "seq": 4,
+            "title": "ممارسة التداخل"
+          }
+        },
+        {
+          "id": "90022050",
+          "title": "كيفية كتابة العوامل",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90022/lecture/90022050",
+          "raw": {
+            "chapter_id": 90022,
+            "id": 90022050,
+            "seq": 5,
+            "title": "كيفية كتابة العوامل"
+          }
+        }
+      ],
+      "question_count": 9,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]let[[/bdi]]",
+              "id": 900220104,
+              "question_id": 90022010
+            },
+            {
+              "content": "[[bdi]]if[[/bdi]]",
+              "id": 900220103,
+              "question_id": 90022010
+            },
+            {
+              "content": "[[bdi]]for[[/bdi]]",
+              "id": 900220101,
+              "question_id": 90022010
+            },
+            {
+              "content": "num",
+              "id": 900220102,
+              "question_id": 90022010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "الرجاء اختيار ما يجب كتابته في بداية البرنامج الذي يعبّر عن: تكرار طباعة[[bdi]] \"apple\" [[/bdi]]على وحدة التحكم 10 مرات.",
+            "hints": [
+              "‏[[bdi]]num [[/bdi]]هو اختصار لـ[[bdi]] number (عدد).[[/bdi]]"
+            ],
+            "id": 90022010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "i+",
+              "id": 900220204,
+              "question_id": 90022020
+            },
+            {
+              "content": "[[bdi]]i++[[/bdi]]",
+              "id": 900220201,
+              "question_id": 90022020
+            },
+            {
+              "content": "[[bdi]]i++1[[/bdi]]",
+              "id": 900220203,
+              "question_id": 90022020
+            },
+            {
+              "content": "i+1",
+              "id": 900220202,
+              "question_id": 90022020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "الرجاء اختيار البرنامج الصحيح لإضافة 1 إلى المتغيّر[[bdi]] i.[[/bdi]]",
+            "hints": [
+              "من دون اختصار يُكتب هكذا: [[bdi]]i = i + 1[[/bdi]]."
+            ],
+            "id": 90022020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]][[code]]for (let i = 0; i < 10; i++) {\n  specified process;\n}[[/code]][[/bdi]]",
+              "id": 900220301,
+              "question_id": 90022030
+            },
+            {
+              "content": "[[bdi]][[code]]for (let i = 0; i++; i < 10) {\n  specified process;\n}[[/code]][[/bdi]]",
+              "id": 900220302,
+              "question_id": 90022030
+            },
+            {
+              "content": "[[bdi]][[code]]for (i < 10; let i = 0; i++; ) {\n  specified process;\n}[[/code]][[/bdi]]",
+              "id": 900220303,
+              "question_id": 90022030
+            },
+            {
+              "content": "[[bdi]][[code]]for  { specified process; } (\n  i < 10; let i = 0; i++; \n)[[/code]][[/bdi]]",
+              "id": 900220304,
+              "question_id": 90022030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "الرجاء اختيار البرنامج الصحيح لتكرار عملية محددة 10 مرات.",
+            "hints": [
+              "داخل القوسين تعني:\n\"أعلن عن متغير وأعطه القيمة 0، وبينما القيمة أقل من 10 أضف 1 في كل مرة\"."
+            ],
+            "id": 90022030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "for (fitbBlock1) {\n  console.log(\"Programming\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 21,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90022040
+            }
+          ],
+          "question": {
+            "chapter_id": 90022,
+            "content": "اكتب برنامجًا كما يلي:\n\n① اطبع[[bdi]] \"Programming\" [[/bdi]]على وحدة التحكم 3 مرات\n* استخدم اسم المتغيّر[[bdi]] i [[/bdi]]وأعطه في البداية القيمة 0.\n* استخدم عامل الزيادة[[bdi]] (increment operator)[[/bdi]].",
+            "hints": [
+              "داخل القوسين تعني:\n\"أعلن عن متغير وأعطه القيمة 0، وبينما القيمة أقل من 3 أضف 1 في كل مرة\".",
+              "الرجاء استخدام[[bdi]] i [[/bdi]]كاسم للمتغير.",
+              "الرجاء استخدام معامل الزيادة ++."
+            ],
+            "id": 90022040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90022050
+            }
+          ],
+          "question": {
+            "chapter_id": 90022,
+            "content": "اكتب برنامجًا كما يلي:\n\n① اطبع[[bdi]] \"Good morning\" [[/bdi]]على وحدة التحكم 7 مرات\n* استخدم اسم المتغيّر[[bdi]] i [[/bdi]]وأعطه في البداية القيمة 0.\n* استخدم عامل الزيادة[[bdi]] (increment operator)[[/bdi]].\n\nنسخ النص: [[copy]]Good morning[[/copy]]",
+            "hints": [
+              "داخل القوسين تعني:\n\"أعلن عن متغير وأعطه القيمة 0، وبينما القيمة أقل من 7 أضف 1 في كل مرة\".\n",
+              "الرجاء استخدام[[bdi]] i [[/bdi]]كاسم للمتغير.",
+              "الرجاء استخدام معامل الزيادة ++."
+            ],
+            "id": 90022050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "يتم عرض 100",
+              "id": 900220602,
+              "question_id": 90022060
+            },
+            {
+              "content": "يؤدي إلى خطأ",
+              "id": 900220601,
+              "question_id": 90022060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "اختر ناتج التنفيذ للبرنامج التالي من الخيارات:\n\n[[code]]for (let i = 0; i < 3; i++) {\n    let num = 100;\n}\nconsole.log(num);[[/code]]",
+            "hints": [
+              "تحقق من مكان إعلان المتغير[[bdi]] num [[/bdi]]ومكان استخدامه."
+            ],
+            "id": 90022060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "for (let i = 0; i < 5; i++) {\n    console.log(\"sit-ups\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90022070
+            }
+          ],
+          "question": {
+            "chapter_id": 90022,
+            "content": "أضف برنامجًا إلى البرنامج المكتوب بحيث يطبع[[bdi]] \"End\" [[/bdi]]عندما تكون قيمة المتغيّر[[bdi]] i [[/bdi]]مساوية لـ 4.\n\nنسخ النص: [[copy]]End[[/copy]]",
+            "hints": [
+              "باستخدام جملة[[bdi]] if [[/bdi]]داخل حلقة[[bdi]] for [[/bdi]]يمكنك إنشاء تفرّع شرطي.",
+              "طريقة كتابة جملة الشرط[[bdi]] if [[/bdi]]هي:\n\n[[bdi]]if (condition) { process }[[/bdi]]"
+            ],
+            "id": 90022070,
+            "seq": 7,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "AAAA",
+              "id": 900220802,
+              "question_id": 90022080
+            },
+            {
+              "content": "AABA",
+              "id": 900220801,
+              "question_id": 90022080
+            },
+            {
+              "content": "ABA",
+              "id": 900220804,
+              "question_id": 90022080
+            },
+            {
+              "content": "ABAA",
+              "id": 900220803,
+              "question_id": 90022080
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "اختر ناتج التنفيذ للبرنامج التالي من الخيارات:\n\n[[code]]for (let i = 0; i < 3; i++) {\n  console.log(\"A\");\n  if (i == 1) {\n    console.log(\"B\");\n  }\n}[[/code]]",
+            "hints": [
+              "القيمة الابتدائية للمتغير[[bdi]] i [[/bdi]]هي 0."
+            ],
+            "id": 90022080,
+            "seq": 8,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "i =+ 2",
+              "id": 900220904,
+              "question_id": 90022090
+            },
+            {
+              "content": "[[bdi]]i+++[[/bdi]]",
+              "id": 900220903,
+              "question_id": 90022090
+            },
+            {
+              "content": "i = 2",
+              "id": 900220902,
+              "question_id": 90022090
+            },
+            {
+              "content": "[[bdi]]i += 2[[/bdi]]",
+              "id": 900220901,
+              "question_id": 90022090
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90022,
+            "content": "الرجاء اختيار البرنامج المعاد كتابته للتعبير عن: [[bdi]]i = i + 2[[/bdi]].",
+            "hints": [
+              "البرنامج الذي له نفس معنى[[bdi]] i = i + 2 [[/bdi]]هو:\n\n[[bdi]]i += 2[[/bdi]]"
+            ],
+            "id": 90022090,
+            "seq": 9,
+            "type": "choice"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

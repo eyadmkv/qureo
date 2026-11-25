@@ -1,0 +1,282 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:03.902Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90005",
+      "title": "جملة if",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم برنامج التفرع الشرطي الذي يقول: “إذا تحقق الشرط A، نفذ العملية A”.",
+          "id": 90005,
+          "name": "جملة if",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 5,
+          "test_range": "if",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90005,
+            "id": 90005010,
+            "seq": 1,
+            "title": "كيفية كتابة المتغيّرات"
+          },
+          {
+            "chapter_id": 90005,
+            "id": 90005020,
+            "seq": 2,
+            "title": "جملة if"
+          },
+          {
+            "chapter_id": 90005,
+            "id": 90005030,
+            "seq": 3,
+            "title": "تدريب على if statement"
+          },
+          {
+            "chapter_id": 90005,
+            "id": 90005040,
+            "seq": 4,
+            "title": "كيفية عمل if statements"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90005010",
+          "title": "كيفية كتابة المتغيّرات",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90005/lecture/90005010",
+          "raw": {
+            "chapter_id": 90005,
+            "id": 90005010,
+            "seq": 1,
+            "title": "كيفية كتابة المتغيّرات"
+          }
+        },
+        {
+          "id": "90005020",
+          "title": "جملة if",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90005/lecture/90005020",
+          "raw": {
+            "chapter_id": 90005,
+            "id": 90005020,
+            "seq": 2,
+            "title": "جملة if"
+          }
+        },
+        {
+          "id": "90005030",
+          "title": "تدريب على if statement",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90005/lecture/90005030",
+          "raw": {
+            "chapter_id": 90005,
+            "id": 90005030,
+            "seq": 3,
+            "title": "تدريب على if statement"
+          }
+        },
+        {
+          "id": "90005040",
+          "title": "كيفية عمل if statements",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90005/lecture/90005040",
+          "raw": {
+            "chapter_id": 90005,
+            "id": 90005040,
+            "seq": 4,
+            "title": "كيفية عمل if statements"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90005010
+            }
+          ],
+          "question": {
+            "chapter_id": 90005,
+            "content": "\"أنشئ برنامجك كما يلي.\n\n1 أعلن المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] وأسند له القيمة 5.\n2 اطبع قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] في وحدة التحكم.\nمع ذلك، يجب أن يُكتب البرنامج كاملًا في سطرين (يُكتب التصريح وإسناد القيمة الأولية في سطر واحد).\n(يجب أن يُكتب التصريح وإسناد القيمة الأولية في سطر واحد).",
+            "hints": [
+              "صرّح وأسند القيم للمتغيّرات في سطر واحد.",
+              "لطباعة قيمة المتغيّر في الـ[[bdi]] console[[/bdi]]، اكتب اسم المتغيّر داخل ()."
+            ],
+            "id": 90005010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]if (conditional){processing}[[/bdi]]",
+              "id": 900050201,
+              "question_id": 90005020
+            },
+            {
+              "content": "[[bdi]](conditional){processing} if[[/bdi]]",
+              "id": 900050204,
+              "question_id": 90005020
+            },
+            {
+              "content": "[[bdi]]if {processing}(conditional)[[/bdi]]",
+              "id": 900050203,
+              "question_id": 90005020
+            },
+            {
+              "content": "[[bdi]](conditional) if {processing}[[/bdi]]",
+              "id": 900050202,
+              "question_id": 90005020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90005,
+            "content": "اختر برنامجًا يقول: \"إذا ~، إذن ________.\"",
+            "hints": [
+              "مثال ملموس على[[bdi]] \"If ~, I will do 00\" [[/bdi]]هو: [[bdi]]\"If 100 points, I will eat out.\"[[/bdi]]"
+            ],
+            "id": 90005020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]num == 50[[/bdi]]",
+              "id": 900050301,
+              "question_id": 90005030
+            },
+            {
+              "content": "[[bdi]]50 >= num[[/bdi]]",
+              "id": 900050302,
+              "question_id": 90005030
+            },
+            {
+              "content": "[[bdi]]num = 50[[/bdi]]",
+              "id": 900050303,
+              "question_id": 90005030
+            },
+            {
+              "content": "[[bdi]]50 = num[[/bdi]]",
+              "id": 900050304,
+              "question_id": 90005030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90005,
+            "content": "اختر عبارة الشرط \"قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] تساوي 50\".",
+            "hints": [
+              "لنقارن إذا كان [[bold]][[bdi]]num[[/bdi]][[/bold]] و 50 متماثلين.\n",
+              "الرمز \"=\" يُستخدم لإسناد قيمة إلى المتغيّر.\n"
+            ],
+            "id": 90005030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90005040
+            }
+          ],
+          "question": {
+            "chapter_id": 90005,
+            "content": "أنشئ برنامجك كما يلي\n\n1 أعلن المتغيّر[[bdi]] num [[/bdi]]وأسند له 100.\n2 إذا كان المتغيّر[[bdi]] num [[/bdi]]يساوي 100، اطبع[[bdi]] \"Correct\"[[/bdi]].\n\nالنص المنسوخ : [[copy]]Correct[[/copy]]",
+            "hints": [
+              "يجب أن تُصرّح المتغيّرات وتُسنَد قيمتها في سطر واحد.",
+              "التعبير الشرطي هو[[bdi]] \"num == 100\"[[/bdi]].\n",
+              "المعالجة التي تريد تنفيذها هي[[bdi]] \"console.log(\"Correct\");\"[[/bdi]]."
+            ],
+            "id": 90005040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "false",
+              "id": 900050501,
+              "question_id": 90005050
+            },
+            {
+              "content": "num",
+              "id": 900050504,
+              "question_id": 90005050
+            },
+            {
+              "content": "true",
+              "id": 900050502,
+              "question_id": 90005050
+            },
+            {
+              "content": "100",
+              "id": 900050503,
+              "question_id": 90005050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90005,
+            "content": "يرجى اختيار نتيجة إخراج البرنامج التالي.\n\n[[code]]let num = 200;\nconsole.log(num == 100)[[/code]];",
+            "hints": [
+              "قارن قيمة المتغيّر [[bold]][[bdi]]num[[/bdi]][[/bold]] مع 100."
+            ],
+            "id": 90005050,
+            "seq": 5,
+            "type": "choice"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

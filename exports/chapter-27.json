@@ -1,0 +1,218 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:27:02.768Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90027",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع للتأكد من فهمك لمحتوى الفصول من 25 إلى 26!",
+          "id": 90027,
+          "name": "مراجعة الفهم",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 27,
+          "test_range": "loops,arrays",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90027,
+            "id": 90027010,
+            "seq": 1,
+            "title": "مراجعة الفصلين 25 و26"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90027010",
+          "title": "مراجعة الفصلين 25 و26",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90027/lecture/90027010",
+          "raw": {
+            "chapter_id": 90027,
+            "id": 90027010,
+            "seq": 1,
+            "title": "مراجعة الفصلين 25 و26"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90027010
+            }
+          ],
+          "question": {
+            "chapter_id": 90027,
+            "content": "سننشئ برنامجًا يحسب[[bdi]] '9×9×9'[[/bdi]].\nلِنُنشئ برنامجًا كما يلي:\n① صرّح عن المتغيّر[[bdi]] num [[/bdi]]وأسنِد إليه القيمة 1\n② كرّر العملية الحسابية[[bdi]] 'num = num * 9' [[/bdi]]ثلاث مرات\n*أسنِد 0 إلى المتغيّر[[bdi]] i[[/bdi]]، وعيّن الشرط بحيث إذا كان[[bdi]] i [[/bdi]]أصغر من 3، قم بزيادة[[bdi]] i.[[/bdi]]\n③ اطبع قيمة المتغيّر[[bdi]] num [[/bdi]]على وحدة التحكم مرة واحدة فقط في النهاية",
+            "hints": null,
+            "id": 90027010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[code]]0→1→2→3[[/code]]",
+              "id": 900270204,
+              "question_id": 90027020
+            },
+            {
+              "content": "[[code]]1→2→3→4[[/code]]",
+              "id": 900270201,
+              "question_id": 90027020
+            },
+            {
+              "content": "[[code]]0→1→2→3→4[[/code]]",
+              "id": 900270203,
+              "question_id": 90027020
+            },
+            {
+              "content": "[[code]]1→2→3[[/code]]",
+              "id": 900270202,
+              "question_id": 90027020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90027,
+            "content": "من بين الخيارات، حدد التمثيل الأنسب لكيفية تغيّر قيمة المتغيّر[[bdi]] i [[/bdi]]في البرنامج التالي.\n\n\n[[code]]let num = 1;\nfor (let i = 1; i <= 4; i++) {\n  num = num * 2;\n}\nconsole.log(num);[[/code]]",
+            "hints": null,
+            "id": 90027020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90027030
+            }
+          ],
+          "question": {
+            "chapter_id": 90027,
+            "content": "سننشئ برنامجًا يحسب[[bdi]] '5040÷1÷2÷3÷4÷5'[[/bdi]].\n\nلِنُنشئ برنامجًا كما يلي:\n① صرّح عن المتغيّر[[bdi]] num [[/bdi]]وأسنِد إليه القيمة 5040\n② كرّر 'إسناد العملية الحسابية[[bdi]] num / i [[/bdi]]إلى المتغيّر[[bdi]] num' [[/bdi]]خمس مرات\nولكن، بالنسبة لشرط الحلقة، أسنِد 1 إلى المتغيّر[[bdi]] i[[/bdi]]، وعيّن الشرط بحيث إذا كان[[bdi]] i [[/bdi]]أصغر من أو يساوي 5، قم بزيادة[[bdi]] i.[[/bdi]]\n③ اطبع قيمة المتغيّر[[bdi]] num [[/bdi]]على وحدة التحكم مرة واحدة فقط في النهاية",
+            "hints": null,
+            "id": 90027030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 12,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90027040
+            }
+          ],
+          "question": {
+            "chapter_id": 90027,
+            "content": "أنشئ برنامجًا يجلب '63' من المتغيّر[[bdi]] scoreList [[/bdi]]ويطبعه على وحدة التحكم.\nولكن، يرجى عدم إدخال '63' مباشرةً.",
+            "hints": null,
+            "id": 90027040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 16,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90027050
+            }
+          ],
+          "question": {
+            "chapter_id": 90027,
+            "content": "أدخل برنامجًا يطبع عدد القيم في المتغيّر[[bdi]] scoreList [[/bdi]]على وحدة التحكم.",
+            "hints": null,
+            "id": 90027050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let scoreList = [52, 90, 70, 83, 63, 72, 89];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90027060
+            }
+          ],
+          "question": {
+            "chapter_id": 90027,
+            "content": "سننشئ برنامجًا يطبع[[bdi]] 'Pass' [[/bdi]]إذا كانت الدرجة 80 أو أعلى.\n\nأنشئ برنامجًا كما يلي:\n① حلقة[[bdi]] for [[/bdi]]تكرارية تتكرر لعدد القيم في المتغيّر[[bdi]] scoreList[[/bdi]]\n② كعملية متكررة في ①، إذا كانت القيمة[[bdi]] i [[/bdi]]للمتغيّر[[bdi]] scoreList [[/bdi]]أكبر من أو تساوي 80، اطبع[[bdi]] 'Pass' [[/bdi]]على وحدة التحكم\n\nنص للنسخ: [[copy]]Pass[[/copy]]",
+            "hints": null,
+            "id": 90027060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

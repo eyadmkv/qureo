@@ -1,0 +1,353 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:33.914Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90017",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع محتوى الفصول من 15 إلى 16 للتأكد من أنك تفهمه!",
+          "id": 90017,
+          "name": "مراجعة الفهم",
+          "question_count": 10,
+          "section_id": 5,
+          "seq": 17,
+          "test_range": "Types, Array",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90017,
+            "id": 90017010,
+            "seq": 1,
+            "title": "مراجعة من 15 إلى 16"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90017010",
+          "title": "مراجعة من 15 إلى 16",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90017/lecture/90017010",
+          "raw": {
+            "chapter_id": 90017,
+            "id": 90017010,
+            "seq": 1,
+            "title": "مراجعة من 15 إلى 16"
+          }
+        }
+      ],
+      "question_count": 10,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "Numerical value",
+              "id": 900170102,
+              "question_id": 90017010
+            },
+            {
+              "content": "String",
+              "id": 900170101,
+              "question_id": 90017010
+            },
+            {
+              "content": "No particular type",
+              "id": 900170103,
+              "question_id": 90017010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر نوع البيانات الصحيح أدناه.\n\n[[code]]console.log(\"11\");[[/code]]",
+            "hints": null,
+            "id": 90017010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(typeof \"50\");[[/bdi]]",
+              "id": 900170201,
+              "question_id": 90017020
+            },
+            {
+              "content": "[[bdi]]console.log(Number \"50\");[[/bdi]]",
+              "id": 900170203,
+              "question_id": 90017020
+            },
+            {
+              "content": "[[bdi]]console.log(typeof 50);[[/bdi]]",
+              "id": 900170202,
+              "question_id": 90017020
+            },
+            {
+              "content": "[[bdi]]console.log(String \"50\");[[/bdi]]",
+              "id": 900170204,
+              "question_id": 90017020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر البرنامج الصحيح الذي يُخرج[[bdi]] \"string\"[[/bdi]].",
+            "hints": null,
+            "id": 90017020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "number",
+              "id": 900170303,
+              "question_id": 90017030
+            },
+            {
+              "content": "true",
+              "id": 900170302,
+              "question_id": 90017030
+            },
+            {
+              "content": "false",
+              "id": 900170301,
+              "question_id": 90017030
+            },
+            {
+              "content": "string",
+              "id": 900170304,
+              "question_id": 90017030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]console.log(200 === 20);[[/code]]",
+            "hints": null,
+            "id": 90017030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "false",
+              "id": 900170403,
+              "question_id": 90017040
+            },
+            {
+              "content": "number",
+              "id": 900170404,
+              "question_id": 90017040
+            },
+            {
+              "content": "true",
+              "id": 900170402,
+              "question_id": 90017040
+            },
+            {
+              "content": "NaN",
+              "id": 900170401,
+              "question_id": 90017040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]console.log(Number(\"value\"));[[/code]]",
+            "hints": null,
+            "id": 90017040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90017050
+            }
+          ],
+          "question": {
+            "chapter_id": 90017,
+            "content": "أنشئ البرنامج كما يلي:\n        1.        الحاسوب يحدد نوع البيانات [[bold]]100[[/bold]] ويطبعه في وحدة التحكم.",
+            "hints": null,
+            "id": 90017050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [ ];",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90017060
+            }
+          ],
+          "question": {
+            "chapter_id": 90017,
+            "content": "ضع القيم التالية في المصفوفة:\n10, 50, 100, 150\n\nلن يظهر أي مخرجات عند التنفيذ.",
+            "hints": null,
+            "id": 90017060,
+            "seq": 6,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "10",
+              "id": 900170702,
+              "question_id": 90017070
+            },
+            {
+              "content": "15",
+              "id": 900170703,
+              "question_id": 90017070
+            },
+            {
+              "content": "20",
+              "id": 900170701,
+              "question_id": 90017070
+            },
+            {
+              "content": "5",
+              "id": 900170704,
+              "question_id": 90017070
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]let num = [5, 10, 15, 20, 25];\nconsole.log(num[3]);[[/code]]",
+            "hints": null,
+            "id": 90017070,
+            "seq": 7,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [2, 4, 6, 8, 10];\nconsole.log(fitbBlock1);",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 3,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90017080
+            }
+          ],
+          "question": {
+            "chapter_id": 90017,
+            "content": "اطبع جميع القيم في المصفوفة إلى وحدة التحكم.\nلا تدخل القيم مباشرة.\nلا تحذف البرنامج المكتوب، بل أضف برنامجًا في[[bdi]] console.log.[[/bdi]]",
+            "hints": null,
+            "id": 90017080,
+            "seq": 8,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "12",
+              "id": 900170901,
+              "question_id": 90017090
+            },
+            {
+              "content": "6",
+              "id": 900170904,
+              "question_id": 90017090
+            },
+            {
+              "content": "4",
+              "id": 900170903,
+              "question_id": 90017090
+            },
+            {
+              "content": "2",
+              "id": 900170902,
+              "question_id": 90017090
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90017,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]let num = [2, 4, 6];\nlet sum = 0;\nfor (let i = 0; i < 3; i++) {\n  sum = sum + num[i];\n}\nconsole.log(sum);[[/code]]",
+            "hints": null,
+            "id": 90017090,
+            "seq": 9,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let num = [2, 4, 6, 8, 10];\nconsole.log( );",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90017100
+            }
+          ],
+          "question": {
+            "chapter_id": 90017,
+            "content": "اطبع طول المصفوفة إلى وحدة التحكم.\nلا تدخل الطول العددي مباشرة.",
+            "hints": null,
+            "id": 90017100,
+            "seq": 10,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

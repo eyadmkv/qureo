@@ -1,0 +1,307 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:22.253Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90013",
+      "title": "الدالة (2)",
+      "raw": {
+        "chapter": {
+          "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+          "id": 90013,
+          "name": "الدالة (2)",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 13,
+          "test_range": "Function",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90013,
+            "id": 90013010,
+            "seq": 1,
+            "title": "مراجعة الدوال"
+          },
+          {
+            "chapter_id": 90013,
+            "id": 90013020,
+            "seq": 2,
+            "title": "قطع الكسر"
+          },
+          {
+            "chapter_id": 90013,
+            "id": 90013030,
+            "seq": 3,
+            "title": "كيفية إنشاء أعداد عشوائية"
+          },
+          {
+            "chapter_id": 90013,
+            "id": 90013040,
+            "seq": 4,
+            "title": "تدريب على استخدام الدوال"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90013010",
+          "title": "مراجعة الدوال",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90013/lecture/90013010",
+          "raw": {
+            "chapter_id": 90013,
+            "id": 90013010,
+            "seq": 1,
+            "title": "مراجعة الدوال"
+          }
+        },
+        {
+          "id": "90013020",
+          "title": "قطع الكسر",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90013/lecture/90013020",
+          "raw": {
+            "chapter_id": 90013,
+            "id": 90013020,
+            "seq": 2,
+            "title": "قطع الكسر"
+          }
+        },
+        {
+          "id": "90013030",
+          "title": "كيفية إنشاء أعداد عشوائية",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90013/lecture/90013030",
+          "raw": {
+            "chapter_id": 90013,
+            "id": 90013030,
+            "seq": 3,
+            "title": "كيفية إنشاء أعداد عشوائية"
+          }
+        },
+        {
+          "id": "90013040",
+          "title": "تدريب على استخدام الدوال",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90013/lecture/90013040",
+          "raw": {
+            "chapter_id": 90013,
+            "id": 90013040,
+            "seq": 4,
+            "title": "تدريب على استخدام الدوال"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(Math.random());[[/bdi]]",
+              "id": 900130101,
+              "question_id": 90013010
+            },
+            {
+              "content": "[[bdi]]console.log(random());[[/bdi]]",
+              "id": 900130104,
+              "question_id": 90013010
+            },
+            {
+              "content": "[[bdi]]console.log(Math.min());[[/bdi]]",
+              "id": 900130102,
+              "question_id": 90013010
+            },
+            {
+              "content": "[[bdi]]console.log(Math.max());[[/bdi]]",
+              "id": 900130103,
+              "question_id": 90013010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90013,
+            "content": "اختر البرنامج الصحيح لإخراج القيم العشوائية.",
+            "hints": [
+              "استخدم الدالّة[[bdi]] \"Math.~\"[[/bdi]]."
+            ],
+            "id": 90013010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(Math.min(10.5));[[/bdi]]",
+              "id": 900130204,
+              "question_id": 90013020
+            },
+            {
+              "content": "[[bdi]]console.log(Math.max(10.5));[[/bdi]]",
+              "id": 900130203,
+              "question_id": 90013020
+            },
+            {
+              "content": "[[bdi]]console.log(Math.floor(10.5));[[/bdi]]",
+              "id": 900130201,
+              "question_id": 90013020
+            },
+            {
+              "content": "[[bdi]]console.log(Math.round(10.5));[[/bdi]]",
+              "id": 900130202,
+              "question_id": 90013020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90013,
+            "content": "اختر الدالة الصحيحة لقطع الكسور العشرية.",
+            "hints": [
+              "فكّر جيدًا في معنى الكلمات."
+            ],
+            "id": 90013020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "7",
+              "id": 900130301,
+              "question_id": 90013030
+            },
+            {
+              "content": "8",
+              "id": 900130303,
+              "question_id": 90013030
+            },
+            {
+              "content": "No output",
+              "id": 900130304,
+              "question_id": 90013030
+            },
+            {
+              "content": "6",
+              "id": 900130302,
+              "question_id": 90013030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90013,
+            "content": "\"اختر ناتج تشغيل البرنامج التالي.\n\n[[code]]console.log(Math.floor(7.7));[[/code]]",
+            "hints": [
+              "[[bdi]]\"Math.floor\" [[/bdi]]دالّة للتقريب إلى الأسفل."
+            ],
+            "id": 90013030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90013040
+            }
+          ],
+          "question": {
+            "chapter_id": 90013,
+            "content": "\"أدخل البرنامج كما يلي.\n\n(1) استخدم الدالة للتقريب لـ 5.5 وأخرج الناتج إلى وحدة التحكم.\n(2) استخدم الدالة للتقريب إلى أسفل للعدد 8.8 إلى أقرب عدد صحيح وأخرج الناتج إلى وحدة التحكم.\n\nاستخدم الدالتين[[bold]][[bdi]] Math.floor[[/bdi]][[/bold]] و [[bold]][[bdi]]Math.round.[[/bdi]][[/bold]]\"",
+            "hints": [
+              "القيمة المراد تقريبها هي \"5.5\"، والقيمة المراد تقريبها إلى الأسفل هي \"8.8\"."
+            ],
+            "id": 90013040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "if (fitbBlock1) {\n  console.log(\"Excellent luck\");\n} else {\n  console.log(\"Bad luck\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 20,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90013050
+            }
+          ],
+          "question": {
+            "chapter_id": 90013,
+            "content": "أنشئ برنامجًا يقوم بإخراج \"حظ ممتاز\" إذا كانت القيمة العشوائية أكبر من أو تساوي 0.5، وإخراج \"حظ سيئ\" في غير ذلك.\n\nاستخدم الدالة[[bdi]] Math.random() [[/bdi]]وأدخل عبارة الشرط[[bdi]] if [[/bdi]]كانت القيمة العشوائية أكبر من أو تساوي 0.5.",
+            "hints": [
+              "تُكتب عبارة «[[bdi]]A [[/bdi]]أكبر من أو يساوي[[bdi]] B[[/bdi]]» على الشكل[[bdi]] \"A >= B\"[[/bdi]]."
+            ],
+            "id": 90013050,
+            "seq": 5,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log( );",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90013060
+            }
+          ],
+          "question": {
+            "chapter_id": 90013,
+            "content": "أنشئ برنامجًا يعيد عددًا صحيحًا عشوائيًا كما يلي:\n\n(1) استخدم الدالة [[bold]][[bdi]]Math.random[[/bdi]][[/bold]] لإرجاع قيمة عددية عشوائية.\n(2) اضرب القيمة العشوائية الناتجة في 10.\n(3) استخدم الدالة [[bold]][[bdi]]Math.floor[[/bdi]][[/bold]] لإرجاع عدد صحيح.\nيجب أن يكون البرنامج في سطر واحد.",
+            "hints": [
+              "تُكتب الدالّة [[bold]][[bdi]]Math.random[[/bdi]][[/bold]] على الشكل[[bdi]] \"Math.random()\"[[/bdi]].",
+              "لضرب في 10، استعمل ‎[[bold]]*10[[/bold]] مع ‎[[bold]][[bdi]]Math.random[[/bdi]][[/bold]].",
+              "لتقريب الكسور إلى الأسفل، استعمل ‎[[bold]][[bdi]]Math.random[[/bdi]][[/bold]] و[[bold]] ‎*10[[/bold]] كوسيطات داخل[[bold]] ‎[[/bold]][[bold]][[bdi]]Math.floor.[[/bdi]][[/bold]]"
+            ],
+            "id": 90013060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

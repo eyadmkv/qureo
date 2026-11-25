@@ -1,0 +1,330 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:52.072Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90024",
+      "title": "مراجعة الفهم",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع للتأكد من فهمك لمحتوى الفصول من 21 إلى 23!\n",
+          "id": 90024,
+          "name": "مراجعة الفهم",
+          "question_count": 10,
+          "section_id": 5,
+          "seq": 24,
+          "test_range": "If,Loops,Functions",
+          "test_type": "test"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90024,
+            "id": 90024010,
+            "seq": 1,
+            "title": "مراجعة الدروس 21–23"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90024010",
+          "title": "مراجعة الدروس 21–23",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90024/lecture/90024010",
+          "raw": {
+            "chapter_id": 90024,
+            "id": 90024010,
+            "seq": 1,
+            "title": "مراجعة الدروس 21–23"
+          }
+        }
+      ],
+      "question_count": 10,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let A = 5\nlet B = 10\nif (A > B) {\n  console.log(\"A is larger\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90024010
+            }
+          ],
+          "question": {
+            "chapter_id": 90024,
+            "content": "أضِف شرطًا ثانيًا إلى البرنامج المكتوب:\nإذا كان[[bdi]] A [[/bdi]]أصغر من[[bdi]] B[[/bdi]]، فاطبع في وحدة التحكم ‘[[bdi]]B is larger[[/bdi]]’.\nسيُكتب الشرط الثاني على النحو ‘[[bdi]]A < B[[/bdi]]’.\n\nنسخ النص: [[copy]]B is larger[[/copy]]",
+            "hints": null,
+            "id": 90024010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "||",
+              "id": 900240203,
+              "question_id": 90024020
+            },
+            {
+              "content": "|",
+              "id": 900240204,
+              "question_id": 90024020
+            },
+            {
+              "content": "&&",
+              "id": 900240201,
+              "question_id": 90024020
+            },
+            {
+              "content": "&",
+              "id": 900240202,
+              "question_id": 90024020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90024,
+            "content": "يرجى اختيار المعامل الصحيح الذي يمثّل \"تحقُّق عدّة شروط في الوقت نفسه[[bdi]]\" (AND)[[/bdi]].",
+            "hints": null,
+            "id": 90024020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let science = 100;\nlet math = 100;\nif (science == 100) {\n  console.log(\"Science is 100 points\");\n\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90024030
+            }
+          ],
+          "question": {
+            "chapter_id": 90024,
+            "content": "أنشئ برنامجًا يطبع ‘[[bdi]]Science is 100 points[[/bdi]]’ إذا كانت درجة[[bdi]] Science [[/bdi]]هي 100 نقطة، ومن بين تلك الحالات، إذا كانت درجة[[bdi]] Math [[/bdi]]أيضًا 100 نقطة، فليطبع ‘[[bdi]]Science and Math are 100 points[[/bdi]]’ إلى وحدة التحكم.\nعلى أن لا تستخدم ‘&&’ التي تعني[[bdi]] AND.[[/bdi]]\n\nنسخ النص:[[copy]] Science and Math are 100 points[[/copy]]",
+            "hints": null,
+            "id": 90024030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90024040
+            }
+          ],
+          "question": {
+            "chapter_id": 90024,
+            "content": "أنشئ برنامجًا كما يلي:\n\n① اطبع ‘[[bdi]]Good morning[[/bdi]]’ في وحدة التحكم 7 مرات\n* استخدم اسم المتغيّر ‘[[bdi]]i[[/bdi]]’ واجعل قيمته الابتدائية 0.\n* استخدم معامل الزيادة.\n\nنسخ النص:[[copy]] Good morning[[/copy]]",
+            "hints": null,
+            "id": 90024040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "ينتج عنه خطأ",
+              "id": 900240501,
+              "question_id": 90024050
+            },
+            {
+              "content": "يتم إخراج 100",
+              "id": 900240502,
+              "question_id": 90024050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90024,
+            "content": "اختر نتيجة تنفيذ البرنامج التالي من الخيارات:\n\n[[code]]for (let i = 0; i < 3; i++) {\n    let num = 100;\n}\nconsole.log(num);[[/code]]",
+            "hints": null,
+            "id": 90024050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "00100",
+              "id": 900240603,
+              "question_id": 90024060
+            },
+            {
+              "content": "00000",
+              "id": 900240602,
+              "question_id": 90024060
+            },
+            {
+              "content": "00001",
+              "id": 900240604,
+              "question_id": 90024060
+            },
+            {
+              "content": "00010",
+              "id": 900240601,
+              "question_id": 90024060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90024,
+            "content": "اختر نتيجة تنفيذ البرنامج التالي من الخيارات:\n\n[[code]]for (let i = 0; i < 4; i++) {\n  console.log(\"0\");\n  if (i == 2) {\n    console.log(\"1\");\n  }\n}[[/code]]",
+            "hints": null,
+            "id": 90024060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "i =+ 5",
+              "id": 900240704,
+              "question_id": 90024070
+            },
+            {
+              "content": "[[bdi]]i += 5[[/bdi]]",
+              "id": 900240701,
+              "question_id": 90024070
+            },
+            {
+              "content": "i = 5",
+              "id": 900240702,
+              "question_id": 90024070
+            },
+            {
+              "content": "[[bdi]]i+++[[/bdi]]",
+              "id": 900240703,
+              "question_id": 90024070
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90024,
+            "content": "يرجى اختيار إعادة كتابة البرنامج لـ[[bdi]] \"i = i + 5\"[[/bdi]].",
+            "hints": null,
+            "id": 90024070,
+            "seq": 7,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "function divide3(num) {\n    let result = num / 3;\n    return result;\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90024080
+            }
+          ],
+          "question": {
+            "chapter_id": 90024,
+            "content": "تم إنشاء دالة[[bdi]] \"divide3\" [[/bdi]]التي تقسم على 3، لذا رجاءً اطبع إلى وحدة التحكم بتمرير القيمة \"12345\" إلى[[bdi]] divide3[[/bdi]]",
+            "hints": null,
+            "id": 90024080,
+            "seq": 8,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]][[code]]move() function {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900240904,
+              "question_id": 90024090
+            },
+            {
+              "content": "[[bdi]][[code]]function move {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900240902,
+              "question_id": 90024090
+            },
+            {
+              "content": "[[bdi]][[code]]move function {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900240903,
+              "question_id": 90024090
+            },
+            {
+              "content": "[[bdi]][[code]]function move() {\n  Program to Run\n}[[/code]][[/bdi]]",
+              "id": 900240901,
+              "question_id": 90024090
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90024,
+            "content": "يرجى اختيار البرنامج الصحيح لإنشاء دالة[[bdi]] move [[/bdi]]بلا معاملات.",
+            "hints": null,
+            "id": 90024090,
+            "seq": 9,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90024100
+            }
+          ],
+          "question": {
+            "chapter_id": 90024,
+            "content": "أنشئ دالة[[bdi]] mul [[/bdi]]بوسيطين.\n① أنشئ دالة بالاسم[[bdi]] \"mul\" [[/bdi]]وبالمعاملين[[bdi]] \"num1\" [[/bdi]]و[[bdi]]\"num2\"[[/bdi]]\n② أسند[[bdi]] \"num1 × num2\" [[/bdi]]إلى المتغيّر[[bdi]] \"result\"[[/bdi]]\n③ أعد المتغيّر[[bdi]] \"result\"[[/bdi]]\n④ استدعِ الدالة[[bdi]] mul [[/bdi]]بالوسيطين \"9\" و\"7\" واطبع إلى وحدة التحكم",
+            "hints": null,
+            "id": 90024100,
+            "seq": 10,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

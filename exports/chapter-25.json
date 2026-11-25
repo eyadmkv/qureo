@@ -1,0 +1,251 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:58.965Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90025",
+      "title": "التكرار (3)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع كيفية استخدام وكتابة حلقات for التي تكرر عملية معينة عددًا محددًا من المرات!\n",
+          "id": 90025,
+          "name": "التكرار (3)",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 25,
+          "test_range": "loops",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90025,
+            "id": 90025010,
+            "seq": 1,
+            "title": "تكرار العمليات الحسابية"
+          },
+          {
+            "chapter_id": 90025,
+            "id": 90025020,
+            "seq": 2,
+            "title": "تمرين تكرار العمليات الحسابية"
+          },
+          {
+            "chapter_id": 90025,
+            "id": 90025030,
+            "seq": 3,
+            "title": "استخدام عدّاد الحلقة for i"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90025010",
+          "title": "تكرار العمليات الحسابية",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90025/lecture/90025010",
+          "raw": {
+            "chapter_id": 90025,
+            "id": 90025010,
+            "seq": 1,
+            "title": "تكرار العمليات الحسابية"
+          }
+        },
+        {
+          "id": "90025020",
+          "title": "تمرين تكرار العمليات الحسابية",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90025/lecture/90025020",
+          "raw": {
+            "chapter_id": 90025,
+            "id": 90025020,
+            "seq": 2,
+            "title": "تمرين تكرار العمليات الحسابية"
+          }
+        },
+        {
+          "id": "90025030",
+          "title": "استخدام عدّاد الحلقة for i",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90025/lecture/90025030",
+          "raw": {
+            "chapter_id": 90025,
+            "id": 90025030,
+            "seq": 3,
+            "title": "استخدام عدّاد الحلقة for i"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "2",
+              "id": 900250102,
+              "question_id": 90025010
+            },
+            {
+              "content": "16",
+              "id": 900250103,
+              "question_id": 90025010
+            },
+            {
+              "content": "8",
+              "id": 900250101,
+              "question_id": 90025010
+            },
+            {
+              "content": "4",
+              "id": 900250104,
+              "question_id": 90025010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90025,
+            "content": "الرجاء اختيار نتيجة تنفيذ البرنامج التالي من الخيارات.\n\n[[code]]let num = 1;\nfor (let i = 0; i < 3; i++) {\n  num = num * 2;\n}\nconsole.log(num);[[/code]]\n",
+            "hints": [
+              "تقوم حلقة[[bdi]] for [[/bdi]]بتنفيذ عملية متكررة.",
+              "القيم الخاصة بالمتغيّر[[bdi]] i [[/bdi]]التي تكون أكبر من أو تساوي 0 وتحقق الشرط[[bdi]] \"i < 3\" [[/bdi]]هي: [[bdi]]i = 0[[/bdi]]، 1، 2.",
+              "العملية[[bdi]] num = num * 2 [[/bdi]]يتم تنفيذها 3 مرات."
+            ],
+            "id": 90025010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90025020
+            }
+          ],
+          "question": {
+            "chapter_id": 90025,
+            "content": "سننشئ برنامجًا يحسب ‘[[bdi]]7×7×7×7×7[[/bdi]]’.\n\nلننشئ البرنامج كما يلي:\n① صرّح عن المتغيّر[[bdi]] num [[/bdi]]وأسنِد له القيمة 1\n② كرّر العملية[[bdi]] num = num * 7 [[/bdi]]خمس مرات\n* أسند 0 للمتغيّر[[bdi]] i[[/bdi]]، وضع الشرط بحيث إذا كان[[bdi]] i [[/bdi]]أصغر من 5 يزداد بمقدار 1\n③ اطبع قيمة المتغيّر[[bdi]] num [[/bdi]]إلى وحدة التحكم مرة واحدة فقط في النهاية",
+            "hints": [
+              "داخل الأقواس () لحلقة[[bdi]] for[[/bdi]]، نكتب برنامجًا يعني: \"أعلن عن متغيّر وامنحه القيمة 0، وبينما تكون القيمة أصغر من 5، أضف 1 إلى القيمة في كل مرة.\"\n",
+              "قيمة المتغيّر[[bdi]] i [[/bdi]]أصغر من 5 تُكتب هكذا: [[bdi]]i < 5[[/bdi]]."
+            ],
+            "id": 90025020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]1→2→3→4→5→6→7[[/bdi]]",
+              "id": 900250301,
+              "question_id": 90025030
+            },
+            {
+              "content": "[[bdi]]0→1→2→3→4→5→6→7[[/bdi]]",
+              "id": 900250303,
+              "question_id": 90025030
+            },
+            {
+              "content": "[[bdi]]1→2→3→4→5→6[[/bdi]]",
+              "id": 900250302,
+              "question_id": 90025030
+            },
+            {
+              "content": "[[bdi]]0→1→2→3→4→5→6[[/bdi]]",
+              "id": 900250304,
+              "question_id": 90025030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90025,
+            "content": "من بين الخيارات، اختر التمثيل الأنسب لكيفية تغيّر قيمة المتغيّر[[bdi]] i [[/bdi]]في البرنامج التالي.\n\n[[code]]let num = 1;\nfor(let i = 1; i <= 7; i++){\n  num = num * 2;\n}\nconsole.log(num);[[/code]]",
+            "hints": [
+              "تبدأ قيمة المتغيّر[[bdi]] i [[/bdi]]من 1.",
+              "[[bdi]]i <= 7 [[/bdi]]تتضمّن الحالة عندما تكون[[bdi]] i = 7[[/bdi]]."
+            ],
+            "id": 90025030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90025040
+            }
+          ],
+          "question": {
+            "chapter_id": 90025,
+            "content": "سننشئ برنامجًا يحسب ‘[[bdi]]0+1+2+3+4+5[[/bdi]]’.\n\nلننشئ البرنامج كما يلي:\n① صرّح عن المتغيّر[[bdi]] num [[/bdi]]وأسنِد له القيمة 0\n② كرّر العملية إسناد نتيجة[[bdi]] (num + i) [[/bdi]]إلى المتغيّر[[bdi]] num [[/bdi]]ست مرات\n* أسند 0 للمتغيّر[[bdi]] i[[/bdi]]، وضع الشرط بحيث إذا كان[[bdi]] i [[/bdi]]أصغر من 6 يزداد بمقدار 1\n③ اطبع قيمة المتغيّر[[bdi]] num [[/bdi]]إلى وحدة التحكم مرة واحدة فقط في النهاية",
+            "hints": [
+              "[[bdi]]\"i [[/bdi]]أصغر من 6\" تُكتب هكذا: [[bdi]]i < 6[[/bdi]]."
+            ],
+            "id": 90025040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90025050
+            }
+          ],
+          "question": {
+            "chapter_id": 90025,
+            "content": "سننشئ برنامجًا يحسب ‘[[bdi]]5040÷1÷2÷3÷4÷5[[/bdi]]’.\n\nلننشئ البرنامج كما يلي:\n① صرّح عن المتغيّر[[bdi]] num [[/bdi]]وأسنِد له القيمة 5040\n② كرّر العملية إسناد نتيجة[[bdi]] (num / i) [[/bdi]]إلى المتغيّر[[bdi]] num [[/bdi]]خمس مرات\n* للشرط في الحلقة، أسند 1 للمتغيّر[[bdi]] i[[/bdi]]، وضع الشرط بحيث إذا كان[[bdi]] i [[/bdi]]أصغر من أو يساوي 5 يزداد بمقدار 1\n③ اطبع قيمة المتغيّر[[bdi]] num [[/bdi]]إلى وحدة التحكم مرة واحدة فقط في النهاية",
+            "hints": [
+              "قيمة[[bdi]] i [[/bdi]]تبدأ من 1."
+            ],
+            "id": 90025050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

@@ -1,0 +1,327 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:25:51.604Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90001",
+      "title": "مقدمة",
+      "raw": {
+        "chapter": {
+          "description": "مرحبًا بك في عالم البرمجة! في هذا الفصل، سنتعلم البرمجة معًا بطريقة ممتعة. سنبدأ بسؤال: “ماذا يمكن أن تفعل البرمجة؟” ثم نتدرج إلى كتابة برنامجك الخاص لعرض النصوص على الشاشة.",
+          "id": 90001,
+          "name": "مقدمة",
+          "question_count": 6,
+          "section_id": 5,
+          "seq": 1,
+          "test_range": "console.log",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90001,
+            "id": 90001010,
+            "seq": 1,
+            "title": "ما هي البرمجة؟ (١)"
+          },
+          {
+            "chapter_id": 90001,
+            "id": 90001020,
+            "seq": 2,
+            "title": "ما هي البرمجة؟ (٢)"
+          },
+          {
+            "chapter_id": 90001,
+            "id": 90001030,
+            "seq": 3,
+            "title": "كيفية استخدام المحرر"
+          },
+          {
+            "chapter_id": 90001,
+            "id": 90001040,
+            "seq": 4,
+            "title": "وحدة التحكم"
+          },
+          {
+            "chapter_id": 90001,
+            "id": 90001050,
+            "seq": 5,
+            "title": "تعليق"
+          },
+          {
+            "chapter_id": 90001,
+            "id": 90001060,
+            "seq": 6,
+            "title": "التعليق خارج البرنامج"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90001010",
+          "title": "ما هي البرمجة؟ (١)",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001010",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001010,
+            "seq": 1,
+            "title": "ما هي البرمجة؟ (١)"
+          }
+        },
+        {
+          "id": "90001020",
+          "title": "ما هي البرمجة؟ (٢)",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001020",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001020,
+            "seq": 2,
+            "title": "ما هي البرمجة؟ (٢)"
+          }
+        },
+        {
+          "id": "90001030",
+          "title": "كيفية استخدام المحرر",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001030",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001030,
+            "seq": 3,
+            "title": "كيفية استخدام المحرر"
+          }
+        },
+        {
+          "id": "90001040",
+          "title": "وحدة التحكم",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001040",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001040,
+            "seq": 4,
+            "title": "وحدة التحكم"
+          }
+        },
+        {
+          "id": "90001050",
+          "title": "تعليق",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001050",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001050,
+            "seq": 5,
+            "title": "تعليق"
+          }
+        },
+        {
+          "id": "90001060",
+          "title": "التعليق خارج البرنامج",
+          "sequence": 6,
+          "url": "https://me-tp.qureo.education/chapter/90001/lecture/90001060",
+          "raw": {
+            "chapter_id": 90001,
+            "id": 90001060,
+            "seq": 6,
+            "title": "التعليق خارج البرنامج"
+          }
+        }
+      ],
+      "question_count": 6,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]consolelog(\"Hello\")[[/bdi]]",
+              "id": 900010104,
+              "question_id": 90001010
+            },
+            {
+              "content": "[[bdi]]console.logHello;[[/bdi]]",
+              "id": 900010103,
+              "question_id": 90001010
+            },
+            {
+              "content": "[[bdi]]log.console(\"Hello\");[[/bdi]]",
+              "id": 900010102,
+              "question_id": 90001010
+            },
+            {
+              "content": "[[bdi]]console.log(\"Hello\");[[/bdi]]",
+              "id": 900010101,
+              "question_id": 90001010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90001,
+            "content": "اختر البرنامج الصحيح لعرض[[bdi]] \"Hello\" [[/bdi]]في وحدة التحكم.\n",
+            "hints": [
+              "إذا كنت تريد عرض نص في وحدة التحكم، استخدم[[bdi]] console.log.[[/bdi]]",
+              "تُحاط الشخصيات بعلامتي \" \" (الاقتباس المزدوج)."
+            ],
+            "id": 90001010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90001020
+            }
+          ],
+          "question": {
+            "chapter_id": 90001,
+            "content": "أنشئ برنامجك كما يلي:\n\n1. اعرض[[bdi]] \"Good morning\" [[/bdi]]في وحدة التحكم.\n\nنسخ النص: [[copy]]Good morning[[/copy]]",
+            "hints": [
+              "يُحاط النص بعلامتي \" \" (الاقتباس المزدوج).\n"
+            ],
+            "id": 90001020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90001030
+            }
+          ],
+          "question": {
+            "chapter_id": 90001,
+            "content": "أنشئ برنامجك كما يلي:\n\n1. اعرض[[bdi]] \"Programming\" [[/bdi]]في وحدة التحكم.\n\nنسخ النص: [[copy]]Programming[[/copy]]",
+            "hints": [
+              "إذا كنت تريد عرض نص في وحدة التحكم، استخدم[[bdi]] console.log.[[/bdi]]",
+              "تُحاط الشخصيات بعلامتي \" \" (الاقتباس المزدوج)."
+            ],
+            "id": 90001030,
+            "seq": 3,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90001040
+            }
+          ],
+          "question": {
+            "chapter_id": 90001,
+            "content": "أنشئ برنامجك كما يلي:\n\n1. اعرض[[bdi]] \"Hello\" [[/bdi]]في وحدة التحكم.\n\nنسخ النص: [[copy]]Hello[[/copy]]",
+            "hints": [
+              "إذا كنت تريد عرض نص في وحدة التحكم، استخدم[[bdi]] console.log.[[/bdi]]",
+              "تُحاط الشخصيات بعلامتي \" \" (الاقتباس المزدوج)."
+            ],
+            "id": 90001040,
+            "seq": 4,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]//Write your comments here.[[/bdi]]",
+              "id": 900010501,
+              "question_id": 90001050
+            },
+            {
+              "content": "[[bdi]]Write your comments here.//[[/bdi]]",
+              "id": 900010504,
+              "question_id": 90001050
+            },
+            {
+              "content": "[[bdi]]/Write your comments here.[[/bdi]]",
+              "id": 900010503,
+              "question_id": 90001050
+            },
+            {
+              "content": "[[bdi]]/Write your comments here./[[/bdi]]",
+              "id": 900010502,
+              "question_id": 90001050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90001,
+            "content": "يرجى اختيار الطريقة الصحيحة لكتابة التعليق.",
+            "hints": [
+              "أدخل \"//\" (شرطتين مائلتين) في بداية السطر المراد جعله تعليقًا،"
+            ],
+            "id": 90001050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "console.log(\"Hello.\");\nconsole.log(\"My name is\");\nconsole.log(\"Rick.\");\nconsole.log(\"Cody.\");",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90001060
+            }
+          ],
+          "question": {
+            "chapter_id": 90001,
+            "content": "علّق البرنامج بحيث تكون المخرجات كما يلي:\n\n[[code]]Hello.\nMy name is\nCody.\n[[/code]]",
+            "hints": [
+              "وتأكّد من عدد الأسطر النصية غير الضرورية.",
+              "علّق البرنامج بوضع \"//\" (شرطتين مائلتين) في بدايته."
+            ],
+            "id": 90001060,
+            "seq": 6,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

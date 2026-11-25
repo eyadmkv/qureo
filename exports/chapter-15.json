@@ -1,0 +1,304 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:29.214Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90015",
+      "title": "الأنواع",
+      "raw": {
+        "chapter": {
+          "description": "سنتعلم كيفية التمييز والمقارنة بين نوع النصوص (string) ونوع الأرقام (number).",
+          "id": 90015,
+          "name": "الأنواع",
+          "question_count": 5,
+          "section_id": 5,
+          "seq": 15,
+          "test_range": "Types",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90015,
+            "id": 90015010,
+            "seq": 1,
+            "title": "إسناد الأحرف"
+          },
+          {
+            "chapter_id": 90015,
+            "id": 90015020,
+            "seq": 2,
+            "title": "أنواع البيانات"
+          },
+          {
+            "chapter_id": 90015,
+            "id": 90015030,
+            "seq": 3,
+            "title": "تحديد النوع"
+          },
+          {
+            "chapter_id": 90015,
+            "id": 90015040,
+            "seq": 4,
+            "title": "مقارنة القيم والأنواع"
+          },
+          {
+            "chapter_id": 90015,
+            "id": 90015050,
+            "seq": 5,
+            "title": "التحويل بين الأنواع"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90015010",
+          "title": "إسناد الأحرف",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90015/lecture/90015010",
+          "raw": {
+            "chapter_id": 90015,
+            "id": 90015010,
+            "seq": 1,
+            "title": "إسناد الأحرف"
+          }
+        },
+        {
+          "id": "90015020",
+          "title": "أنواع البيانات",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90015/lecture/90015020",
+          "raw": {
+            "chapter_id": 90015,
+            "id": 90015020,
+            "seq": 2,
+            "title": "أنواع البيانات"
+          }
+        },
+        {
+          "id": "90015030",
+          "title": "تحديد النوع",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90015/lecture/90015030",
+          "raw": {
+            "chapter_id": 90015,
+            "id": 90015030,
+            "seq": 3,
+            "title": "تحديد النوع"
+          }
+        },
+        {
+          "id": "90015040",
+          "title": "مقارنة القيم والأنواع",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90015/lecture/90015040",
+          "raw": {
+            "chapter_id": 90015,
+            "id": 90015040,
+            "seq": 4,
+            "title": "مقارنة القيم والأنواع"
+          }
+        },
+        {
+          "id": "90015050",
+          "title": "التحويل بين الأنواع",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90015/lecture/90015050",
+          "raw": {
+            "chapter_id": 90015,
+            "id": 90015050,
+            "seq": 5,
+            "title": "التحويل بين الأنواع"
+          }
+        }
+      ],
+      "question_count": 5,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "String",
+              "id": 900150101,
+              "question_id": 90015010
+            },
+            {
+              "content": "Numerical value",
+              "id": 900150102,
+              "question_id": 90015010
+            },
+            {
+              "content": "No particular data type",
+              "id": 900150103,
+              "question_id": 90015010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90015,
+            "content": "اختر نوع البيانات الصحيح أدناه.\n\n[[code]]console.log(\"50+30\");[[/code]]",
+            "hints": [
+              "القيم مُحاطة بـ \"\" ."
+            ],
+            "id": 90015010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]console.log(typeof \"1\");[[/bdi]]",
+              "id": 900150201,
+              "question_id": 90015020
+            },
+            {
+              "content": "[[bdi]]console.log(typeof 1);[[/bdi]]",
+              "id": 900150202,
+              "question_id": 90015020
+            },
+            {
+              "content": "[[bdi]]console.log(string \"1\");[[/bdi]]",
+              "id": 900150204,
+              "question_id": 90015020
+            },
+            {
+              "content": "[[bdi]]console.log(Number \"1\");[[/bdi]]",
+              "id": 900150203,
+              "question_id": 90015020
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90015,
+            "content": "اختر البرنامج الصحيح الذي يُخرج[[bdi]] **string**[[/bdi]]. ",
+            "hints": [
+              "يستخدم الكمبيوتر[[bdi]] \"typeof\" [[/bdi]]لتحديد نوع البيانات."
+            ],
+            "id": 90015020,
+            "seq": 2,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "true",
+              "id": 900150302,
+              "question_id": 90015030
+            },
+            {
+              "content": "string",
+              "id": 900150304,
+              "question_id": 90015030
+            },
+            {
+              "content": "false",
+              "id": 900150301,
+              "question_id": 90015030
+            },
+            {
+              "content": "numerical value",
+              "id": 900150303,
+              "question_id": 90015030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90015,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.  \n\n[[code]]console.log(100 === 500);[[/code]]",
+            "hints": [
+              "\"===\" يتحقق مما إذا كانت القيم وأنواع البيانات متماثلة."
+            ],
+            "id": 90015030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "false",
+              "id": 900150403,
+              "question_id": 90015040
+            },
+            {
+              "content": "number",
+              "id": 900150404,
+              "question_id": 90015040
+            },
+            {
+              "content": "NaN",
+              "id": 900150401,
+              "question_id": 90015040
+            },
+            {
+              "content": "true",
+              "id": 900150402,
+              "question_id": 90015040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90015,
+            "content": "اختر ناتج تنفيذ البرنامج التالي.\n\n[[code]]console.log(Number(\"Hello\"));[[/code]]",
+            "hints": [
+              "عند تغيير نوع البيانات، اكتب[[bdi]] \"Number(\"String\")\"[[/bdi]]."
+            ],
+            "id": 90015040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90015050
+            }
+          ],
+          "question": {
+            "chapter_id": 90015,
+            "content": "أنشئ برنامجك كما يلي.\n\n(1) حدد نوع البيانات لـ `\"7\"` في الحاسوب واطبعه في وحدة التحكم.",
+            "hints": [
+              "يستخدم الكمبيوتر[[bdi]] \"typeof\" [[/bdi]]لتحديد نوع البيانات."
+            ],
+            "id": 90015050,
+            "seq": 5,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

@@ -1,0 +1,424 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:43.324Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90021",
+      "title": "الشروط (4)",
+      "raw": {
+        "chapter": {
+          "description": "دعنا نراجع كيفية استخدام وكتابة جمل if، و if-else، و else if!",
+          "id": 90021,
+          "name": "الشروط (4)",
+          "question_count": 9,
+          "section_id": 5,
+          "seq": 21,
+          "test_range": "Conditional",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90021,
+            "id": 90021010,
+            "seq": 1,
+            "title": "مراجعة الشروط"
+          },
+          {
+            "chapter_id": 90021,
+            "id": 90021020,
+            "seq": 2,
+            "title": "تدريب على العوامل"
+          },
+          {
+            "chapter_id": 90021,
+            "id": 90021030,
+            "seq": 3,
+            "title": "نطاق جمل if"
+          },
+          {
+            "chapter_id": 90021,
+            "id": 90021040,
+            "seq": 4,
+            "title": "التفرعات الشرطية المتداخلة"
+          },
+          {
+            "chapter_id": 90021,
+            "id": 90021050,
+            "seq": 5,
+            "title": "ممارسة كتابة جملة if متداخلة"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90021010",
+          "title": "مراجعة الشروط",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90021/lecture/90021010",
+          "raw": {
+            "chapter_id": 90021,
+            "id": 90021010,
+            "seq": 1,
+            "title": "مراجعة الشروط"
+          }
+        },
+        {
+          "id": "90021020",
+          "title": "تدريب على العوامل",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90021/lecture/90021020",
+          "raw": {
+            "chapter_id": 90021,
+            "id": 90021020,
+            "seq": 2,
+            "title": "تدريب على العوامل"
+          }
+        },
+        {
+          "id": "90021030",
+          "title": "نطاق جمل if",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90021/lecture/90021030",
+          "raw": {
+            "chapter_id": 90021,
+            "id": 90021030,
+            "seq": 3,
+            "title": "نطاق جمل if"
+          }
+        },
+        {
+          "id": "90021040",
+          "title": "التفرعات الشرطية المتداخلة",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90021/lecture/90021040",
+          "raw": {
+            "chapter_id": 90021,
+            "id": 90021040,
+            "seq": 4,
+            "title": "التفرعات الشرطية المتداخلة"
+          }
+        },
+        {
+          "id": "90021050",
+          "title": "ممارسة كتابة جملة if متداخلة",
+          "sequence": 5,
+          "url": "https://me-tp.qureo.education/chapter/90021/lecture/90021050",
+          "raw": {
+            "chapter_id": 90021,
+            "id": 90021050,
+            "seq": 5,
+            "title": "ممارسة كتابة جملة if متداخلة"
+          }
+        }
+      ],
+      "question_count": 9,
+      "questions": [
+        {
+          "choices": [
+            {
+              "content": "score < 50",
+              "id": 900210103,
+              "question_id": 90021010
+            },
+            {
+              "content": "score = 50",
+              "id": 900210104,
+              "question_id": 90021010
+            },
+            {
+              "content": "score > 50",
+              "id": 900210102,
+              "question_id": 90021010
+            },
+            {
+              "content": "[[bdi]]score == 50[[/bdi]]",
+              "id": 900210101,
+              "question_id": 90021010
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر التعبير الصحيح للشرط \"المتغيّر[[bdi]] score [[/bdi]]يساوي 50\".",
+            "hints": [
+              "لنُقارن إذا كانت قيمة المتغيّر[[bdi]] score [[/bdi]]تساوي 50.",
+              "\"=\" يُستخدم عند إسناد القيم إلى المتغيرات."
+            ],
+            "id": 90021010,
+            "seq": 1,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let A = 5\nlet B = 10\nif (A > B) {\n  console.log(\"A is larger\");\n} fitbBlock1 {\n  console.log(\"B is larger\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 15,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90021020
+            }
+          ],
+          "question": {
+            "chapter_id": 90021,
+            "content": "أضف شرطًا ثانيًا إلى البرنامج المكتوب:\nإذا كان[[bdi]] A [[/bdi]]أصغر من[[bdi]] B[[/bdi]]، اطبع[[bdi]] \"B is larger\" [[/bdi]]في وحدة التحكم[[bdi]] (console)[[/bdi]].\nسيُكتب الشرط الثاني على الشكل التالي: [[bdi]]\"A < B\"[[/bdi]].",
+            "hints": [
+              "لإضافة شرط آخر في برنامج يحتوي بالفعل على جملة[[bdi]] if[[/bdi]]، نستخدم[[bdi]] else if.[[/bdi]]"
+            ],
+            "id": 90021020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]A <= B[[/bdi]]",
+              "id": 900210304,
+              "question_id": 90021030
+            },
+            {
+              "content": "A > B",
+              "id": 900210303,
+              "question_id": 90021030
+            },
+            {
+              "content": "[[bdi]]A == B[[/bdi]]",
+              "id": 900210302,
+              "question_id": 90021030
+            },
+            {
+              "content": "A < B",
+              "id": 900210301,
+              "question_id": 90021030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر التعبير الصحيح للشرط[[bdi]] \"A [[/bdi]]أصغر من[[bdi]] B\"[[/bdi]].",
+            "hints": [
+              "[[bdi]]A [[/bdi]]أصغر من[[bdi]] B [[/bdi]]لا يشمل[[bdi]] B.[[/bdi]]"
+            ],
+            "id": 90021030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "[[bdi]]score >= 50[[/bdi]]",
+              "id": 900210401,
+              "question_id": 90021040
+            },
+            {
+              "content": "[[bdi]]score == 50[[/bdi]]",
+              "id": 900210402,
+              "question_id": 90021040
+            },
+            {
+              "content": "score > 50",
+              "id": 900210404,
+              "question_id": 90021040
+            },
+            {
+              "content": "[[bdi]]score <= 50[[/bdi]]",
+              "id": 900210403,
+              "question_id": 90021040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر البرنامج الذي يمثّل الشرط \"المتغيّر[[bdi]] score [[/bdi]]أكبر من أو يساوي 50\".",
+            "hints": [
+              "[[bdi]]A [[/bdi]]أكبر من أو يساوي[[bdi]] B [[/bdi]]يشمل[[bdi]] B.[[/bdi]]"
+            ],
+            "id": 90021040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "&",
+              "id": 900210502,
+              "question_id": 90021050
+            },
+            {
+              "content": "&&",
+              "id": 900210501,
+              "question_id": 90021050
+            },
+            {
+              "content": "|",
+              "id": 900210504,
+              "question_id": 90021050
+            },
+            {
+              "content": "||",
+              "id": 900210503,
+              "question_id": 90021050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر العامل[[bdi]] (operator) [[/bdi]]الصحيح الذي يمثّل \"تحقّق عدّة شروط في الوقت نفسه[[bdi]]\" (AND)[[/bdi]].",
+            "hints": [
+              "المعامل الذي يعني[[bdi]] \"AND\" [[/bdi]]هو &&."
+            ],
+            "id": 90021050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "||",
+              "id": 900210601,
+              "question_id": 90021060
+            },
+            {
+              "content": "&&",
+              "id": 900210604,
+              "question_id": 90021060
+            },
+            {
+              "content": "|",
+              "id": 900210603,
+              "question_id": 90021060
+            },
+            {
+              "content": "&",
+              "id": 900210602,
+              "question_id": 90021060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر العامل[[bdi]] (operator) [[/bdi]]الصحيح الذي يمثّل \"تحقّق شرط واحد على الأقل من عدّة شروط[[bdi]]\" (OR)[[/bdi]].",
+            "hints": [
+              "المعامل الذي يعني[[bdi]] \"OR\" [[/bdi]]هو ||."
+            ],
+            "id": 90021060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let numberOfPeople = 8;\nlet weight = 400;\nif (fitbBlock1) {\n  console.log(\"You can ride the elevator\");\n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [
+                {
+                  "col_size": 37,
+                  "name": "fitbBlock1"
+                }
+              ],
+              "question_id": 90021070
+            }
+          ],
+          "question": {
+            "chapter_id": 90021,
+            "content": "اكتب شرطًا ينص على أن \"عدد الأشخاص أصغر من أو يساوي 10\" أو \"الوزن الكلي أصغر من أو يساوي[[bdi]] 800kg\"[[/bdi]].\nالمتغيّر لعدد الأشخاص هو[[bdi]] numberOfPeople[[/bdi]]، والمتغيّر للوزن الكلي هو[[bdi]] weight.[[/bdi]]",
+            "hints": [
+              "لربط شرطين باستخدام[[bdi]] \"OR\"[[/bdi]]، نستخدم المعامل ||."
+            ],
+            "id": 90021070,
+            "seq": 7,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "ينتج عنه خطأ",
+              "id": 900210801,
+              "question_id": 90021080
+            },
+            {
+              "content": "يتم طباعة[[bdi]] \"500 codycoins GET\"[[/bdi]]",
+              "id": 900210802,
+              "question_id": 90021080
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90021,
+            "content": "اختر نتيجة الإخراج[[bdi]] (output) [[/bdi]]للبرنامج التالي:\n\n[[code]]let math = 100;\nif (math == 100) {\n  let fee = 500;\n}\nconsole.log(fee + \" codycoins GET\");[[/code]]",
+            "hints": [
+              "انتبه إلى نطاق المتغيّر[[bdi]] fee[[/bdi]]، فإذا تمّ التصريح به داخل { } فلا يمكن استخدامه خارجها."
+            ],
+            "id": 90021080,
+            "seq": 8,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "let math = 100;\nlet science = 100;\nif (math == 100) {\n  console.log(\"Math is 100 points\");\n  \n}",
+              "editable": true,
+              "lang": "javascript",
+              "placeholders": [],
+              "question_id": 90021090
+            }
+          ],
+          "question": {
+            "chapter_id": 90021,
+            "content": "أنشئ برنامجًا يطبع[[bdi]] \"Math is 100 points\" [[/bdi]]إذا كان[[bdi]] math [[/bdi]]يساوي 100 نقطة، ومن بين هذه الحالات، إذا كان[[bdi]] science [[/bdi]]أيضًا يساوي 100 نقطة، يطبع[[bdi]] \"Math and science are 100 points\" [[/bdi]]في وحدة التحكم[[bdi]] (console)[[/bdi]].\nولكن لا تستخدم \"&&\" التي تعني[[bdi]] AND.[[/bdi]]\n\nالنص المطلوب نسخه: [[copy]]Math and science are 100 points[[/copy]]",
+            "hints": [
+              "يرجى إنشاء برنامج يتحقق من الشرط الثاني فقط عندما يتحقق الشرط الأول."
+            ],
+            "id": 90021090,
+            "seq": 9,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}

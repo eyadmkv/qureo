@@ -1,0 +1,360 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-25T16:26:38.263Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [],
+  "errors": [],
+  "chapters": [
+    {
+      "id": "90019",
+      "title": "CSS(1)",
+      "raw": {
+        "chapter": {
+          "description": "تعلم كيفية تغيير لون النصوص وتغيير حجم الأحرف لتنسيق مظهر النصوص في المتصفح باستخدام CSS!",
+          "id": 90019,
+          "name": "CSS(1)",
+          "question_count": 8,
+          "section_id": 5,
+          "seq": 19,
+          "test_range": "CSS",
+          "test_type": "review"
+        },
+        "lectures": [
+          {
+            "chapter_id": 90019,
+            "id": 90019010,
+            "seq": 1,
+            "title": "لون الحروف"
+          },
+          {
+            "chapter_id": 90019,
+            "id": 90019020,
+            "seq": 2,
+            "title": "سماكة وحجم الأحرف"
+          },
+          {
+            "chapter_id": 90019,
+            "id": 90019030,
+            "seq": 3,
+            "title": "الفئة (class)"
+          },
+          {
+            "chapter_id": 90019,
+            "id": 90019040,
+            "seq": 4,
+            "title": "تعليق"
+          }
+        ],
+        "section": {
+          "course_id": "javascript_ar",
+          "id": 5
+        }
+      },
+      "lessons": [
+        {
+          "id": "90019010",
+          "title": "لون الحروف",
+          "sequence": 1,
+          "url": "https://me-tp.qureo.education/chapter/90019/lecture/90019010",
+          "raw": {
+            "chapter_id": 90019,
+            "id": 90019010,
+            "seq": 1,
+            "title": "لون الحروف"
+          }
+        },
+        {
+          "id": "90019020",
+          "title": "سماكة وحجم الأحرف",
+          "sequence": 2,
+          "url": "https://me-tp.qureo.education/chapter/90019/lecture/90019020",
+          "raw": {
+            "chapter_id": 90019,
+            "id": 90019020,
+            "seq": 2,
+            "title": "سماكة وحجم الأحرف"
+          }
+        },
+        {
+          "id": "90019030",
+          "title": "الفئة (class)",
+          "sequence": 3,
+          "url": "https://me-tp.qureo.education/chapter/90019/lecture/90019030",
+          "raw": {
+            "chapter_id": 90019,
+            "id": 90019030,
+            "seq": 3,
+            "title": "الفئة (class)"
+          }
+        },
+        {
+          "id": "90019040",
+          "title": "تعليق",
+          "sequence": 4,
+          "url": "https://me-tp.qureo.education/chapter/90019/lecture/90019040",
+          "raw": {
+            "chapter_id": 90019,
+            "id": 90019040,
+            "seq": 4,
+            "title": "تعليق"
+          }
+        }
+      ],
+      "question_count": 8,
+      "questions": [
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "{\n  color: red;\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90019010
+            }
+          ],
+          "question": {
+            "chapter_id": 90019,
+            "content": "حدد الـ[[bdi]] selector [[/bdi]]كـ[[bdi]] \"h1\"[[/bdi]].\n\nلن يتم عرض أي شيء في المتصفح.",
+            "hints": [
+              "المُحدِّد[[bdi]] (selector) [[/bdi]]هو الجزء الذي يُحدد \"أي جزء\" سيتم تغيير مظهره."
+            ],
+            "id": 90019010,
+            "seq": 1,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "h1 {\n  color:\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90019020
+            }
+          ],
+          "question": {
+            "chapter_id": 90019,
+            "content": "حدد القيمة[[bdi]] \"blue.\"[[/bdi]]\n\nلن يتم عرض أي شيء في المتصفح.",
+            "hints": [
+              "القيمة[[bdi]] (value) [[/bdi]]هي الجزء الذي يُحدد \"كيف\" سيتم تغيير المظهر."
+            ],
+            "id": 90019020,
+            "seq": 2,
+            "type": "description"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "تغيير لون الصورة",
+              "id": 900190304,
+              "question_id": 90019030
+            },
+            {
+              "content": "تغيير حجم الخط",
+              "id": 900190302,
+              "question_id": 90019030
+            },
+            {
+              "content": "تغيير لون النص",
+              "id": 900190301,
+              "question_id": 90019030
+            },
+            {
+              "content": "تغيير لون الخلفية",
+              "id": 900190303,
+              "question_id": 90019030
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90019,
+            "content": "اختر الوصف الصحيح لخاصية[[bdi]] color.[[/bdi]]",
+            "hints": null,
+            "id": 90019030,
+            "seq": 3,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "تغيير سُمك الخط",
+              "id": 900190402,
+              "question_id": 90019040
+            },
+            {
+              "content": "تغيير لون الصورة",
+              "id": 900190404,
+              "question_id": 90019040
+            },
+            {
+              "content": "تغيير لون الخلفية",
+              "id": 900190401,
+              "question_id": 90019040
+            },
+            {
+              "content": "تغيير لون النص",
+              "id": 900190403,
+              "question_id": 90019040
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90019,
+            "content": "اختر الوصف الصحيح لخاصية[[bdi]] background-color.[[/bdi]]",
+            "hints": null,
+            "id": 90019040,
+            "seq": 4,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "يصبح النص عريضًا",
+              "id": 900190501,
+              "question_id": 90019050
+            },
+            {
+              "content": "يصبح النص نحيفًا",
+              "id": 900190502,
+              "question_id": 90019050
+            },
+            {
+              "content": "يتغير لون النص إلى ذهبي",
+              "id": 900190504,
+              "question_id": 90019050
+            },
+            {
+              "content": "يصبح حجم الخط أصغر",
+              "id": 900190503,
+              "question_id": 90019050
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90019,
+            "content": "اختر الوصف الصحيح لقيمة خاصية[[bdi]] font-weight [[/bdi]]عند كتابتها كـ[[bdi]] bold.[[/bdi]]",
+            "hints": null,
+            "id": 90019050,
+            "seq": 5,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": [
+            {
+              "content": "font-size: 10size;",
+              "id": 900190604,
+              "question_id": 90019060
+            },
+            {
+              "content": "font-size: 10px;",
+              "id": 900190601,
+              "question_id": 90019060
+            },
+            {
+              "content": "font-size: 10g;",
+              "id": 900190603,
+              "question_id": 90019060
+            },
+            {
+              "content": "font-size: 10;",
+              "id": 900190602,
+              "question_id": 90019060
+            }
+          ],
+          "descriptions": null,
+          "question": {
+            "chapter_id": 90019,
+            "content": "اختر القيمة الصحيحة لخاصية[[bdi]] font-size.[[/bdi]]",
+            "hints": [
+              "يجب أن تُعطى القيم وحدة تعني \"بيكسل\"."
+            ],
+            "id": 90019060,
+            "seq": 6,
+            "type": "choice"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "{\n  color: blue;\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [],
+              "question_id": 90019070
+            }
+          ],
+          "question": {
+            "chapter_id": 90019,
+            "content": "\"يُحدد اسم الـ[[bdi]] class [[/bdi]]كما يلي. اكتب[[bdi]] CSS [[/bdi]]لتغيير كلمة[[bdi]] \"Dog\" [[/bdi]]إلى اللون الأزرق.\n\n[[bdi]]HTML[[/bdi]]\n[[code]]<p class=\"dog\">Dog</p>\n<p class=\"cat\">Cat</p>[[/code]]\n\n*لن يتم عرض أي شيء في المتصفح عند تشغيله.",
+            "hints": [
+              "اسم الكلاس لكلمة[[bdi]] \"Dog\" [[/bdi]]هو[[bdi]] \"dog\"[[/bdi]].\n"
+            ],
+            "id": 90019070,
+            "seq": 7,
+            "type": "description"
+          }
+        },
+        {
+          "choices": null,
+          "descriptions": [
+            {
+              "code": "fitbBlock1Change the text color to navy.fitbBlock2\np {\n  color: navy;\n}",
+              "editable": true,
+              "lang": "css",
+              "placeholders": [
+                {
+                  "col_size": 2,
+                  "name": "fitbBlock1"
+                },
+                {
+                  "col_size": 2,
+                  "name": "fitbBlock2"
+                }
+              ],
+              "question_id": 90019080
+            }
+          ],
+          "question": {
+            "chapter_id": 90019,
+            "content": "اترك تعليقًا في السطر الأول من النص.\n\n*لن ترى أي شيء في متصفحك عند تشغيله.",
+            "hints": [
+              "على عكس التعليقات في[[bdi]] JavaScript [[/bdi]]و[[bdi]]HTML.[[/bdi]]"
+            ],
+            "id": 90019080,
+            "seq": 8,
+            "type": "description"
+          }
+        }
+      ],
+      "questions_error": null
+    }
+  ]
+}
