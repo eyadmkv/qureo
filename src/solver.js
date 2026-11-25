@@ -141,8 +141,13 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     return;
   }
   if (response.status === 404) {
-    onProgress(`  lesson ${lessonId}: completion endpoint returned 404; skipped`);
-    return;
+    const error = new Error(
+      `Lesson ${lessonId} could not be completed (HTTP 404). Stop here, finish this lesson in QUREO, then rerun the solver. Later lessons and the chapter assessment were not started.`
+    );
+    error.code = 'LESSON_NOT_AVAILABLE';
+    error.status = 404;
+    error.lessonId = String(lessonId);
+    throw error;
   }
   const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
   throw error;
