@@ -181,3 +181,22 @@ Do not share the `data` directory. It contains your authenticated session and pe
 ## Network behavior
 
 The login endpoint currently used by QUREO integrations is `POST https://me-portal.qureo.education/oauth2/password-login` with a JSON body containing `student_id` and `password`. The learning API is under `https://me-tp.qureo.education/api/study`. These are service endpoints rather than a documented public API, so QUREO can change them at any time. Requests are restricted in this client to the two HTTPS QUREO hosts.
+
+
+## Terminal experience
+
+The CLI includes a local dashboard, diagnostics, status view, configurable themes, command suggestions, a privacy-conscious command history, and PowerShell tab completion.
+
+```powershell
+qureo dashboard
+qureo status
+qureo doctor
+qureo history
+qureo config show
+qureo config set theme cyan
+qureo completion powershell --install
+```
+
+The first run creates a root-level `qureo.config.json`. Supported themes are `auto`, `cyan`, `green`, `amber`, `monochrome`, and `none`. Configure progress bars, suggestions, and history retention in the same file or with `qureo config set`.
+
+Command history stores command names and timestamps only. It does not store arguments, answer text, search terms, or credentials. The dashboard reads local cached progress; run `qureo sync` to refresh it. See [terminal experience documentation](docs/terminal-experience.md) for details.
