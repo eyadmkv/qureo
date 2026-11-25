@@ -12,8 +12,8 @@ permissions:
 
 jobs:
   test:
-    name: Node ${{ matrix.node }} on Windows
-    runs-on: windows-latest
+    name: Node ${{ matrix.node }} on Windows Server 2022
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +21,12 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+      - name: Set up Python for native modules
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Set up MSVC build environment
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
