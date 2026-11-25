@@ -169,7 +169,7 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, { 
   const testReferer = `${COURSE_ORIGIN}/chapter/${chapterId}/${testSlug}`;
   const initPath = `/students/chapters/${encodeURIComponent(chapterId)}/test`;
   onProgress(`  initializing ${testType} attempt`);
-  await requestJson(client, initPath, { method: 'PUT', body: {}, referer: testReferer });
+  await requestJson(client, initPath, { method: 'PUT', referer: testReferer });
 
   let submitted = 0;
   let correct = 0;

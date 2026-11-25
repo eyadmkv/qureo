@@ -13,12 +13,13 @@ import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
 import { DB_PATH, ROOT } from './paths.js';
+import { solveCourse } from './solver.js';
 
 const program = new Command();
 program
   .name('qureo')
   .description('Private QUREO HTTP client, course index and local answer search')
-  .version('0.2.2');
+  .version('0.3.0');
 
 function outputJson(value) { console.log(JSON.stringify(value, null, 2)); }
 
@@ -196,7 +197,7 @@ program.command('export')
       fs.writeFileSync(temporaryPath, JSON.stringify(report, null, 2), 'utf8');
       fs.renameSync(temporaryPath, outputPath);
     };
-    const isAuthError = error => /authentication expired \(HTTP (401|403)\)/i.test(error && error.message || '');
+    const isAuthError = error => error?.code === 'AUTH_EXPIRED' || error?.status === 401 || /authentication expired \(HTTP 401\)/i.test(error && error.message || '');
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     const targetChapter = options.chapter ? String(options.chapter) : null;
 
@@ -263,12 +264,16 @@ program.command('export')
               raw: null,
               lessons: [],
               questions: [],
+              expected_question_count: null,
+              questions_status: 'pending',
               questions_error: null
             };
 
             try {
               chapterOut.raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
               const lessons = asArray(chapterOut.raw?.lectures || chapterOut.raw?.chapter?.lectures || chapterOut.raw?.data?.lectures);
+              const expectedCount = chapterOut.raw?.chapter?.question_count ?? chapterOut.raw?.question_count ?? null;
+              chapterOut.expected_question_count = Number.isFinite(Number(expectedCount)) ? Number(expectedCount) : null;
               chapterOut.lessons = lessons.map((lesson, index) => ({
                 id: String(lesson.id ?? lesson.lecture_id ?? ''),
                 title: lesson.title || lesson.name || '',
@@ -290,13 +295,16 @@ program.command('export')
             try {
               const questionsRaw = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
               chapterOut.questions = asArray(questionsRaw);
+              chapterOut.questions_status = chapterOut.questions.length ? 'available' : 'empty';
               chapterOut.questions_raw = chapterOut.questions.length ? undefined : questionsRaw;
               for (const item of chapterOut.questions) saveApiQuestion(chapterId, item);
             } catch (error) {
               chapterOut.questions_error = error.message;
-              report.errors.push({ course_id: course.id, chapter_id: chapterId, stage: 'chapter_questions', message: error.message });
+              chapterOut.questions_status = error.code === 'PRECONDITION_NOT_FULFILLED' ? 'precondition_blocked' : error.code === 'AUTH_EXPIRED' ? 'authentication_expired' : 'error';
+              report.errors.push({ course_id: course.id, chapter_id: chapterId, stage: 'chapter_questions', code: error.code || null, status: error.status || null, message: error.message });
               if (isAuthError(error)) {
                 courseOut.chapters.push(chapterOut);
+                report.courses = report.courses.filter(item => String(item.id) !== String(course.id));
                 report.courses.push(courseOut);
                 saveCheckpoint();
                 throw error;
@@ -323,12 +331,30 @@ program.command('export')
     }
 
     saveCheckpoint();
+    if (Array.isArray(report.courses)) {
+      const uniqueCourses = new Map(report.courses.map(course => [String(course.id), course]));
+      report.courses = [...uniqueCourses.values()];
+    }
     const chapterCount = report.chapters?.length || report.courses.reduce((n, c) => n + c.chapters.length, 0);
     const lessonCount = (report.chapters || report.courses.flatMap(c => c.chapters)).reduce((n, ch) => n + ch.lessons.length, 0);
     const questionCount = (report.chapters || report.courses.flatMap(c => c.chapters)).reduce((n, ch) => n + ch.questions.length, 0);
     console.log(`\nExport complete: ${chapterCount} chapter(s), ${lessonCount} lesson record(s), ${questionCount} assessment question(s).`);
     console.log(`Saved: ${outputPath}`);
     console.log('Upload this JSON file here so the question sets can be solved in bulk.');
+  }));
+
+program.command('solve [toChapter]')
+  .description('Solve chapters starting at the first unfinished chapter in your QUREO account')
+  .option('--course <id>', 'Course ID to solve', 'javascript_ar')
+  .option('--dry-run', 'Preview the selected chapters without submitting answers')
+  .action(async (toChapter, options) => withClient(async client => {
+    const result = await solveCourse(client, {
+      courseId: options.course,
+      targetChapter: toChapter || null,
+      dryRun: Boolean(options.dryRun),
+      onProgress: message => console.log(message)
+    });
+    console.log(result.summary);
   }));
 
 program.command('lessons <chapterId>')

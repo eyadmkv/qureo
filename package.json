@@ -1,9 +1,9 @@
 {
   "name": "qureo-personal-cli",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Private HTTP-only QUREO course exporter and local answer archive",
+  "description": "Private QUREO HTTP client, progress-aware chapter solver and local course archive",
   "bin": {
     "qureo": "src/cli.js"
   },

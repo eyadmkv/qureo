@@ -1,4 +1,4 @@
-# QUREO Personal CLI 0.2.2
+# QUREO Personal CLI 0.3.0
 
 A private, local-only, HTTP-based QUREO client for Windows and PowerShell 7. It uses direct HTTPS requests (`POST` for login and `GET` for account/course/question data), SQLite for a personal archive, and Windows DPAPI to encrypt the local session cookie jar.
 
@@ -91,6 +91,21 @@ qureo answers list
 ```
 
 Each answer record should include `question_id` and `answer` (or `answer_text`), and can include `answer_type`, `question_text`, `explanation` and `source_url`. Imported answers are stored as locally supplied answers, not marked as QUREO-verified.
+
+## Solve from your current progress
+
+The solver reads your current account progress and starts at the first unfinished chapter. The optional target can be a chapter sequence number or QUREO chapter ID:
+
+```powershell
+qureo solve
+qureo solve 20
+qureo solve 90044
+qureo solve 44 --dry-run
+```
+
+Before making changes, the solver checks that every question in a chapter has a matching local answer. It submits only reviewed answers in `answers/<course_id>.json`, checks QUREO's response, and stops if an answer is missing, rejected, or not confirmed correct. It does not probe for answer keys or bypass locked chapter preconditions.
+
+The current JavaScript answer bank contains the five questions in Chapter 43. Add reviewed answers as further chapters become available.
 
 ## Search answer references
 
