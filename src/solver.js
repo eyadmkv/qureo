@@ -6,6 +6,36 @@ import { ROOT } from './paths.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
+function integerSetting(name, fallback, minimum, maximum) {
+  const value = Number.parseInt(process.env[name] ?? '', 10);
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+const LESSON_INIT_WAIT_MS = integerSetting('QUREO_LESSON_INIT_WAIT_MS', 10000, 0, 60000);
+const LESSON_RETRY_INTERVAL_MS = integerSetting('QUREO_LESSON_RETRY_INTERVAL_MS', 3000, 250, 30000);
+const LESSON_RETRY_ATTEMPTS = integerSetting('QUREO_LESSON_RETRY_ATTEMPTS', 40, 1, 100);
+const LESSON_RETRY_TIMEOUT_MS = integerSetting('QUREO_LESSON_RETRY_TIMEOUT_MS', 180000, 10000, 600000);
+const LESSON_REQUEST_TIMEOUT_MS = integerSetting('QUREO_LESSON_REQUEST_TIMEOUT_MS', 15000, 1000, 120000);
+
+const RETRYABLE_NETWORK_CODES = new Set([
+  'ECONNRESET', 'ETIMEDOUT', 'EAI_AGAIN', 'ENETUNREACH', 'ECONNREFUSED',
+  'EHOSTUNREACH', 'ECONNABORTED', 'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_SOCKET', 'UND_ERR_HEADERS_TIMEOUT'
+]);
+const RETRYABLE_HTTP_STATUSES = new Set([404, 408, 425, 429, 500, 502, 503, 504]);
+
+function isRetryableNetworkError(error) {
+  if (['TimeoutError', 'AbortError', 'ConnectTimeoutError'].includes(error?.name)) return true;
+  const codes = [error?.code, error?.cause?.code, error?.cause?.cause?.code];
+  if (codes.some(code => RETRYABLE_NETWORK_CODES.has(code))) return true;
+  return error instanceof TypeError && /fetch failed|network|socket|connect/i.test(error.message);
+}
+
+function isRetryableResponse(response) {
+  return RETRYABLE_HTTP_STATUSES.has(response?.status);
+}
+
 function asArray(value) {
   if (Array.isArray(value)) return value;
   if (Array.isArray(value?.data)) return value.data;
@@ -151,51 +181,13 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     return;
   }
 
-  const submitCompletion = () => client.request(`${API_BASE}${endpoint}`, {
-    method: 'PUT',
-    headers: { Accept: 'application/json, */*', Referer: referer }
-  });
-
-  let response = await submitCompletion();
-  if (response.status === 404) {
-    onProgress(`  lesson ${lessonId}: API returned 404 before the lesson page initialized; opening it in your default browser`);
-    openLecturePage(lectureUrl);
-    onProgress(`  lesson ${lessonId}: waiting for QUREO to initialize`);
-    await wait(2500);
-
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      response = await submitCompletion();
-      if (response.status !== 404) break;
-      if (attempt < 4) {
-        onProgress(`  lesson ${lessonId}: still initializing; retry ${attempt}/4`);
-        await wait(1000);
-      }
-    }
-  }
-
-  if (response.ok) {
-    onProgress(`  lesson ${lessonId}: completed`);
-    return;
-  }
-  if (response.status === 400 || response.status === 409) {
-    onProgress(`  lesson ${lessonId}: already completed`);
-    return;
-  }
-
-  const body = await response.text().catch(() => '');
-  if (response.status === 404) {
-    const error = new Error(
-      `Lesson ${lessonId} still returns HTTP 404 after opening its page. Check that your default browser is signed in to the same QUREO account, complete the lesson there, then rerun the solver. Later lessons and the chapter assessment were not started.`
-    );
-    error.code = 'LESSON_NOT_AVAILABLE';
-    error.status = 404;
-    error.lessonId = String(lessonId);
-    throw error;
-  }
-  const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
-  throw error;
-}
-
+  const deadline = Date.now() + LESSON_RETRY_TIMEOUT_MS;
+  const submitCompletion = () => {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) throw new Error('Lesson completion retry window expired.');
+    return client.request(`${API_BASE}${endpoint}`, {
+      method: 'PUT',
+      headers: { Accept: 'application/json, *.,¨°IÉÈèÉÉÈô°(Ñ¥µ½ÕÑ5Ìè5Ñ ¹µ¥¸¡1MM=9}IEUMQ}Q%5=UQ}5L°Éµ¥¹¥¹5Ì¤(ô¤ì(ôì((±ÐÉÍÁ½¹Íô¹Õ±°ì(±Ð±ÍÑ9ÑÝ½É­ÉÉ½Èô¹Õ±°ì(ÑÉäì(ÉÍÁ½¹ÍôÝ¥ÐÍÕµ¥Ñ½µÁ±Ñ¥½¸ ¤ì(ôÑ ¡ÉÉ½È¤ì(¥ ¥ÍIÑÉå±9ÑÝ½É­ÉÉ½È¡ÉÉ½È¤¤Ñ¡É½ÜÉÉ½Èì(±ÍÑ9ÑÝ½É­ÉÉ½ÈôÉÉ½Èì(ô((½¹ÍÐ¹ÍA%¹¥Ñ¥±¥éÑ¥½¸ôÉÍÁ½¹ÍñðÉÍÁ½¹Í¹ÍÑÑÕÌôôôÐÀÐì(¥¡¹ÍA%¹¥Ñ¥±¥éÑ¥½¸¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèí±ÍÑ9ÑÝ½É­ÉÉ½ÈüÑµÁ½ÉÉä¹ÑÝ½É¬¥±ÕÉèA$ÉÑÕÉ¹ÐÀÐ½ÉÑ¡±ÍÍ½¸Á¥¹¥Ñ¥±¥éôì½Á¹¥¹¥Ð¥¸å½ÕÈÕ±ÐÉ½ÝÍÉ¤ì(½Á¹1ÑÕÉA¡±ÑÕÉUÉ°¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèÝ¥Ñ¥¹í5Ñ ¹¥°¡1MM=9}%9%Q}]%Q}5L¼ÄÀÀÀ¥õÌ½ÈEUI<Ñ¼¥¹¥Ñ¥±¥é¤ì(Ý¥ÐÝ¥Ð¡5Ñ ¹µ¥¸¡1MM=9}%9%Q}]%Q}5L°5Ñ ¹µà À°±¥¹´Ñ¹¹½Ü ¤¤¤¤ì(ô((½È¡±ÐÑÑµÁÐôÄìÑÑµÁÐðô1MM=9}IQIe}QQ5AQLÑ¹¹½Ü ¤ð±¥¹ìÑÑµÁÐ¬¬¤ì(ÑÉäì(ÉÍÁ½¹ÍôÝ¥ÐÍÕµ¥Ñ½µÁ±Ñ¥½¸ ¤ì(±ÍÑ9ÑÝ½É­ÉÉ½Èô¹Õ±°ì(ôÑ ¡ÉÉ½È¤ì(¥ ¥ÍIÑÉå±9ÑÝ½É­ÉÉ½È¡ÉÉ½È¤¤Ñ¡É½ÜÉÉ½Èì(ÉÍÁ½¹Íô¹Õ±°ì(±ÍÑ9ÑÝ½É­ÉÉ½ÈôÉÉ½Èì(ô((¥¡ÉÍÁ½¹Í¥ÍIÑÉå±IÍÁ½¹Í¡ÉÍÁ½¹Í¤¤É¬ì((½¹ÍÐÉµ¥¹¥¹5Ìô±¥¹´Ñ¹¹½Ü ¤ì(¥¡ÑÑµÁÐð1MM=9}IQIe}QQ5AQLÉµ¥¹¥¹5ÌøÀ¤ì(½¹ÍÐ±å5Ìô5Ñ ¹µ¥¸¡1MM=9}IQIe}%9QIY1}5L°Éµ¥¹¥¹5Ì¤ì(½¹ÍÐÉÍ½¸ô±ÍÑ9ÑÝ½É­ÉÉ½È(ü¹ÑÝ½É¬ÉÉ½È í±ÍÑ9ÑÝ½É­ÉÉ½È¹µÍÍô¥(è!QQ@íÉÍÁ½¹Í¹ÍÑÑÕÍõì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôèíÉÍ½¹ôìÉÑÉäíÑÑµÁÑô¼í1MM=9}IQIe}QQ5AQMô¥¸í5Ñ ¹¥°¡±å5Ì¼ÄÀÀÀ¥õÍ¤ì(Ý¥ÐÝ¥Ð¡±å5Ì¤ì(ô(ô((¥¡ÉÍÁ½¹Íü¹½¬¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôè½µÁ±Ñ¤ì(ÉÑÕÉ¸ì(ô(¥¡ÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀÀñðÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀä¤ì(½¹AÉ½ÉÍÌ¡±ÍÍ½¸í±ÍÍ½¹%ôè±Éä½µÁ±Ñ¤ì(ÉÑÕÉ¸ì(ô((¥ ÉÍÁ½¹Í±ÍÑ9ÑÝ½É­ÉÉ½È¤ì(½¹ÍÐÉÉ½Èô¹ÜÉÉ½È (1ÍÍ½¸í±ÍÍ½¹%ô½Õ±¹½Ð½µÁ±ÑÕÍÑ¡¹ÑÝ½É¬­ÁÐ¥±¥¹ÕÉ¥¹Ñ¡í5Ñ ¹¥°¡1MM=9}IQIe}Q%5=UQ}5L¼ÄÀÀÀ¥õÌÉÑÉäÝ¥¹½Ü¸¡¬å½ÕÈ½¹¹Ñ¥½¸¹ÉÉÕ¸Ñ¡Í½±ÙÈ¸1ÑÈ±ÍÍ½¹Ì¹Ñ¡¡ÁÑÈÍÍÍÍµ¹ÐÝÉ¹½ÐÍÑÉÑ¹(¤ì(ÉÉ½È¹½ô1MM=9}9Q]=I-}Q%5=UPì(ÉÉ½È¹±ÍÍ½¹%ôMÑÉ¥¹¡±ÍÍ½¹%¤ì(ÉÉ½È¹ÕÍô±ÍÑ9ÑÝ½É­ÉÉ½Èì(Ñ¡É½ÜÉÉ½Èì(ô((¥¡ÉÍÁ½¹Íü¹ÍÑÑÕÌôôôÐÀÐ¤ì(½¹ÍÐÉÉ½Èô¹ÜÉÉ½È (1ÍÍ½¸í±ÍÍ½¹%ôÍÑ¥±°ÉÑÕÉ¹Ì!QQ@ÐÀÐÑÈí5Ñ ¹¥°¡1MM=9}IQIe}Q%5=UQ}5L¼ÄÀÀÀ¥õÌ½ÉÑÉ¥Ì¸¡¬Ñ¡Ðå½ÕÈÕ±ÐÉ½ÝÍÈ¥ÌÍ¥¹¥¸Ñ¼Ñ¡ÍµEUI<½Õ¹Ð°½µÁ±ÑÑ¡±ÍÍ½¸Ñ¡É°Ñ¡¸ÉÉÕ¸Ñ¡Í½±ÙÈ¸1ÑÈ±ÍÍ½¹Ì¹Ñ¡¡ÁÑÈÍÍÍÍµ¹ÐÝÉ¹½ÐÍÑÉÑ¹(¤ì(ÉÉ½È¹½ô1MM=9}9=Q}Y%1	1ì(ÉÉ½È¹ÍÑÑÕÌôÐÀÐì(ÉÉ½È¹±ÍÍ½¹%ôMÑÉ¥¹¡±ÍÍ½¹%¤ì(Ñ¡É½ÜÉÉ½Èì(ô((½¹ÍÐ½äôÝ¥ÐÉÍÁ½¹Íü¹ÑáÐ ¤¹Ñ   ¤ôø¤üüì(½¹ÍÐÉÉ½ÈôÉÉ½ÉÉ½µIÍÁ½¹Í¡¹Á½¥¹Ð°ÉÍÁ½¹Í°½äüìµÍÍè½ä¹Í±¥ À°ÈÀÀ¤ôè¹Õ±°¤ì(Ñ¡É½ÜÉÉ½Èì)ô
 async function solveChapter(client, chapter, chapterMeta, questions, answers, { dryRun, onProgress }) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
