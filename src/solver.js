@@ -107,6 +107,17 @@ async function getProgress(client, sectionId) {
   return new Map(asArray(raw).map(row => [String(row.chapter_id), row]));
 }
 
+async function waitForChapterCompletion(client, sectionId, chapterId, attempts = 6) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const progress = await getProgress(client, sectionId);
+    if (isCompleted(progress.get(String(chapterId)))) return true;
+    if (attempt + 1 < attempts) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+  return false;
+}
+
 async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress) {
   const lessonId = lesson?.id ?? lesson?.lecture_id;
   if (lessonId === undefined || lessonId === null) return;
@@ -257,9 +268,9 @@ export async function solveCourse(client, {
     questionsSubmitted += solved.submitted;
     if (dryRun) continue;
 
-    const updatedProgress = await getProgress(client, sectionId);
-    if (!isCompleted(updatedProgress.get(chapterId)) && solved.correct !== solved.total) {
-      throw new Error(`Chapter ${chapter.seq ?? chapterId} submissions were accepted, but QUREO has not marked the chapter complete yet. Stopping before the next chapter.`);
+    const completionConfirmed = await waitForChapterCompletion(client, sectionId, chapterId);
+    if (!completionConfirmed) {
+      throw new Error(`Chapter ${chapter.seq ?? chapterId} received ${solved.correct}/${solved.total} confirmed correct answers, but QUREO has not marked it complete. Stopping before the next chapter.`);
     }
     chaptersCompleted++;
   }
