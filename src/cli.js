@@ -119,6 +119,7 @@ program.command('me')
       completed: 0,
       gems: 0,
       completedWithGemData: 0,
+      skipped: 0,
       errors: 0
     };
 
@@ -183,6 +184,11 @@ program.command('me')
         totals.gems += courseGems;
         totals.completedWithGemData += knownGemRewards.length;
       } catch (error) {
+        if (error?.status === 404) {
+          totals.skipped++;
+          console.log(`\n${accountCourse.name || accountCourse.id}: course data unavailable (HTTP 404); skipped.`);
+          continue;
+        }
         totals.errors++;
         console.log(`\n${accountCourse.name || accountCourse.id}: progress unavailable (${error.message})`);
       }
@@ -201,6 +207,9 @@ program.command('me')
       } else {
         console.log('Total gems: unavailable in the progress records returned by QUREO.');
       }
+    }
+    if (totals.skipped) {
+      console.log(`Skipped ${totals.skipped} course(s) that QUREO listed but did not expose through the Learning API.`);
     }
     if (totals.errors) {
       console.log(`Progress could not be loaded for ${totals.errors} course(s).`);
