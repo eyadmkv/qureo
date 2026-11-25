@@ -13,7 +13,7 @@ function integerSetting(name, fallback, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
-const LESSON_INIT_WAIT_MS = integerSetting('QUREO_LESSON_INIT_WAIT_MS', 10000, 0, 60000);
+const LESSON_INIT_POLL_INTERVAL_MS = integerSetting('QUREO_LESSON_INIT_POLL_INTERVAL_MS', 1000, 250, 10000);
 const LESSON_RETRY_INTERVAL_MS = integerSetting('QUREO_LESSON_RETRY_INTERVAL_MS', 3000, 250, 30000);
 const LESSON_RETRY_ATTEMPTS = integerSetting('QUREO_LESSON_RETRY_ATTEMPTS', 40, 1, 100);
 const LESSON_RETRY_TIMEOUT_MS = integerSetting('QUREO_LESSON_RETRY_TIMEOUT_MS', 180000, 10000, 600000);
@@ -226,8 +226,7 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson page initialized';
     onProgress('  lesson ' + lessonId + ': ' + reason + '; opening it in your default browser');
     openLecturePage(referer);
-    onProgress('  lesson ' + lessonId + ': waiting ' + Math.ceil(LESSON_INIT_WAIT_MS / 1000) + 's for QUREO to initialize');
-    await wait(Math.min(LESSON_INIT_WAIT_MS, Math.max(0, deadline - Date.now())));
+    onProgress('  lesson ' + lessonId + ': checking initialization immediately, then every ' + Math.ceil(LESSON_INIT_POLL_INTERVAL_MS / 1000) + 's until QUREO is ready');
   }
 
   for (let attempt = 1; attempt <= LESSON_RETRY_ATTEMPTS && Date.now() < deadline; attempt++) {
@@ -244,10 +243,15 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
 
     const remainingMs = deadline - Date.now();
     if (attempt < LESSON_RETRY_ATTEMPTS && remainingMs > 0) {
-      const delayMs = Math.min(LESSON_RETRY_INTERVAL_MS, remainingMs);
+      const delayMs = Math.min(
+        response?.status === 404 ? LESSON_INIT_POLL_INTERVAL_MS : LESSON_RETRY_INTERVAL_MS,
+        remainingMs
+      );
       const reason = lastNetworkError
         ? 'network error (' + lastNetworkError.message + ')'
-        : 'HTTP ' + response.status;
+        : response?.status === 404
+          ? 'lesson page is still initializing'
+          : 'HTTP ' + response.status;
       onProgress('  lesson ' + lessonId + ': ' + reason + '; retry ' + attempt + '/' + LESSON_RETRY_ATTEMPTS + ' in ' + Math.ceil(delayMs / 1000) + 's');
       await wait(delayMs);
     }
