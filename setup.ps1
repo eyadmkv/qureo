@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $ProjectRoot = $PSScriptRoot
 Set-Location $ProjectRoot
 
-Write-Host 'QUREO Personal CLI 0.2.2 setup' -ForegroundColor Cyan
+Write-Host 'QUREO Personal CLI 0.3.0 setup' -ForegroundColor Cyan
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     throw 'Node.js is not installed. Install Node.js 22 or newer, reopen PowerShell, then retry.'
@@ -13,7 +13,7 @@ if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { throw 'npm was not f
 if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) { throw 'PowerShell 7 (pwsh) is required for Windows DPAPI session encryption.' }
 
 New-Item -ItemType Directory -Force -Path '.\data' | Out-Null
-foreach ($LegacyFile in @('.\src\browser.js', '.\src\extractor.js', '.\src\solver.js')) {
+foreach ($LegacyFile in @('.\src\browser.js', '.\src\extractor.js')) {
     if (Test-Path $LegacyFile) { Remove-Item -LiteralPath $LegacyFile -Force }
 }
 
