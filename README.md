@@ -96,21 +96,41 @@ Each answer record should include `question_id` and `answer` (or `answer_text`),
 
 ## Solve from your current progress
 
-The solver reads your current account progress and starts at the first unfinished chapter. The optional target can be a chapter sequence number or QUREO chapter ID:
+The solver reads your current account progress and starts at the first unfinished chapter. A numeric target preserves the existing behavior of solving through that chapter. A range selects an explicit inclusive chapter window, while still refusing to jump over an earlier unfinished chapter.
 
 ```powershell
 qureo solve
 qureo solve 20
 qureo solve 90044
+qureo solve 18-30
+qureo solve --single
+qureo solve 21 --single
+qureo solve --max-chapters 5
+qureo solve 18-30 --max-chapters 5
+qureo solve 18-30 --interactive
+qureo solve --pause-between-chapters 5 --pause-between-questions 1
+qureo solve 18-30 --no-skip-completed
 qureo solve 44 --dry-run
 ```
 
-Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser, waits 10 seconds by default, then retries every 3 seconds for up to 3 minutes. Temporary network failures and transient HTTP errors are retried too. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
+Available controls:
+
+- `--single`: solve only the current unfinished chapter, or the explicitly selected chapter if it is the first unfinished chapter.
+- `--max-chapters <count>`: cap the number of chapters selected in this run.
+- `--pause-between-chapters <seconds>`: wait after each completed chapter.
+- `--pause-between-questions <seconds>`: wait between question submissions.
+- `--interactive`: ask before starting each selected chapter. Answering `n` pauses the run.
+- `--no-skip-completed`: when used with an explicit range, revisit completed chapters inside that range. QUREO may refuse a repeated assessment.
+- `--no-resume`: ignore the previous local checkpoint for the startup message. Server-reported QUREO progress remains authoritative.
+
+Before making changes, the solver checks that every question in a chapter has a matching local answer. It completes lessons in order and stops at the first lesson that cannot be completed. If QUREO returns HTTP 404 before a lesson page has initialized, it opens that lesson in your default browser and immediately retries the completion request. While QUREO still returns 404, it polls every 1 second by default, proceeding as soon as the endpoint becomes available. Other transient network failures and HTTP errors use the normal 3-second retry interval. The retry window is up to 3 minutes. The browser must be signed in to the same account. Only after every lesson succeeds does the solver initialize the chapter assessment and submit answers from `answers/<course_id>.json`. It stops if an answer is rejected or chapter completion is not confirmed.
+
+The local checkpoint at `data\\solve-checkpoint.json` records the active chapter, lesson, question, and last known run state. On the next run, the CLI checks QUREO progress again before selecting work. Fine-grained reconciliation of a submission interrupted mid-request is part of the next recovery update; a checkpoint does not independently prove whether QUREO accepted a timed-out answer.
 
 You can tune the retry behavior for slower connections in the current PowerShell session:
 
 ```powershell
-$env:QUREO_LESSON_INIT_WAIT_MS = '15000'
+$env:QUREO_LESSON_INIT_POLL_INTERVAL_MS = '500'
 $env:QUREO_LESSON_RETRY_INTERVAL_MS = '5000'
 $env:QUREO_LESSON_RETRY_TIMEOUT_MS = '300000'
 $env:QUREO_LESSON_RETRY_ATTEMPTS = '60'
