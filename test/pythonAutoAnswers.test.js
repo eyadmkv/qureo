@@ -247,3 +247,147 @@ test('matches symbol-only choices when the guide wraps the answer in a Markdown 
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+
+test('resolves all five Chapter 6 review answers from live questions and guide order', () => {
+  const questions = [
+    {
+      question: {
+        id: 511006010,
+        type: 'choice',
+        content: 'اختر الشكل الصحيح للبرنامج: إذا كان ~ فافعل [[bdi]]A[[/bdi]]، وإلا فافعل [[bdi]]B.[[/bdi]]'
+      },
+      choices: [
+        { id: 5110060102, content: '[[bdi]]if condition: else:\n    A\n    B[[/bdi]]' },
+        { id: 5110060103, content: '[[bdi]]else condition:\n    A\nif:\n    B[[/bdi]]' },
+        { id: 5110060104, content: '[[bdi]]else:\n    B\nif condition:\n    A[[/bdi]]' },
+        { id: 5110060101, content: '[[bdi]]if condition:\n    A\nelse:\n    B[[/bdi]]' }
+      ]
+    },
+    {
+      question: {
+        id: 511006020,
+        type: 'description',
+        content: 'أنشئ برنامجا كما يلي: num = 5 ثم إذا كان num يساوي 10 اطبع Win وإلا اطبع No prize.'
+      },
+      choices: []
+    },
+    {
+      question: {
+        id: 511006030,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير [[bdi]]num[[/bdi]] تساوي 80 أو أقل".'
+      },
+      choices: [
+        { id: 5110060301, content: '[[bdi]]num <= 80[[/bdi]]' },
+        { id: 5110060304, content: 'num < 80' },
+        { id: 5110060303, content: 'num > 80' },
+        { id: 5110060302, content: '[[bdi]]num == 80[[/bdi]]' }
+      ]
+    },
+    {
+      question: {
+        id: 511006040,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير [[bdi]]num[[/bdi]] أكبر من 30".'
+      },
+      choices: [
+        { id: 5110060403, content: 'num < 30' },
+        { id: 5110060401, content: 'num > 30' },
+        { id: 5110060404, content: '[[bdi]]num >= 30[[/bdi]]' },
+        { id: 5110060402, content: '[[bdi]]num == 30[[/bdi]]' }
+      ]
+    },
+    {
+      question: {
+        id: 511006050,
+        type: 'description',
+        content: 'إذا كانت score تساوي 60 أو أكبر، أدخل التعبير الشرطي في المربع الملون.'
+      },
+      choices: []
+    }
+  ];
+
+  const guide = [1, 2, 3, 4, 5].map((question_number) => ({
+    id: 'py-l06-s06-q' + question_number,
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number,
+    question: 'دليل إجابة سؤال مراجعة ' + question_number,
+    answer: [
+      'لا توجد إجابة قابلة للمطابقة في الدليل',
+      'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")',
+      'تعذر استخراج الإجابة من الدليل',
+      'تعذر استخراج الإجابة من الدليل',
+      'score >= 60'
+    ][question_number - 1]
+  }));
+
+  const result = matchPythonAssessmentAnswers(questions, guide, '06');
+
+  assert.equal(result.matches.length, 5);
+  assert.deepEqual(result.answers, {
+    '511006010': { type: 'choice', choice_id: 5110060101 },
+    '511006020': {
+      type: 'description',
+      answer_code: 'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")'
+    },
+    '511006030': { type: 'choice', choice_id: 5110060301 },
+    '511006040': { type: 'choice', choice_id: 5110060401 },
+    '511006050': { type: 'description', answer_code: 'score >= 60' }
+  });
+  assert.deepEqual(result.unmatched, []);
+  assert.ok(result.matches.every(match => match.strategy === 'review-order'));
+});
+
+
+test('does not guess when a prompt-derived Python choice is ambiguous', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511006099,
+      type: 'choice',
+      content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير num أكبر من 30".'
+    },
+    choices: [
+      { id: 5110060991, content: 'num > 30' },
+      { id: 5110060992, content: 'num > 30' },
+      { id: 5110060993, content: 'num < 30' }
+    ]
+  }], [{
+    id: 'py-l06-s06-q1',
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'مقارنة رقمية',
+    answer: 'لا توجد إجابة مطابقة'
+  }], '06');
+
+  assert.deepEqual(result.answers, {});
+  assert.equal(result.unmatched[0].question_id, '511006099');
+});
+
+test('extracts a comparison-only answer for a Python fill-in description', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511006050,
+      type: 'description',
+      content: 'أدخل التعبير الشرطي الذي يجعل score أكبر من أو يساوي 60.'
+    },
+    choices: []
+  }], [{
+    id: 'py-l06-s06-q5',
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 5,
+    question: 'أدخل التعبير الشرطي',
+    answer: 'score >= 60'
+  }], '06');
+
+  assert.deepEqual(result.answers, {
+    '511006050': { type: 'description', answer_code: 'score >= 60' }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
