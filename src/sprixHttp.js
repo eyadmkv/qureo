@@ -75,7 +75,9 @@ export function parseSprixCookieHeader(rawValue) {
     const cookie = raw.match(/(?:-b|--cookie)\s+(['"])([\s\S]*?)\1/i);
     if (cookie) value = cookie[2];
   }
-  if (!value && !/[\r\n]/u.test(raw) && !/\bcurl\b/i.test(raw)) value = raw;
+  if (!value && !/[\r\n]/u.test(raw) && !/\bcurl\b/i.test(raw)) {
+    try { return normalizeCookie(raw); } catch {}
+  }
   if (!value) throw new Error('No Cookie header found. Copy an authenticated SPRIX request as cURL from DevTools Network.');
   return normalizeCookie(value);
 }
