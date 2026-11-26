@@ -406,7 +406,8 @@ function makeAnswer(question, record) {
   if (type === 'choice') {
     const choiceId = resolveChoice(question, record);
     if (!Number.isSafeInteger(choiceId)) return null;
-    const choices = Array.isArray(question?.choices) ? question.choices : [];
+    const choices = Array.isArray(question?.choices) ? question.choices :
+      Array.isArray(questionRow?.choices) ? questionRow.choices : [];
     if (!choices.some(choice => Number(choice.id) === choiceId)) return null;
     return { type: 'choice', choice_id: choiceId };
   }
