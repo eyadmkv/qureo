@@ -539,7 +539,9 @@ export async function solveSprixCourse(session, bank, {
     }
   }
 
-  const resolvedSubjectId = await session.resolveSubjectId(subjectId);
+  const resolvedSubjectId = typeof session.resolveSubjectId === 'function'
+    ? await session.resolveSubjectId(subjectId)
+    : subjectId ?? '7';
   let units = await session.getCurriculum(resolvedSubjectId);
   const allChapters = listSprixChapters(units);
   const targetedChapter = chapterId !== null && chapterId !== undefined;
