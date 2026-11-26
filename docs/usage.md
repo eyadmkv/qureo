@@ -57,6 +57,17 @@ qureo answers list
 
 Public guide synchronization stores only material available without bypassing access controls. Personal answer notes are kept in the local database.
 
+### Python public answer reference
+
+Download the publicly available Python course answers:
+
+```powershell
+qureo answers sync-python
+qureo search "print"
+```
+
+The importer follows the public index, level pages and lesson pages, then saves extracted question/answer pairs to `data/python_short_ar_answer_guide.json`. It also caches the lesson pages for local `qureo search`. The guide currently advertises 25 levels, 116 lessons and 448 answered questions. The downloaded reference is separate from `answers/python_short_ar.json`, which the solver uses by QUREO question ID. Review and map an answer to the exact QUREO question before adding it to that solver file.
+
 ## Local files
 
 - `data/qureo.db`: course metadata, cached questions and personal answer notes.
