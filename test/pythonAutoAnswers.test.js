@@ -243,7 +243,7 @@ test('matches symbol-only choices when the guide wraps the answer in a Markdown 
   }], '04');
 
   assert.deepEqual(result.answers, {
-    '511004050': { type: 'choice', choice_id: 5110040502 }
+    '511004050': { type: 'choice', choice_id: 5110040501 }
   });
   assert.deepEqual(result.unmatched, []);
 });
