@@ -187,9 +187,9 @@ test('inspects a copied SPRIX cURL request while redacting cookies, CSRF headers
 });
 
 test('supports explicit request methods, line continuations and omits non-JSON bodies', () => {
-  const curl = String.raw`curl 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/read-state' \\
-  -X PATCH \\
-  --data-raw 'reviewed=1'`;
+  const slash = String.fromCharCode(92);
+  const curl = "curl 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/read-state' " +
+    slash + "\n  -X PATCH " + slash + "\n  --data-raw 'reviewed=1'";
   const parsed = parseSprixCurlRequest(curl);
   assert.equal(parsed.method, 'PATCH');
   assert.equal(parsed.bodyFormat, 'non-json');
