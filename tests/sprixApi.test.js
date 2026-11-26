@@ -50,10 +50,10 @@ test('selects the active Financial Literacy course and ignores game subjects', (
   ]), 3);
 });
 
-test('requires an explicit subject when multiple active courses are available', () => {
+test('requires an explicit subject when multiple Financial Literacy courses are available', () => {
   assert.throws(() => selectSprixSubjectId([
     { id: 3, name: 'Financial Literacy', subject_type: 'financial_literacy', kind: 'normal', status: 'active', total_items: 134 },
-    { id: 9, name: 'Business', kind: 'normal', status: 'active', total_items: 40 }
+    { id: 9, name: 'Financial Literacy 2', course_code: 'financial_literacy', kind: 'normal', status: 'active', total_items: 134 }
   ]), /Choose one with --subject/u);
 });
 
