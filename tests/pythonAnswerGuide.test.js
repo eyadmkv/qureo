@@ -118,6 +118,28 @@ test('recognizes Arabic-Indic question numbers and invisible direction marks', (
   ]);
 });
 
+test('preserves Python indentation in code answers from the public guide', () => {
+  const html = `
+    <main>
+      <p>السؤال 3</p>
+      <h2>إذا كانت num تساوي 100 اطبع Correct.</h2>
+      <pre><code>num = 100
+if num == 100:
+    print("Correct")</code></pre>
+      <button>نسخ الإجابة ⧉</button>
+    </main>
+  `;
+  const body = htmlToText(html);
+
+  assert.deepEqual(extractPythonAnswerPairs(body), [
+    {
+      question_number: 3,
+      question: 'إذا كانت num تساوي 100 اطبع Correct.',
+      answer: 'num = 100\nif num == 100:\n    print("Correct")'
+    }
+  ]);
+});
+
 
 test('builds a serializable answer guide summary with count mismatch details', () => {
   const result = buildPythonAnswerGuideResult({
