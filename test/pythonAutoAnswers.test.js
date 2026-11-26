@@ -316,10 +316,10 @@ test('resolves all five Chapter 6 review answers from live questions and guide o
     question_number,
     question: 'دليل إجابة سؤال مراجعة ' + question_number,
     answer: [
-      'if condition:\nA\nelse:\nB',
+      'لا توجد إجابة قابلة للمطابقة في الدليل',
       'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")',
-      'num <= 80',
-      'num > 30',
+      'تعذر استخراج الإجابة من الدليل',
+      'تعذر استخراج الإجابة من الدليل',
       'score >= 60'
     ][question_number - 1]
   }));
