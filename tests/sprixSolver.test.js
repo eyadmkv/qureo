@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, parseSprixBlockAnswerBank, buildSprixChapterPlan, buildSprixTestPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, parseSprixAnswerArchive, parseSprixBlockAnswerBank, buildSprixChapterPlan, buildSprixTestPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -71,6 +71,59 @@ test('imports subject-3 English chapter and test answer maps', () => {
   assert.equal(bank.testTotal, 380);
   assert.equal(bank.testAnswers['1'], 9999);
   assert.equal(bank.source_url, 'https://example.test/subject3.json');
+});
+
+test('imports Arabic subject-7 chapter and test answer maps', () => {
+  const block = Object.fromEntries(Array.from({ length: 200 }, (_, index) => [
+    String(index + 1),
+    index + 2001
+  ]));
+  const testAnswers = Object.fromEntries(Array.from({ length: 100 }, (_, index) => [
+    String(index + 411),
+    index + 2984
+  ]));
+  const bank = parseSprixBlockAnswerBank(JSON.stringify({ block, test: testAnswers }), 'https://example.test/subject7.json', 7);
+
+  assert.equal(bank.subject_id, 7);
+  assert.equal(bank.language, 'ar');
+  assert.equal(bank.total, 200);
+  assert.equal(bank.testTotal, 100);
+  assert.equal(bank.answers['1'], 2001);
+  assert.equal(bank.testAnswers['411'], 2984);
+});
+
+test('imports answered questions from the Arabic answer archive', () => {
+  const archive = {
+    lessons: [{
+      id: 12,
+      title: 'أساسيات المال والتمويل',
+      questions: [
+        {
+          id: 'q1',
+          question: 'ما الفرق بين الزكاة والصدقة؟',
+          answer: { text: 'الزكاة واجبة والصدقة تطوعية' }
+        },
+        {
+          id: 'q2',
+          question: 'ما الفرق بين الزكاة والصدقة؟',
+          answer: { text: 'الزكاة واجبة والصدقة تطوعية' }
+        },
+        {
+          id: 'q3',
+          question: 'سؤال بلا إجابة',
+          answer: null
+        }
+      ]
+    }]
+  };
+  const bank = parseSprixAnswerArchive(JSON.stringify(archive), 'answers_archive.json');
+
+  assert.equal(bank.format, 'sprix-answer-bank');
+  assert.equal(bank.total, 1);
+  assert.equal(bank.answered, 1);
+  assert.equal(bank.questions[0].question, 'ما الفرق بين الزكاة والصدقة؟');
+  assert.equal(bank.questions[0].answer, 'الزكاة واجبة والصدقة تطوعية');
+  assert.equal(bank.source, 'answers_archive.json');
 });
 
 test('rejects an incomplete subject-3 block answer map', () => {
@@ -166,6 +219,79 @@ test('builds test answer plans from test-question IDs and verifies live option I
   assert.equal(result.plan[0].alreadySelected, false);
   assert.equal(result.plan[1].alreadySelected, false);
   assert.match(result.plan[0].prompt, /barter/u);
+});
+
+test('uses exact subject-7 test-question mappings before text matching', () => {
+  const ids = [411, 412, 413, 414, 415, 416, 417, 418, 419, 420];
+  const optionIds = [2984, 2986, 2990, 2995, 2998, 3001, 3006, 3011, 3013, 3020];
+  const data = {
+    test_questions: ids.map((id, index) => ({
+      id,
+      question_id: 800 + index,
+      sort_order: index + 1
+    })),
+    questions: Object.fromEntries(ids.map((id, index) => [
+      String(800 + index),
+      { question_text: 'سؤال الاختبار ' + id }
+    ])),
+    options: Object.fromEntries(ids.map((id, index) => [
+      String(800 + index),
+      [
+        { id: optionIds[index] + 1, text: 'خيار غير صحيح' },
+        { id: optionIds[index], text: 'الخيار المحدد في خريطة المادة العربية' }
+      ]
+    ])),
+    question_responses: []
+  };
+  const bank = {
+    subjectId: 7,
+    questions: [],
+    testAnswers: Object.fromEntries(ids.map((id, index) => [String(id), optionIds[index]]))
+  };
+  const result = buildSprixTestPlan(data, bank);
+
+  assert.equal(result.pendingQuestionCount, 10);
+  assert.equal(result.plan.length, 10);
+  assert.equal(result.unmatched.length, 0);
+  assert.deepEqual(result.plan.map(row => row.optionId), optionIds);
+  assert.ok(result.plan.every(row => row.answerSource === 'test-answer-map'));
+});
+
+test('uses exact subject-7 chapter mappings and falls back to its text archive', () => {
+  const localBank = parseSprixAnswerBank(sampleSource());
+  const result = buildSprixChapterPlan({
+    chapter: { title: 'ما هي الزكاة؟' },
+    blocks: [
+      {
+        id: 6941,
+        type: 'question',
+        question: { text: 'سؤال الزكاة' },
+        options: [
+          { id: 2681, text: 'خيار آخر' },
+          { id: 2680, text: 'الإجابة المعتمدة في الخريطة' }
+        ]
+      },
+      {
+        id: 6942,
+        type: 'question',
+        question: { text: 'ما وظيفة المال في المجتمع؟' },
+        options: [
+          { id: 204, text: 'تقتصر وظيفة المال على شراء الذهب' },
+          { id: 203, text: 'يعمل المال كوسيط للتبادل بين الناس' }
+        ]
+      }
+    ]
+  }, {
+    subjectId: 7,
+    questions: localBank.questions,
+    blockAnswers: { 6941: 2680 }
+  });
+
+  assert.equal(result.plan.length, 2);
+  assert.deepEqual(result.plan.map(row => row.optionId), [2680, 203]);
+  assert.equal(result.unmatched.length, 0);
+  assert.match(result.plan[0].bankQuestion, /Arabic subject-7/u);
+  assert.equal(result.plan[1].bankQuestion, 'ما وظيفة المال في المجتمع؟');
 });
 
 test('matches Arabic test questions and answers from a local answer bank', () => {
