@@ -110,7 +110,7 @@ sprix bank build --source .\\tmp\\course-source.json --answers .\\data\\sprix\\a
 
 ## Solve the entire SPRIX course
 
-The solver uses your local answer bank and the live curriculum. It processes chapters and reviews in their curriculum order, starting at the first unfinished item and skipping completed items. When it reaches a review, it fetches the review items and submits the review-completion request automatically. Test items remain untouched.
+The solver uses your local answer bank and the live curriculum. It processes chapters and reviews in their curriculum order, starting at the first unfinished item and skipping completed items. When it reaches a review, it submits the review-completion request directly. The solver does not need to fetch the protected review-item payload first. Test items remain untouched.
 
 Import your local answer source if you have not already done so:
 
@@ -131,7 +131,7 @@ Run the course solver:
 sprix solve
 ```
 
-The command asks once before making account changes. It processes chapter and review items in curriculum order. After every chapter has received confirmed correct answers, it requests chapter completion and refreshes the curriculum. At each review, it loads the review items, sends the review-completion request, then refreshes the curriculum and confirms completion before continuing. This allows SPRIX to unlock later items in sequence. It stops at the first locked or inaccessible chapter, unmatched question, rejected answer, or unconfirmed chapter or review completion. It never guesses an option or continues past a failed item.
+The command asks once before making account changes. It processes chapter and review items in curriculum order. After every chapter has received confirmed correct answers, it requests chapter completion and refreshes the curriculum. At each review, it sends the review-completion request directly, then refreshes the curriculum and confirms completion before continuing. A dry-run only prints the review action and does not request protected review-item data. This allows SPRIX to unlock later items in sequence. It stops at the first locked or inaccessible chapter, unmatched question, rejected answer, or unconfirmed chapter or review completion. It never guesses an option or continues past a failed item.
 
 For non-interactive terminals, pass `--yes` to confirm the full run:
 
