@@ -243,6 +243,7 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
   const answers = [];
   const countMismatches = [];
   const failedPages = [];
+  const emptyLessonPages = [];
   let lessonsFound = 0;
   let lessonsFetched = 0;
   let requests = 0;
@@ -279,6 +280,14 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
       try {
         const lessonPage = await fetchPage(lessonUrl);
         const pairs = extractPythonAnswerPairs(lessonPage.body);
+        if (!pairs.length) {
+          emptyLessonPages.push({
+            url: lessonPage.url,
+            title: lessonPage.title,
+            hasQuestionMarker: /السؤال\\s*[0-9٠-٩]+/u.test(lessonPage.body),
+            preview: lessonPage.body.slice(0, 500)
+          });
+        }
         savePublicPage({
           url: lessonPage.url,
           source: 'StudentPlatformEG public QUREO Python answer guide',
@@ -333,7 +342,15 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
     levels.push(levelRecord);
   }
 
-  if (!answers.length) throw new Error('No answer pairs were extracted. The guide page format may have changed.');
+  if (!answers.length) {
+    const sample = emptyLessonPages[0];
+    const details = sample
+      ? ` First lesson page: ${sample.url} | title: ${sample.title} | question marker: ${sample.hasQuestionMarker}. Preview: ${JSON.stringify(sample.preview)}`
+      : '';
+    throw new Error(
+      `No answer pairs were extracted from ${lessonsFetched} lesson pages (${failedPages.length} fetch failures).${details} Check whether the site returned its normal lesson content or a bot/challenge page.`
+    );
+  }
 
   const result = {
     format: 'qureo-public-answer-guide',
@@ -350,6 +367,7 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
       levels_fetched: levels.length,
       lessons_found: lessonsFound,
       lessons_fetched: lessonsFetched,
+      lessons_without_answer_blocks: emptyLessonPages.length,
       answers_extracted: answers.length,
       failed_pages: failedPages.length,
       count_mismatches: countMismatches.length
@@ -357,6 +375,7 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
     levels,
     answers,
     count_mismatches,
+    empty_lesson_pages: emptyLessonPages,
     failed_pages: failedPages
   };
 
