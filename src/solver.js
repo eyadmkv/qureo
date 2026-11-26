@@ -178,24 +178,20 @@ async function waitForChapterCompletion(client, sectionId, chapterId, attempts =
   return false;
 }
 
-export async function initializeLecturePage(client, url) {
-  const response = await client.request(url, {
+export async function initializeLecture(client, lessonId, referer) {
+  const pathname = '/students/lectures/' + encodeURIComponent(lessonId);
+  const payload = await requestJson(client, pathname, {
     method: 'GET',
-    headers: {
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-    },
-    timeoutMs: LESSON_REQUEST_TIMEOUT_MS
+    referer
   });
-  await response.text().catch(() => '');
 
-  if (!response.ok) {
-    const error = new Error(`QUREO lesson page initialization failed (HTTP ${response.status}).`);
-    error.code = response.status === 401 ? 'AUTH_EXPIRED' : 'LESSON_PAGE_INIT_FAILED';
-    error.status = response.status;
+  if (String(payload?.lecture?.lecture_id ?? '') !== String(lessonId)) {
+    const error = new Error(`QUREO did not confirm initialization for lesson ${lessonId}.`);
+    error.code = 'LESSON_INIT_UNCONFIRMED';
     throw error;
   }
 
-  return response.status;
+  return payload;
 }
 
 function wait(ms) {
@@ -269,8 +265,8 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson page initialized';
     onProgress('  lesson ' + lessonId + ': ' + reason + '; requesting the lesson page through the saved QUREO session');
     try {
-      await initializeLecturePage(client, referer);
-      onProgress('  lesson ' + lessonId + ': page requested in the background; checking initialization immediately, then every ' + Math.ceil(LESSON_INIT_POLL_INTERVAL_MS / 1000) + 's until QUREO is ready');
+      await initializeLecture(client, lessonId, referer);
+      onProgress('  lesson ' + lessonId + ': initialized through the QUREO lecture API; retrying completion');
     } catch (error) {
       if (!isRetryableNetworkError(error)) throw error;
       lastNetworkError = error;
