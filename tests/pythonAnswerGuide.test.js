@@ -110,7 +110,7 @@ test('recognizes Arabic-Indic question numbers and invisible direction marks', (
     'ما وظيفة الدالة؟',
     'print()',
     'نسخ الإجابة ⧉'
-  ].join('\\n');
+  ].join('\n');
 
   assert.deepEqual(extractPythonAnswerPairs(body), [
     { question_number: 2, question: 'ما وظيفة الدالة؟', answer: 'print()' }
