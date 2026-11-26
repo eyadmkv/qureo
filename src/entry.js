@@ -139,7 +139,7 @@ function completion() {
   const script = [
     "Register-ArgumentCompleter -CommandName qureo -Native -ScriptBlock {",
     "  param($wordToComplete, $commandAst, $cursorPosition)",
-    "  $commands = @('login','logout','me','check','courses','sync','export','solve','lessons','progress','chapter','questions','result','answers','answer','search','exercises','stats','database','dashboard','doctor','status','config','history','completion')",
+    "  $commands = @('login','logout','me','check','courses','sync','export','solve','lessons','progress','chapter','questions','result','answers','answer','search','exercises','stats','database','sprix','dashboard','doctor','status','config','history','completion')",
     '  $commands | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, "Command", $_) }',
     "}"
   ].join('\n') + '\n';
@@ -196,7 +196,7 @@ async function main() {
     console.log('Updated ' + key + ' in qureo.config.json');
     return;
   }
-  const known = ['login','logout','me','check','courses','sync','export','solve','lessons','progress','chapter','questions','result','answers','answer','search','exercises','stats','database'];
+  const known = ['login','logout','me','check','courses','sync','export','solve','lessons','progress','chapter','questions','result','answers','answer','search','exercises','stats','database','sprix'];
   if (!known.includes(command)) {
     if (config.commandSuggestions) {
       const all = known.concat(['dashboard','doctor','status','config','history','completion']);
