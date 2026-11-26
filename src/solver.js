@@ -492,10 +492,10 @@ export async function solveCourse(client, {
           if (progress.message) onProgress(progress.message);
         }
       });
-      onProgress(\`Downloaded \${synced.answers_extracted} answers across \${synced.levels_fetched} levels and \${synced.lessons_fetched} lessons.\`);
+      onProgress(`Downloaded ${synced.answers_extracted} answers across ${synced.levels_fetched} levels and ${synced.lessons_fetched} lessons.`);
       pythonGuide = loadSavedPythonAnswerGuide();
     } else {
-      onProgress(\`Using cached Python guide: \${pythonGuide.answers.length} answers across \${pythonGuide.coverage?.levels_fetched ?? '?'} levels.\`);
+      onProgress(`Using cached Python guide: ${pythonGuide.answers.length} answers across ${pythonGuide.coverage?.levels_fetched ?? '?'} levels.`);
     }
     if (!pythonGuide?.answers?.length) {
       throw new Error('The public Python guide is empty. Run qureo answers sync-python and check its output.');
