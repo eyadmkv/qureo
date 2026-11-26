@@ -215,7 +215,7 @@ function splitPythonBoolean(expression, operator) {
     else if (character === ')') depth--;
 
     if (depth === 0) {
-      const match = expression.slice(index).match(new RegExp('^\\\\s+' + operator + '\\\\s+', 'u'));
+      const match = expression.slice(index).match(new RegExp('^\s+' + operator + '\s+', 'u'));
       if (match) {
         parts.push(expression.slice(start, index).trim());
         index += match[0].length - 1;
@@ -271,9 +271,16 @@ function pythonPrintValue(line, variables) {
 }
 
 function evaluatePythonConditionalOutput(source) {
-  const lines = normalizePythonKeywordCase(
+  const normalizedSource = normalizePythonKeywordCase(
     stripQureoMarkup(source).replace(/\r/gu, '')
-  ).split('\n');
+  );
+  const assignmentStart = normalizedSource.search(/[A-Za-z_]\w*\s*=\s*-?\d+(?:\.\d+)?/u);
+  if (assignmentStart < 0) return null;
+
+  const codeSource = normalizedSource.slice(assignmentStart)
+    .replace(/\s+(?=(?:if|elif|else)\b)/giu, '\n')
+    .replace(/:\s*(?=print\s*\()/giu, ':\n    ');
+  const lines = codeSource.split('\n');
   const variables = {};
   const clauses = [];
   let started = false;
