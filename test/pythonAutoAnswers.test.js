@@ -187,3 +187,33 @@ test('does not invent a choice ID when the guide answer cannot match a visible o
   assert.deepEqual(result.answers, {});
   assert.equal(result.unmatched[0].question_id, '511003010');
 });
+
+
+test('matches symbol-only choices when the guide wraps the answer in a Markdown heading', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511004050,
+      type: 'choice',
+      content: 'اختر رمز الضرب الصحيح في لغة Python.'
+    },
+    choices: [
+      { id: 5110040501, content: '+' },
+      { id: 5110040502, content: '*' },
+      { id: 5110040503, content: '/' },
+      { id: 5110040504, content: '-' }
+    ]
+  }], [{
+    id: 'py-l04-s02-q5',
+    level_id: '04',
+    lesson_id: 'py-l04-s02',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 5,
+    question: 'ما رمز الضرب في لغة Python؟',
+    answer: '## *'
+  }], '04');
+
+  assert.deepEqual(result.answers, {
+    '511004050': { type: 'choice', choice_id: 5110040502 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
