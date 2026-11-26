@@ -1,10 +1,15 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { DATA_DIR } from './paths.js';
 import {
   SPRIX_ORIGIN,
   SprixHttpClient,
   parseSprixCookieHeader,
   readSprixClipboard
 } from './sprixHttp.js';
+
+const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
+const CURRICULUM_CACHE = path.join(SPRIX_DIR, 'curriculum.json');
 
 function client() {
   return SprixHttpClient.loadSession();
@@ -132,6 +137,60 @@ function registerSessionCommands(sprix) {
     });
 }
 
+function registerSyncCommands(sprix) {
+  sprix.command('sync [subjectId]')
+    .description('Fetch live SPRIX curriculum and save a local progress snapshot')
+    .option('--json', 'Print the synced curriculum JSON')
+    .action(async (subjectId = '7', options) => {
+      const units = await client().getCurriculum(subjectId);
+      fs.mkdirSync(SPRIX_DIR, { recursive: true });
+      const snapshot = {
+        format: 'sprix-curriculum-snapshot',
+        schema_version: 1,
+        subject_id: Number(subjectId),
+        synced_at: new Date().toISOString(),
+        units
+      };
+      const temporaryPath = CURRICULUM_CACHE + '.tmp';
+      fs.writeFileSync(temporaryPath, JSON.stringify(snapshot, null, 2) + '\n', {
+        encoding: 'utf8',
+        mode: 0o600
+      });
+      fs.renameSync(temporaryPath, CURRICULUM_CACHE);
+      const itemCount = units.reduce((count, unit) => count + sectionsOf(unit).reduce(
+        (sectionCount, section) => sectionCount + (section.items || []).length, 0
+      ), 0);
+      console.log('Synced subject ' + subjectId + ': ' + units.length + ' unit(s), ' + itemCount + ' learning item(s).');
+      console.log('Saved locally: ' + CURRICULUM_CACHE);
+      if (options.json) printJson(snapshot);
+    });
+
+  sprix.command('progress')
+    .description('Show the most recently synced SPRIX completion summary')
+    .action(() => {
+      if (!fs.existsSync(CURRICULUM_CACHE)) throw new Error('No SPRIX curriculum snapshot. Run sprix sync first.');
+      let snapshot;
+      try { snapshot = JSON.parse(fs.readFileSync(CURRICULUM_CACHE, 'utf8')); }
+      catch { throw new Error('The local SPRIX curriculum snapshot is invalid. Run sprix sync again.'); }
+      if (snapshot?.format !== 'sprix-curriculum-snapshot' || !Array.isArray(snapshot.units)) {
+        throw new Error('The local SPRIX curriculum snapshot has an unsupported format. Run sprix sync again.');
+      }
+      let completed = 0;
+      let total = 0;
+      for (const unit of snapshot.units) {
+        const items = sectionsOf(unit).flatMap(section => section.items || []);
+        const unitCompleted = items.filter(item => item.is_completed).length;
+        completed += unitCompleted;
+        total += items.length;
+        const percent = items.length ? Math.round(unitCompleted * 100 / items.length) : 0;
+        console.log((unit.title || unit.name || 'Unit') + ': ' + unitCompleted + '/' + items.length + ' (' + percent + '%)');
+      }
+      const percent = total ? Math.round(completed * 100 / total) : 0;
+      console.log('\nOverall: ' + completed + '/' + total + ' (' + percent + '%)');
+      console.log('Last synced: ' + snapshot.synced_at);
+    });
+}
+
 function registerReadCommands(sprix) {
   sprix.command('curriculum [subjectId]')
     .description('Fetch the live SPRIX subject curriculum and completion state')
@@ -232,6 +291,7 @@ function registerMutationCommands(sprix) {
 
 export function registerSprixApiCommands(sprix) {
   registerSessionCommands(sprix);
+  registerSyncCommands(sprix);
   registerReadCommands(sprix);
   registerMutationCommands(sprix);
 }
