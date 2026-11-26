@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecturePage } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -109,30 +109,59 @@ test('initializes the selected course page before fetching its learning API data
 });
 
 
-test('initializes a lesson page through the saved session without launching a browser', async () => {
+test('initializes a lesson through the observed QUREO lecture API', async () => {
   const calls = [];
-  const lessonUrl = 'https://me-tp.qureo.education/chapter/511001/lecture/511001030';
+  const lessonId = '511002010';
+  const referer = 'https://me-tp.qureo.education/chapter/511002/lecture/511002010';
   const client = {
     async request(url, options) {
-      calls.push({ url, method: options.method, accept: options.headers.Accept });
-      return new Response('<html>QUREO lesson</html>', {
+      calls.push({
+        url,
+        method: options.method,
+        accept: options.headers.Accept,
+        referer: options.headers.Referer
+      });
+      return new Response(JSON.stringify({
+        lecture: { lecture_id: 511002010, started_at: '2026-11-27T01:23:58.301+09:00' },
+        talks: []
+      }), {
         status: 200,
-        headers: { 'content-type': 'text/html' }
+        headers: { 'content-type': 'application/json' }
       });
     }
   };
 
-  const status = await initializeLecturePage(client, lessonUrl);
+  const result = await initializeLecture(client, lessonId, referer);
 
-  assert.equal(status, 200);
+  assert.deepEqual(result, {
+    lecture: { lecture_id: 511002010, started_at: '2026-11-27T01:23:58.301+09:00' },
+    talks: []
+  });
   assert.deepEqual(calls, [{
-    url: lessonUrl,
+    url: 'https://me-tp.qureo.education/api/study/students/lectures/511002010',
     method: 'GET',
-    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    accept: 'application/json, text/plain, */*',
+    referer
   }]);
 });
 
-test('reports an unsuccessful background lesson-page initialization', async () => {
+test('rejects a lecture API response that does not confirm the requested lesson', async () => {
+  const client = {
+    async request() {
+      return new Response(JSON.stringify({ lecture: null, talks: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+  };
+
+  await assert.rejects(
+    initializeLecture(client, '511001030', 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
+    error => error.code === 'LESSON_INIT_UNCONFIRMED'
+  );
+});
+
+test('reports a failed QUREO lecture API initialization', async () => {
   const client = {
     async request() {
       return new Response('Not found', { status: 404 });
@@ -140,11 +169,10 @@ test('reports an unsuccessful background lesson-page initialization', async () =
   };
 
   await assert.rejects(
-    initializeLecturePage(client, 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
-    error => error.code === 'LESSON_PAGE_INIT_FAILED' && error.status === 404
+    initializeLecture(client, '511001030', 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
+    error => error.code === 'HTTP_ERROR' && error.status === 404
   );
 });
-
 
 test('resolves all nine verified Python chapter 2 answers against QUREO types and option IDs', () => {
   const questions = [
