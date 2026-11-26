@@ -528,3 +528,54 @@ test('uses the exact matching review lesson when a level contains multiple revie
     ])
   ));
 });
+
+
+test('matches Python if/elif choices by branch structure when code wording differs', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511007010,
+      type: 'choice',
+      content: 'اختر الشكل الصحيح لجملة if و elif.'
+    },
+    choices: [
+      { id: 5110070102, content: 'if (condition):\n    A\nelse if (condition):\n    B' },
+      { id: 5110070103, content: 'if condition:\n    A\nelif:\n    B' },
+      { id: 5110070104, content: 'elif condition:\n    A\nif condition:\n    B' },
+      { id: 5110070101, content: 'if (condition):\n    A\nelif condition:\n    B' }
+    ]
+  }], [{
+    id: 'py-l07-s04-q1',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'اكتب شكل if وelif.',
+    answer: 'If condition:\n    A\nelif conditions:\n    B'
+  }], '07');
+
+  assert.deepEqual(result.answers, {
+    '511007010': { type: 'choice', choice_id: 5110070101 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('keeps conditional structure matching unambiguous', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511007011, type: 'choice', content: 'اختر شكل if وelif.' },
+    choices: [
+      { id: 5110070111, content: 'if condition:\n    A\nelif condition:\n    B' },
+      { id: 5110070112, content: 'if (condition):\n    A\nelif (condition):\n    B' }
+    ]
+  }], [{
+    id: 'py-l07-s04-q1',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'اكتب شكل if وelif.',
+    answer: 'If condition:\n    A\nelif conditions:\n    B'
+  }], '07');
+
+  assert.deepEqual(result.answers, {});
+  assert.equal(result.unmatched[0].question_id, '511007011');
+});
