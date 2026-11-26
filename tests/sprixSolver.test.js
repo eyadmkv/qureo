@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, planSprixChapterSelection, solveSprixCourse } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -388,6 +388,152 @@ test('supports single-chapter and maximum-chapter SPRIX solve limits', () => {
 
   const targeted = planSprixChapterSelection(chapters, { chapterId: '301' });
   assert.deepEqual(targeted.chapters.map(chapter => chapter.id), ['301']);
+});
+
+test('lists chapters and reviews in curriculum order while leaving tests out of the solve queue', () => {
+  const items = listSprixCourseItems([{
+    title: 'Unit One',
+    sections: [{
+      items: [
+        { id: 101, item_type: 'chapter', title: 'Chapter One', is_completed: true },
+        { id: 151, item_type: 'review', title: 'Review One', is_completed: false },
+        { id: 201, item_type: 'test', title: 'Test One' },
+        { id: 202, item_type: 'chapter', title: 'Chapter Two', is_completed: false }
+      ]
+    }]
+  }]);
+
+  assert.deepEqual(items.map(item => [item.itemType, item.id]), [
+    ['chapter', '101'],
+    ['review', '151'],
+    ['chapter', '202']
+  ]);
+  assert.deepEqual(items.map(item => item.sequence), [1, 2, 3]);
+  assert.deepEqual(items.map(item => item.chapterSequence), [1, null, 2]);
+  assert.equal(items[1].completed, false);
+  assert.equal(items[1].unitTitle, 'Unit One');
+});
+
+test('plans reviews in order before the first unfinished chapter and respects chapter limits', () => {
+  const items = [
+    { id: '101', itemType: 'chapter', completed: true },
+    { id: '151', itemType: 'review', completed: false },
+    { id: '201', itemType: 'chapter', completed: false },
+    { id: '251', itemType: 'review', completed: false },
+    { id: '301', itemType: 'chapter', completed: false }
+  ];
+
+  const single = planSprixCourseItemSelection(items, { single: true });
+  assert.deepEqual(single.items.map(item => item.id), ['151', '201']);
+
+  const limited = planSprixCourseItemSelection(items, { maxChapters: 1 });
+  assert.deepEqual(limited.items.map(item => item.id), ['151', '201']);
+
+  const all = planSprixCourseItemSelection(items);
+  assert.deepEqual(all.items.map(item => item.id), ['151', '201', '251', '301']);
+});
+
+test('automatically completes reviews at their position in the SPRIX course sequence', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const units = [{
+    title: 'Unit',
+    items: [
+      { id: 101, item_type: 'chapter', title: 'Completed chapter', is_completed: true, is_unlocked: true },
+      { id: 151, item_type: 'review', title: 'Required review', is_completed: false, is_unlocked: true },
+      { id: 201, item_type: 'chapter', title: 'Next chapter', is_completed: false, is_unlocked: true }
+    ]
+  }];
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return structuredClone(units);
+    },
+    async getReviewItems(reviewId) {
+      calls.push('read-review:' + reviewId);
+      return { data: { items: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] } };
+    },
+    async completeReview(reviewId) {
+      calls.push('complete-review:' + reviewId);
+      units[0].items.find(item => String(item.id) === String(reviewId)).is_completed = true;
+      return { data: { is_completed: true } };
+    },
+    async getChapterBlocks(chapterId) {
+      calls.push('read-chapter:' + chapterId);
+      return {
+        chapter: { title: 'Next chapter', cleared_block_ids: [] },
+        blocks: [{
+          id: 202,
+          type: 'question',
+          question: { text: 'ما وظيفة المال في المجتمع؟' },
+          options: [
+            { id: 203, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+            { id: 204, text: 'تقتصر وظيفة المال على شراء الذهب' }
+          ]
+        }]
+      };
+    },
+    async answerChapterQuestion(chapterId, blockId, optionId) {
+      calls.push('answer:' + chapterId + ':' + blockId + ':' + optionId);
+      return { data: { is_correct: true } };
+    },
+    async completeChapter(chapterId) {
+      calls.push('complete-chapter:' + chapterId);
+      units[0].items.find(item => String(item.id) === String(chapterId)).is_completed = true;
+      return { data: { is_completed: true } };
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    onConfirm: async details => {
+      assert.equal(details.chapters.length, 1);
+      assert.equal(details.reviews.length, 1);
+      return true;
+    },
+    onProgress: () => {}
+  });
+
+  assert.equal(result.chaptersProcessed, 1);
+  assert.equal(result.chaptersCompleted, 1);
+  assert.equal(result.reviewsProcessed, 1);
+  assert.equal(result.reviewsCompleted, 1);
+  assert.equal(result.questionsSubmitted, 1);
+  assert.deepEqual(calls, [
+    'read-review:151',
+    'complete-review:151',
+    'read-chapter:201',
+    'answer:201:202:203',
+    'complete-chapter:201'
+  ]);
+});
+
+test('dry-run reads review items but never completes them', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return [{
+        title: 'Unit',
+        items: [{ id: 151, item_type: 'review', title: 'Review One', is_completed: false, is_unlocked: true }]
+      }];
+    },
+    async getReviewItems(reviewId) {
+      calls.push('read:' + reviewId);
+      return { data: { items: [{ id: 1 }] } };
+    },
+    async completeReview() {
+      assert.fail('Dry-run must not complete reviews.');
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    dryRun: true,
+    onConfirm: async () => assert.fail('Dry-run must not ask for confirmation.'),
+    onProgress: () => {}
+  });
+
+  assert.equal(result.reviewsProcessed, 1);
+  assert.equal(result.reviewsCompleted, 0);
+  assert.deepEqual(calls, ['read:151']);
 });
 
 test('probes the live chapter endpoint when the curriculum lock flag is false', async () => {
