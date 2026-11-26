@@ -287,7 +287,7 @@ export class QureoLectureBrowser {
         ? `Chrome exited with code ${exitDetails.code ?? 'unknown'}${exitDetails.signal ? ` (signal ${exitDetails.signal})` : ''}.`
         : fallback || 'Chrome did not start its automation interface.';
       const diagnostic = stderr.trim();
-      return [exit, diagnostic].filter(Boolean).join(' Chrome output: ');
+      return [`Executable: ${executable}`, exit, diagnostic].filter(Boolean).join(' Chrome output: ');
     };
     const childError = new Promise((_, reject) => {
       this.child.once('error', reject);
