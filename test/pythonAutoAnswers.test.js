@@ -1,0 +1,189 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { matchPythonAssessmentAnswers } from '../src/pythonAutoAnswers.js';
+
+const levelTwoAnswers = [
+  {
+    id: 'py-l02-s05-q1',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'احسب 50+100.',
+    answer: 'print(50 + 100)'
+  },
+  {
+    id: 'py-l02-s05-q2',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 2,
+    question: 'ما رمز القسمة في بايثون؟',
+    answer: '/'
+  },
+  {
+    id: 'py-l02-s05-q3',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 3,
+    question: 'احسب 19+40.',
+    answer: 'print(19 + 40)'
+  },
+  {
+    id: 'py-l02-s05-q4',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 4,
+    question: 'اكتب عملية الطرح كما وردت في الإجابة.',
+    answer: 'print(7 - 2)'
+  },
+  {
+    id: 'py-l02-s05-q5',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 5,
+    question: 'اكتب عملية القسمة كما وردت في الإجابة.',
+    answer: 'print(15 / 5)'
+  },
+  {
+    id: 'py-l02-s05-q6',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 6,
+    question: 'اطبع جملة تحسب اليوم قبل 7 أيام من اليوم 17.',
+    answer: 'print("Today is the 17th. 7 days ago was the " + str(17 - 7) + "th.")'
+  },
+  {
+    id: 'py-l02-s05-q7',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 7,
+    question: 'اطبع ناتج 2*5 داخل جملة.',
+    answer: 'print("The answer is " + str(2 * 5))'
+  },
+  {
+    id: 'py-l02-s05-q8',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 8,
+    question: 'ما نوع "50+30"؟',
+    answer: 'نص (String).\nالكود:\nprint("50+30")'
+  },
+  {
+    id: 'py-l02-s05-q9',
+    level_id: '02',
+    lesson_id: 'py-l02-s05',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 9,
+    question: 'اعرض نوع "1".',
+    answer: 'print(type("1"))'
+  }
+];
+
+const chapterTwoQuestions = [
+  {
+    question: { id: 511002010, type: 'choice', content: 'اختر البرنامج الصحيح لطباعة نتيجة حساب "50+100" في وحدة التحكم.' },
+    choices: [
+      { id: 5110020101, content: '[[bdi]]print(50 + 100)[[/bdi]]' },
+      { id: 5110020104, content: '[[bdi]]print("50" + 100)[[/bdi]]' },
+      { id: 5110020102, content: '[[bdi]]print("50 + 100")[[/bdi]]' },
+      { id: 5110020103, content: '[[bdi]]print("50" + "100")[[/bdi]]' }
+    ]
+  },
+  {
+    question: { id: 511002020, type: 'choice', content: 'اختر رمز القسمة الصحيح الذي يستخدم في البرنامج.' },
+    choices: [
+      { id: 5110020202, content: '÷' },
+      { id: 5110020201, content: '/' },
+      { id: 5110020203, content: '-' },
+      { id: 5110020204, content: '*' }
+    ]
+  },
+  {
+    question: { id: 511002030, type: 'description', content: 'اجعل الكمبيوتر يحسب "19+40" ويطبع نتيجة الحساب في وحدة التحكم.' },
+    choices: []
+  },
+  {
+    question: { id: 511002040, type: 'description', content: 'اجعل الكمبيوتر يحسب "7-2" ويطبع نتيجة الحساب في وحدة التحكم.' },
+    choices: []
+  },
+  {
+    question: { id: 511002050, type: 'description', content: 'اجعل الكمبيوتر يحسب "15÷5" ويطبع نتيجة الحساب في وحدة التحكم.' },
+    choices: []
+  },
+  {
+    question: { id: 511002060, type: 'choice', content: 'اختر البرنامج الصحيح لطباعة "Today is the 17th. 7 days ago was the 10th." في وحدة التحكم.' },
+    choices: [
+      { id: 5110020604, content: 'print("Today is the 17th. 7 days ago was the " + "17 - 7" + "th.")' },
+      { id: 5110020603, content: 'print("Today is the 17th. 7 days ago was the (17 - 7)th.")' },
+      { id: 5110020601, content: 'print("Today is the 17th. 7 days ago was the " + str(17 - 7) + "th.")' },
+      { id: 5110020602, content: 'print("Today is the 17th. 7 days ago was the + 17 - 7 + th.")' }
+    ]
+  },
+  {
+    question: { id: 511002070, type: 'description', content: 'اجعل الكمبيوتر يحسب "2*5" ويطبع "The answer is 10" في وحدة التحكم.' },
+    choices: []
+  },
+  {
+    question: { id: 511002080, type: 'choice', content: 'اختر نوع البيانات الصحيح لما يلي. print("50+30")' },
+    choices: [
+      { id: 5110020803, content: 'لا شيء مما سبق' },
+      { id: 5110020802, content: 'نوع رقمي' },
+      { id: 5110020801, content: 'نوع السلسلة النصية' }
+    ]
+  },
+  {
+    question: { id: 511002090, type: 'choice', content: 'اختر البرنامج الذي يطبع "<class \'str\'>" بشكل صحيح.' },
+    choices: [
+      { id: 5110020902, content: 'print(type(1))' },
+      { id: 5110020901, content: 'print(type("1"))' },
+      { id: 5110020904, content: 'print(string("1"))' },
+      { id: 5110020903, content: 'print(str("1"))' }
+    ]
+  }
+];
+
+test('maps the complete Python level 2 review to live QUREO assessment IDs and types', () => {
+  const result = matchPythonAssessmentAnswers(chapterTwoQuestions, levelTwoAnswers, '02');
+
+  assert.equal(result.matches.length, 9);
+  assert.deepEqual(result.unmatched, []);
+  assert.deepEqual(result.answers, {
+    '511002010': { type: 'choice', choice_id: 5110020101 },
+    '511002020': { type: 'choice', choice_id: 5110020201 },
+    '511002030': { type: 'description', answer_code: 'print(19 + 40)' },
+    '511002040': { type: 'description', answer_code: 'print(7 - 2)' },
+    '511002050': { type: 'description', answer_code: 'print(15 / 5)' },
+    '511002060': { type: 'choice', choice_id: 5110020601 },
+    '511002070': { type: 'description', answer_code: 'print("The answer is " + str(2 * 5))' },
+    '511002080': { type: 'choice', choice_id: 5110020801 },
+    '511002090': { type: 'choice', choice_id: 5110020901 }
+  });
+  assert.ok(result.matches.every(match => match.strategy === 'review-order'));
+});
+
+test('does not invent a choice ID when the guide answer cannot match a visible option', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511003010, type: 'choice', content: 'اختر نوع البيانات' },
+    choices: [
+      { id: 5110030101, content: 'خيار أ' },
+      { id: 5110030102, content: 'خيار ب' }
+    ]
+  }], [{
+    level_id: '03',
+    lesson_id: 'py-l03-s03',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'اختر نوع البيانات',
+    answer: 'إجابة غير موجودة ضمن الاختيارات'
+  }], '03');
+
+  assert.deepEqual(result.answers, {});
+  assert.equal(result.unmatched[0].question_id, '511003010');
+});
