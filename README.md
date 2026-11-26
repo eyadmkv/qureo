@@ -77,7 +77,9 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo export` | Export course, chapter, lesson and assessment data |
 | `qureo search <query>` | Search local questions and answer sources |
 | `qureo answer save ...` | Save a personal answer or solution note |
-| `qureo solve [range]` | Choose JavaScript or Python interactively, then run the chapter solver |
+| `qureo answers sync-community` | Download the public community answer archive into ignored local data for fallback matching |
+| `qureo solve [range]` | Choose a course interactively, then run the chapter solver |
+| `qureo python solve [range]` / `qureo solve python [range]` | Solve the Python course directly using course-specific answers and the optional community fallback archive |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
 | `sprix sync` / `progress` | Sync the live curriculum and summarize saved progress |
@@ -124,7 +126,7 @@ SPRIX session cookies, lesson captures, extracted questions and personal referen
 - Command history records command names and timestamps only. It omits arguments and search terms.
 - Course exports may contain account-related learning data. Review them before sharing.
 
-This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO and SPRIX hosts and, when syncing public answer guides, to the documented public guide source.
+This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO and SPRIX hosts and, when syncing public answer guides or the optional community archive, to their documented public source URLs. The community archive is pinned to a source commit, stored only under ignored `data/`, and is not redistributed by this repository.
 
 ## Third-party content and redistribution
 
@@ -135,7 +137,7 @@ The repository currently includes generated files under `exports/` containing co
 - QUREO endpoints are undocumented and can change.
 - Some courses listed by QUREO may return HTTP 404 from the learning API.
 - Interactive lesson screens are not fully represented by the metadata export.
-- The solver can only use answers available in your local answer bank.
+- The solver uses your course-specific bank first, then optional community archive answers matched by exact question ID; choice IDs are validated against the live options.
 - This project does not bypass paywalls or access controls.
 
 ## Contributing

@@ -12,8 +12,10 @@ The CLI lists supported courses and asks you to choose one. You can also select 
 
 \`\`\`powershell
 qureo solve --course javascript_ar
+qureo python solve
+qureo solve python
+qureo python solve --dry-run
 qureo solve --course python_short_ar
-qureo solve --course python_short_ar --dry-run
 \`\`\`
 
 A chapter number or range keeps its existing meaning after the course is selected:
@@ -45,9 +47,9 @@ The solver starts at the first unfinished chapter and refuses to jump over an ea
 
 Python uses the same solver flow as JavaScript. Both QUREO question types currently used by the Python course, \`choice\` and \`description\`, are supported. The description type submits the saved Python code through QUREO's answer endpoint.
 
-The committed \`answers/python_short_ar.json\` currently contains the six chapter 1 answers (\`511001\`) and nine chapter 2 answers (\`511002\`). For later chapters, use \`--auto-answers\` to reuse the public Python guide. The guide has 448 question/answer pairs across 25 levels and 116 lessons, and is cached locally after its first download.
+The committed \`answers/python_short_ar.json\` contains the original course-specific Python answers. The community archive is also used as a fallback by exact QUREO question ID. The first Python solve automatically downloads that archive into the ignored local \`data/\` directory when it is missing. You can also download it explicitly with \`qureo answers sync-community\`. Your course-specific answers always take priority. Community choice answers are accepted only when their choice ID exists in the live question options; missing or mismatched answers stop the chapter before submission.
 
-\`qureo solve --course python_short_ar --auto-answers\` loads the cached guide or downloads it when missing. For each selected chapter, it fetches the live QUREO assessment questions, matches guide review/test answers by level and question text, converts code answers, and resolves choice answers against the actual visible option IDs. When the assessment is locked, auto-answer mode completes that chapter's lessons to unlock the questions before matching. New mappings and their source metadata are saved into \`answers/python_short_ar.json\`, so completed mappings are reused on later runs.
+\`qureo python solve --auto-answers\` (or \`qureo solve python --auto-answers\`) loads the cached guide or downloads it when missing. For each selected chapter, it fetches the live QUREO assessment questions, matches guide review/test answers by level and question text, converts code answers, and resolves choice answers against the actual visible option IDs. When the assessment is locked, auto-answer mode completes that chapter's lessons to unlock the questions before matching. New mappings and their source metadata are saved into \`answers/python_short_ar.json\`, so completed mappings are reused on later runs.
 
 The matcher uses review/test lesson order when the guide's review set has the same number of questions as the live assessment. Otherwise it uses question-text similarity and requires a suitable match. If it cannot map every question or find a valid visible choice ID, it stops before submitting any answers for that chapter. QUREO's response remains the final correctness check, and the solver stops if QUREO marks an answer incorrect.
 
