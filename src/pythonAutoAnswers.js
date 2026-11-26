@@ -180,6 +180,144 @@ function extractOutputAnswer(answer) {
   return match?.[1]?.trim() || '';
 }
 
+function pythonValue(expression, variables) {
+  const value = String(expression ?? '').trim().replace(/^\((.*)\)$/u, '$1').trim();
+  if (/^-?\d+(?:\.\d+)?$/u.test(value)) return Number(value);
+  if (/^(?:True|False)$/u.test(value)) return value === 'True';
+
+  const quoted = value.match(/^(['"])([\s\S]*)\1$/u);
+  if (quoted) return quoted[2];
+
+  if (/^[A-Za-z_]\w*$/u.test(value) && Object.hasOwn(variables, value)) {
+    return variables[value];
+  }
+
+  return undefined;
+}
+
+function splitPythonBoolean(expression, operator) {
+  const parts = [];
+  let depth = 0;
+  let quote = null;
+  let start = 0;
+
+  for (let index = 0; index < expression.length; index++) {
+    const character = expression[index];
+    if (quote) {
+      if (character === quote && expression[index - 1] !== '\\') quote = null;
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '(') depth++;
+    else if (character === ')') depth--;
+
+    if (depth === 0) {
+      const match = expression.slice(index).match(new RegExp('^\\\\s+' + operator + '\\\\s+', 'u'));
+      if (match) {
+        parts.push(expression.slice(start, index).trim());
+        index += match[0].length - 1;
+        start = index + 1;
+      }
+    }
+  }
+
+  if (parts.length) {
+    parts.push(expression.slice(start).trim());
+    return parts;
+  }
+  return null;
+}
+
+function pythonCondition(expression, variables) {
+  const source = String(expression ?? '').trim().replace(/^\((.*)\)$/u, '$1').trim();
+  const orParts = splitPythonBoolean(source, 'or');
+  if (orParts) return orParts.some(part => pythonCondition(part, variables));
+
+  const andParts = splitPythonBoolean(source, 'and');
+  if (andParts) return andParts.every(part => pythonCondition(part, variables));
+
+  if (/^not\s+/iu.test(source)) return !pythonCondition(source.replace(/^not\s+/iu, ''), variables);
+
+  const comparison = source.match(/^(.+?)\s*(==|!=|>=|<=|>|<)\s*(.+)$/u);
+  if (!comparison) {
+    const value = pythonValue(source, variables);
+    return typeof value === 'boolean' ? value : null;
+  }
+
+  const left = pythonValue(comparison[1], variables);
+  const right = pythonValue(comparison[3], variables);
+  if (left === undefined || right === undefined) return null;
+
+  switch (comparison[2]) {
+    case '==': return left === right;
+    case '!=': return left !== right;
+    case '>=': return left >= right;
+    case '<=': return left <= right;
+    case '>': return left > right;
+    case '<': return left < right;
+    default: return null;
+  }
+}
+
+function pythonPrintValue(line, variables) {
+  const match = String(line ?? '').match(/^\s*print\s*\(\s*(.*?)\s*\)\s*$/u);
+  if (!match) return null;
+
+  const value = pythonValue(match[1], variables);
+  return value === undefined ? null : String(value);
+}
+
+function evaluatePythonConditionalOutput(source) {
+  const lines = normalizePythonKeywordCase(
+    stripQureoMarkup(source).replace(/\r/gu, '')
+  ).split('\n');
+  const variables = {};
+  const clauses = [];
+  let started = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    const assignment = line.match(/^([A-Za-z_]\w*)\s*=\s*(-?\d+(?:\.\d+)?|True|False|(['"])[\s\S]*\3)\s*;?$/u);
+    if (assignment && !started) {
+      variables[assignment[1]] = pythonValue(assignment[2], variables);
+      continue;
+    }
+
+    const clause = line.match(/^(if|elif|else)\b(.*?)\s*:\s*$/iu);
+    if (clause) {
+      started = true;
+      clauses.push({
+        kind: clause[1].toLowerCase(),
+        condition: clause[1].toLowerCase() === 'else' ? '' : clause[2].trim(),
+        output: null
+      });
+      continue;
+    }
+
+    if (started && clauses.length) {
+      const output = pythonPrintValue(line, variables);
+      if (output !== null) clauses.at(-1).output = output;
+    }
+  }
+
+  if (!clauses.length || !clauses.some(clause => clause.output !== null)) return null;
+
+  for (const clause of clauses) {
+    const matches = clause.kind === 'else'
+      ? true
+      : pythonCondition(clause.condition, variables);
+    if (matches === true) return clause.output;
+    if (matches === null) return null;
+  }
+
+  return null;
+}
+
 function resolveChoice(question, record) {
   const questionRow = question?.question || question || {};
   const choices = Array.isArray(question?.choices) ? question.choices :
@@ -191,6 +329,14 @@ function resolveChoice(question, record) {
   const code = extractCodeAnswer(answer);
   const output = extractOutputAnswer(answer);
   const variants = [...new Set([...answerLines, code, output].filter(Boolean))];
+
+  const evaluatedOutput = evaluatePythonConditionalOutput(questionText(question));
+  if (evaluatedOutput !== null) {
+    const outputMatches = choices.filter(choice =>
+      compact(choiceText(choice)) === compact(evaluatedOutput)
+    );
+    if (outputMatches.length === 1) return Number(outputMatches[0].id);
+  }
 
   for (const choice of choices) {
     const text = choiceText(choice);
