@@ -247,3 +247,102 @@ test('matches symbol-only choices when the guide wraps the answer in a Markdown 
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+
+test('resolves Chapter 6 if/else review choices from the live prompt and options', () => {
+  const result = matchPythonAssessmentAnswers([
+    {
+      question: {
+        id: 511006010,
+        type: 'choice',
+        content: 'اختر الشكل الصحيح للبرنامج: إذا كان ~ فافعل [[bdi]]A[[/bdi]]، وإلا فافعل [[bdi]]B.[[/bdi]]'
+      },
+      choices: [
+        { id: 5110060102, content: '[[bdi]]if condition: else:\n    A\n    B[[/bdi]]' },
+        { id: 5110060103, content: '[[bdi]]else condition:\n    A\nif:\n    B[[/bdi]]' },
+        { id: 5110060104, content: '[[bdi]]else:\n    B\nif condition:\n    A[[/bdi]]' },
+        { id: 5110060101, content: '[[bdi]]if condition:\n    A\nelse:\n    B[[/bdi]]' }
+      ]
+    },
+    {
+      question: {
+        id: 511006030,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير [[bdi]]num[[/bdi]] تساوي 80 أو أقل".'
+      },
+      choices: [
+        { id: 5110060301, content: '[[bdi]]num <= 80[[/bdi]]' },
+        { id: 5110060304, content: 'num < 80' },
+        { id: 5110060303, content: 'num > 80' },
+        { id: 5110060302, content: '[[bdi]]num == 80[[/bdi]]' }
+      ]
+    },
+    {
+      question: {
+        id: 511006040,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير [[bdi]]num[[/bdi]] أكبر من 30".'
+      },
+      choices: [
+        { id: 5110060403, content: 'num < 30' },
+        { id: 5110060401, content: 'num > 30' },
+        { id: 5110060404, content: '[[bdi]]num >= 30[[/bdi]]' },
+        { id: 5110060402, content: '[[bdi]]num == 30[[/bdi]]' }
+      ]
+    }
+  ], [
+    {
+      id: 'py-l06-s06-q1',
+      level_id: '06',
+      lesson_id: 'py-l06-s06',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 1,
+      question: 'سؤال مراجعة عن if و else',
+      answer: 'إجابة عن شكل if و else'
+    },
+    {
+      id: 'py-l06-s06-q2',
+      level_id: '06',
+      lesson_id: 'py-l06-s06',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 2,
+      question: 'سؤال عن نتيجة البرنامج',
+      answer: 'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")'
+    },
+    {
+      id: 'py-l06-s06-q3',
+      level_id: '06',
+      lesson_id: 'py-l06-s06',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 3,
+      question: 'سؤال عن المقارنة',
+      answer: 'num <= 80'
+    },
+    {
+      id: 'py-l06-s06-q4',
+      level_id: '06',
+      lesson_id: 'py-l06-s06',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 4,
+      question: 'سؤال عن المقارنة',
+      answer: 'num > 30'
+    },
+    {
+      id: 'py-l06-s06-q5',
+      level_id: '06',
+      lesson_id: 'py-l06-s06',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 5,
+      question: 'سؤال عن الشرط',
+      answer: 'score >= 60'
+    }
+  ], '06');
+
+  assert.equal(result.matches.length, 3);
+  assert.deepEqual(result.answers, {
+    '511006010': { type: 'choice', choice_id: 5110060101 },
+    '511006030': { type: 'choice', choice_id: 5110060301 },
+    '511006040': { type: 'choice', choice_id: 5110060401 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
