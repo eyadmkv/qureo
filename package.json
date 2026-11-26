@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node src/entry.js",
-    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --check src/sprix.js && node --test",
+    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --check src/sprix.js && node --check userscripts/sprix-lesson-export.user.js && node --test",
     "test": "node --test"
   },
   "engines": {

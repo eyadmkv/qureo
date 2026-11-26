@@ -95,6 +95,8 @@ SPRIX lesson pages are interactive and use a different platform from QUREO. This
 
 See the [SPRIX guide](docs/sprix.md) for capture, question review, local answer keys and practice commands. Captured content and personal notes stay under `data/sprix/`, which is excluded from Git.
 
+For browser-based lesson capture, install the standalone [Tampermonkey lesson exporter](userscripts/sprix-lesson-export.user.js). It downloads the visible lesson text as a UTF-8 file that can be passed to `qureo sprix capture --file`. Installation steps and the CLI capture command are documented in [`userscripts/README.md`](userscripts/README.md).
+
 ## Solver safety
 
 The solver processes chapters and lessons sequentially. It checks that required local answers exist before starting a chapter, waits for lesson completion to succeed before initializing the assessment, and requires QUREO to confirm chapter completion. It stops when a required operation fails.
