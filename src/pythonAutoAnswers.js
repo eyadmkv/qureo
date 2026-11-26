@@ -364,6 +364,9 @@ function resolveChoice(question, record) {
     if (outputMatches.length === 1) return Number(outputMatches[0].id);
   }
 
+  const logicalOperatorChoice = resolveLogicalOperatorChoice(question, choices);
+  if (Number.isSafeInteger(logicalOperatorChoice)) return logicalOperatorChoice;
+
   for (const choice of choices) {
     const text = choiceText(choice);
     const normalizedChoice = compact(text);
@@ -381,9 +384,6 @@ function resolveChoice(question, record) {
 
   const promptChoice = resolvePromptChoice(question, choices);
   if (Number.isSafeInteger(promptChoice)) return promptChoice;
-
-  const logicalOperatorChoice = resolveLogicalOperatorChoice(question, choices);
-  if (Number.isSafeInteger(logicalOperatorChoice)) return logicalOperatorChoice;
 
   const conditionalChoice = resolveConditionalStructureChoice(code || answer, choices);
   if (Number.isSafeInteger(conditionalChoice)) return conditionalChoice;
