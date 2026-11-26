@@ -72,7 +72,7 @@ function saveAnswers(courseId, answers, sources = {}) {
     ...sources
   };
   const temporaryPath = file + '.tmp';
-  fs.writeFileSync(temporaryPath, JSON.stringify(parsed, null, 2) + '\\n', {
+  fs.writeFileSync(temporaryPath, JSON.stringify(parsed, null, 2) + '\n', {
     encoding: 'utf8',
     mode: 0o600
   });
