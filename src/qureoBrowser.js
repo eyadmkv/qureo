@@ -23,7 +23,7 @@ export function toCdpCookie(cookie) {
   if (cookie.hostOnly) {
     result.url = `https://${cookie.domain}${cookie.path || '/'}`;
   } else {
-    result.domain = `.${String(cookie.domain || '').replace(/^\\./, '')}`;
+    result.domain = `.${String(cookie.domain || '').replace(/^\./, '')}`;
   }
 
   if (cookie.sameSite && ['Strict', 'Lax', 'None'].includes(cookie.sameSite)) {
@@ -200,7 +200,7 @@ async function waitForDevTools(profileDir, child) {
     }
 
     if (fs.existsSync(activePortFile)) {
-      const [portText] = fs.readFileSync(activePortFile, 'utf8').trim().split(/\\r?\\n/);
+      const [portText] = fs.readFileSync(activePortFile, 'utf8').trim().split(/\r?\n/);
       const port = Number(portText);
       if (Number.isInteger(port) && port > 0) {
         try {
@@ -333,7 +333,8 @@ export class QureoLectureBrowser {
   async waitForApiIdle(timeoutMs = 15000) {
     const startedAt = Date.now();
     while (Date.now() - startedAt < timeoutMs) {
-      if (this.inFlightApi.size === 0 && Date.now() - this.lastApiActivity >= 650) {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed >= 1500 && this.inFlightApi.size === 0 && Date.now() - this.lastApiActivity >= 650) {
         return;
       }
       await sleep(100);
