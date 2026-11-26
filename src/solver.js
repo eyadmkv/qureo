@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
@@ -162,21 +161,24 @@ async function waitForChapterCompletion(client, sectionId, chapterId, attempts =
   return false;
 }
 
-function openLecturePage(url) {
-  if (process.platform !== 'win32') {
-    throw new Error('Automatic lecture initialization currently requires Windows.');
+export async function initializeLecturePage(client, url) {
+  const response = await client.request(url, {
+    method: 'GET',
+    headers: {
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    },
+    timeoutMs: LESSON_REQUEST_TIMEOUT_MS
+  });
+  await response.text().catch(() => '');
+
+  if (!response.ok) {
+    const error = new Error(`QUREO lesson page initialization failed (HTTP ${response.status}).`);
+    error.code = response.status === 401 ? 'AUTH_EXPIRED' : 'LESSON_PAGE_INIT_FAILED';
+    error.status = response.status;
+    throw error;
   }
-  const quotedUrl = url.replace(/'/g, "''");
-  const result = spawnSync('pwsh', [
-    '-NoProfile',
-    '-NonInteractive',
-    '-Command',
-    `Start-Process -FilePath '${quotedUrl}'`
-  ], { encoding: 'utf8', windowsHide: true });
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    throw new Error((result.stderr || 'Could not open the QUREO lesson in your default browser.').trim());
-  }
+
+  return response.status;
 }
 
 function wait(ms) {
@@ -248,9 +250,15 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
   const needsPageInitialization = !response || response.status === 404;
   if (needsPageInitialization) {
     const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson page initialized';
-    onProgress('  lesson ' + lessonId + ': ' + reason + '; opening it in your default browser');
-    openLecturePage(referer);
-    onProgress('  lesson ' + lessonId + ': checking initialization immediately, then every ' + Math.ceil(LESSON_INIT_POLL_INTERVAL_MS / 1000) + 's until QUREO is ready');
+    onProgress('  lesson ' + lessonId + ': ' + reason + '; requesting the lesson page through the saved QUREO session');
+    try {
+      await initializeLecturePage(client, referer);
+      onProgress('  lesson ' + lessonId + ': page requested in the background; checking initialization immediately, then every ' + Math.ceil(LESSON_INIT_POLL_INTERVAL_MS / 1000) + 's until QUREO is ready');
+    } catch (error) {
+      if (!isRetryableNetworkError(error)) throw error;
+      lastNetworkError = error;
+      onProgress('  lesson ' + lessonId + ': background page request failed temporarily; retrying the completion API');
+    }
   }
 
   for (let attempt = 1; attempt <= LESSON_RETRY_ATTEMPTS && Date.now() < deadline; attempt++) {
@@ -306,7 +314,7 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     const error = new Error(
       'Lesson ' + lessonId + ' still returns HTTP 404 after ' +
       Math.ceil(LESSON_RETRY_TIMEOUT_MS / 1000) +
-      's of retries. Check that your default browser is signed in to the same QUREO account, complete the lesson there, then rerun the solver. Later lessons and the chapter assessment were not started.'
+      's of retries. The authenticated background page request did not initialize this lesson. Run qureo login to refresh the saved session, then rerun the solver. Later lessons and the chapter assessment were not started.'
     );
     error.code = 'LESSON_NOT_AVAILABLE';
     error.status = 404;
