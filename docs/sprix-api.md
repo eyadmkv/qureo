@@ -125,7 +125,7 @@ The client uses these observed API routes:
 | Test answer | PUT | `/api/v1/tests/{testId}/questions/{testQuestionId}/answer` |
 | Submit test | POST | `/api/v1/tests/{testId}/submit` |
 
-These routes and payload shapes were identified from a public browser extension implementation and have not yet been validated against every SPRIX account or course state. Session import performs a live read-only curriculum request before saving. If an endpoint changes or your account lacks access, the CLI reports the API response and stops.
+These routes and payload shapes were cross-referenced against the public [Qureo & SPX Auto Completer](https://github.com/pola90000/Qureo-SPX-Auto-Completer) browser-extension implementation. They have not yet been validated against every SPRIX account or course state. Session import performs a live read-only curriculum request before saving. If an endpoint changes or your account lacks access, the CLI reports the API response and stops.
 
 The client is restricted to HTTPS `*.spx-learning-square.com` hosts and same-origin `/api/v1/` paths. It does not retry POST or PUT requests after network errors because the server may already have processed a request. Account-changing actions require `--yes`.
 
