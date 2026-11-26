@@ -478,17 +478,34 @@ export async function solveSprixCourse(session, bank, {
       continue;
     }
     if (!current.unlocked) {
-      const message = 'Chapter ' + current.sequence + ' (' + current.title +
-        ') is still locked or inaccessible. The solver stopped here.';
-      if (dryRun) {
-        onProgress('[locked] ' + message);
-        break;
-      }
-      throw new Error(message + ' Complete the preceding chapter, then rerun sprix solve.');
+      onProgress(
+        '[access] Curriculum marks chapter ' + current.sequence +
+        ' as locked; checking the live chapter endpoint before deciding.'
+      );
     }
 
-    const data = await session.getChapterBlocks(current.id);
+    let data;
+    try {
+      data = await session.getChapterBlocks(current.id);
+    } catch (error) {
+      if (!current.unlocked) {
+        throw new Error(
+          'Chapter ' + current.sequence + ' (' + current.title +
+          ') is flagged as locked by the curriculum, and SPRIX denied the read-only chapter request: ' +
+          error.message + ' No answers were submitted for this chapter.'
+        );
+      }
+      throw error;
+    }
+
     const result = buildSprixChapterPlan(data, bank);
+    if (!current.unlocked && result.pendingQuestionCount === 0) {
+      throw new Error(
+        'Chapter ' + current.sequence + ' (' + current.title +
+        ') is flagged as locked, and SPRIX returned no pending questions. ' +
+        'The solver stopped without submitting answers or requesting completion.'
+      );
+    }
     onProgress(
       '\nChapter ' + current.sequence + '/' + allChapters.length + ': ' + current.title +
       (current.unitTitle ? ' | ' + current.unitTitle : '') +
