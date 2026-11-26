@@ -46,9 +46,9 @@ Some interactive lesson controls are not represented by the currently documented
 4. Select the new request, right-click it, and choose **Copy → Copy as cURL**.
 5. In PowerShell, run:
 
-   \`\`\`powershell
+   ~~~powershell
    sprix inspect-action
-   \`\`\`
+   ~~~
 
 6. Paste only the sanitized JSON printed by the command into your issue or chat. It removes cookies, authorization values, CSRF/XSRF tokens, sensitive URL parameters and sensitive JSON fields. It performs no network request and does not save the copied cURL.
 
