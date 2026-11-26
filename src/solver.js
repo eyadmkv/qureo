@@ -262,8 +262,8 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
 
   const needsPageInitialization = !response || response.status === 404;
   if (needsPageInitialization) {
-    const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson page initialized';
-    onProgress('  lesson ' + lessonId + ': ' + reason + '; requesting the lesson page through the saved QUREO session');
+    const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson was initialized';
+    onProgress('  lesson ' + lessonId + ': ' + reason + '; initializing the lesson through the saved QUREO session');
     try {
       await initializeLecture(client, lessonId, referer);
       onProgress('  lesson ' + lessonId + ': initialized through the QUREO lecture API; retrying completion');
