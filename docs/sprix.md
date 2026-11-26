@@ -78,3 +78,12 @@ The default store is `data/sprix/study.json`. It contains captured lesson text, 
 - If the platform changes its visible wording or option layout, some questions may need to be captured from a text file with minor cleanup.
 
 The material is stored on your computer. The QUREO login session and QUREO solver are separate and are not used by these SPRIX commands.
+
+
+## Live SPRIX CLI
+
+The standalone `sprix` command now supports live curriculum, chapter, review and test API operations. The same commands are available as `qureo sprix`.
+
+Start with the [SPRIX API CLI guide](sprix-api.md) to import your browser session, inspect live course data, and use explicit confirmed actions. Session cookies are encrypted locally with Windows DPAPI. Commands that submit answers, complete lessons/reviews, or open/submit tests require `--yes`.
+
+The previous local-only commands remain available for lesson text captures, offline question review, personal reference keys, and practice.
