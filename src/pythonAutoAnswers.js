@@ -58,7 +58,7 @@ function choiceText(choice) {
 function compact(value) {
   return stripQureoMarkup(value)
     .toLocaleLowerCase('ar')
-    .replace(/[\u064b-\u065f\u0670\u0640\s"'’‘`]/gu, '')
+    .replace(/[\u064b-\u065f\u0670\u0640\s]/gu, '')
     .replace(/[أإآ]/gu, 'ا')
     .replace(/ى/gu, 'ي');
 }
