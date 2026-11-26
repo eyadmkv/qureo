@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DATA_DIR } from './paths.js';
-import { savePublicPage } from './db.js';
+import { normalizeText, savePublicPage } from './db.js';
 
 export const PYTHON_ANSWER_INDEX_URL = 'https://answers.studentplatformeg.online/qureo-python/';
 const HOST = 'answers.studentplatformeg.online';
@@ -128,6 +128,42 @@ export function extractPythonAnswerPairs(body) {
   }
 
   return records;
+}
+
+
+export function searchPythonAnswers(records, query, limit = 8) {
+  const terms = normalizeText(query).split(/\\s+/u).filter(term => term.length > 1);
+  if (!terms.length || !Array.isArray(records)) return [];
+
+  return records.map(record => {
+    const question = normalizeText(record.question || '');
+    const answer = normalizeText(record.answer || '');
+    const metadata = normalizeText(`${record.level_title || ''} ${record.lesson_title || ''}`);
+    const score = terms.reduce((total, term) =>
+      total + (question.includes(term) ? 3 : 0) +
+        (answer.includes(term) ? 1 : 0) +
+        (metadata.includes(term) ? 1 : 0), 0);
+    return { ...record, score };
+  }).filter(record => record.score > 0)
+    .sort((a, b) => b.score - a.score || a.question.length - b.question.length)
+    .slice(0, Math.max(1, Math.min(100, Number(limit) || 8)));
+}
+
+export function searchSavedPythonAnswers(query, limit = 8) {
+  if (!fs.existsSync(OUTPUT_PATH)) {
+    throw new Error('No local Python answer guide. Run: qureo answers sync-python');
+  }
+  let guide;
+  try {
+    guide = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
+  } catch {
+    throw new Error('The local Python answer guide is not valid JSON. Run qureo answers sync-python again.');
+  }
+  if (guide?.format !== 'qureo-public-answer-guide' || guide?.course_id !== 'python_short_ar' ||
+      !Array.isArray(guide.answers)) {
+    throw new Error('The local Python answer guide format is unsupported. Run qureo answers sync-python again.');
+  }
+  return searchPythonAnswers(guide.answers, query, limit);
 }
 
 async function fetchPage(url) {
