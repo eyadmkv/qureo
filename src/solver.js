@@ -103,7 +103,7 @@ async function requestJson(client, pathname, { method = 'GET', body, referer } =
   return payload;
 }
 
-function getQuestionAnswer(item, answers) {
+export function getQuestionAnswer(item, answers) {
   const question = item?.question || item;
   const id = String(question?.id ?? '');
   const saved = answers[id];
@@ -120,6 +120,23 @@ function getQuestionAnswer(item, answers) {
     return { type: 'description', answer_code: answerCode };
   }
   return null;
+}
+
+export function getChapterAnswerCoverage(chapterMeta, chapterId, answers) {
+  const rawExpected = chapterMeta?.chapter?.question_count ??
+    chapterMeta?.question_count ??
+    chapterMeta?.data?.chapter?.question_count;
+  const expectedQuestions = Number(rawExpected);
+  const answerQuestions = Object.keys(answers || {})
+    .filter(id => id.startsWith(String(chapterId))).length;
+  return {
+    expectedQuestions: Number.isInteger(expectedQuestions) && expectedQuestions > 0
+      ? expectedQuestions
+      : null,
+    answerQuestions,
+    complete: Number.isInteger(expectedQuestions) && expectedQuestions > 0 &&
+      answerQuestions >= expectedQuestions
+  };
 }
 
 async function getProgress(client, sectionId) {
@@ -298,7 +315,8 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
   dryRun,
   onProgress,
   onCheckpoint = () => {},
-  questionDelayMs = 0
+  questionDelayMs = 0,
+  lessonsAlreadyCompleted = false
 }) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
@@ -335,11 +353,13 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
     return { submitted: 0, correct: 0, total: prepared.length, dryRun: true };
   }
 
-  for (const lesson of lectures) {
-    const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
-    onCheckpoint({ stage: 'lesson-start', lesson_id: lessonId, question_id: null, question_index: null });
-    await markLectureCompleted(client, chapterId, lesson, false, onProgress);
-    onCheckpoint({ stage: 'lesson-completed', lesson_id: lessonId });
+  if (!lessonsAlreadyCompleted) {
+    for (const lesson of lectures) {
+      const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
+      onCheckpoint({ stage: 'lesson-start', lesson_id: lessonId, question_id: null, question_index: null });
+      await markLectureCompleted(client, chapterId, lesson, false, onProgress);
+      onCheckpoint({ stage: 'lesson-completed', lesson_id: lessonId });
+    }
   }
 
   const testType = chapter.test_type || chapterMeta?.test_type || chapterMeta?.chapter?.test_type || 'review';
@@ -551,11 +571,58 @@ export async function solveCourse(client, {
       });
 
       const chapterMeta = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
-      const questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+      let questions;
+      let lessonsAlreadyCompleted = false;
+      try {
+        questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+      } catch (error) {
+        if (error.code !== 'PRECONDITION_NOT_FULFILLED') throw error;
+
+        const coverage = getChapterAnswerCoverage(chapterMeta, chapterId, answers);
+        if (!coverage.complete || dryRun) {
+          const expected = coverage.expectedQuestions ?? 'unknown';
+          throw new Error(
+            `Chapter ${chapterSequence} assessment is locked until its lessons are completed. ` +
+            `The local ${courseId} answer bank covers ${coverage.answerQuestions}/${expected} question IDs. ` +
+            'The solver left all lessons and assessment progress unchanged. Add verified answers for every question before rerunning this chapter.'
+          );
+        }
+
+        const lectures = asArray(chapterMeta?.lectures || chapterMeta?.chapter?.lectures || chapterMeta?.data?.lectures);
+        if (!lectures.length) {
+          throw new Error(
+            `Chapter ${chapterSequence} assessment is locked, and QUREO did not return its lesson list. ` +
+            'No lesson or assessment changes were made.'
+          );
+        }
+
+        onProgress(
+          `Assessment is locked until lessons are completed. The local answer bank covers ` +
+          `${coverage.answerQuestions}/${coverage.expectedQuestions} expected question IDs; completing lessons first.`
+        );
+        for (const lesson of lectures) {
+          const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
+          checkpoint({
+            stage: 'lesson-start',
+            chapter_id: chapterId,
+            chapter_sequence: chapterSequence,
+            chapter_title: chapterTitle,
+            lesson_id: lessonId,
+            question_id: null,
+            question_index: null
+          });
+          await markLectureCompleted(client, chapterId, lesson, false, onProgress);
+          checkpoint({ stage: 'lesson-completed', lesson_id: lessonId });
+        }
+        lessonsAlreadyCompleted = true;
+        questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+      }
+
       const solved = await solveChapter(client, chapter, chapterMeta, questions, answers, {
         dryRun,
         onProgress,
         questionDelayMs,
+        lessonsAlreadyCompleted,
         onCheckpoint: patch => checkpoint({
           ...patch,
           chapter_id: chapterId,

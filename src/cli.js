@@ -12,8 +12,10 @@ import {
 import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
+import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
+import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
 const program = new Command();
@@ -49,6 +51,35 @@ async function confirmChapter({ chapter, position, total }) {
   try {
     const answer = await rl.question(`Start chapter ${sequence} (${position}/${total}) - ${title}? [Y/n] `);
     return !/^(n|no)$/i.test(answer.trim());
+  } finally {
+    rl.close();
+  }
+}
+
+async function chooseSolveCourse(user) {
+  const courses = listSolvableCourses(
+    user?.available_courses || [],
+    listApiCourses(),
+    courseId => fs.existsSync(path.join(ROOT, 'answers', courseId + '.json'))
+  );
+  if (!courses.length) {
+    throw new Error('No available course has a local answer bank. Run qureo sync and add answers/<course_id>.json before solving.');
+  }
+  if (!input.isTTY) {
+    throw new Error('Course selection requires an interactive PowerShell terminal. Pass --course <id> to choose a course directly.');
+  }
+
+  console.log('\nChoose a QUREO course:');
+  for (const [index, course] of courses.entries()) {
+    console.log(`  ${index + 1}. ${displayCourseName(course)} (${course.id})`);
+  }
+
+  const rl = readline.createInterface({ input, output });
+  try {
+    const answer = await rl.question(`Select a course [1-${courses.length}]: `);
+    const selected = resolveCourseChoice(answer, courses);
+    if (!selected) throw new Error('Invalid course selection. Run qureo solve again and enter one of the listed numbers.');
+    return selected.id;
   } finally {
     rl.close();
   }
@@ -492,8 +523,8 @@ program.command('export')
   }));
 
 program.command('solve [chapterRange]')
-  .description('Solve from your first unfinished chapter, with optional chapter ranges and run limits')
-  .option('--course <id>', 'Course ID to solve', 'javascript_ar')
+  .description('Interactively choose a QUREO course, then solve its remaining chapters')
+  .option('--course <id>', 'Course ID to solve; prompts for a choice when omitted')
   .option('--dry-run', 'Preview selected chapters without submitting answers')
   .option('--single', 'Solve only the current or explicitly selected chapter')
   .option('--max-chapters <count>', 'Stop after this many chapters')
@@ -502,9 +533,10 @@ program.command('solve [chapterRange]')
   .option('--interactive', 'Ask before starting each chapter')
   .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
   .option('--no-resume', 'Ignore the previous local checkpoint')
-  .action(async (chapterRange, options) => withClient(async client => {
+  .action(async (chapterRange, options) => withClient(async (client, user) => {
+    const courseId = options.course || await chooseSolveCourse(user);
     const result = await solveCourse(client, {
-      courseId: options.course,
+      courseId,
       targetChapter: chapterRange || null,
       dryRun: Boolean(options.dryRun),
       single: Boolean(options.single),
@@ -620,6 +652,50 @@ answers.command('sync')
       if (p.total) process.stdout.write(`\r${p.message}   `);
     } });
     console.log(`\nSaved ${result.saved} page(s). Discovered ${result.discovered} chapter pages; ${result.failed} failed.`);
+  });
+
+
+answers.command('sync-python')
+  .description('Download the public Python course answer guide into a local searchable reference bank')
+  .option('--delay <milliseconds>', 'Pause between public page requests', '300')
+  .action(async options => {
+    const delayMs = Number(options.delay);
+    if (!Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
+      throw new Error('--delay must be an integer between 0 and 5000 milliseconds.');
+    }
+
+    console.log('Source: https://answers.studentplatformeg.online/qureo-python/');
+    console.log('Downloading public Python answer pages. No QUREO account or progress changes are involved.');
+    const result = await syncPythonAnswerGuide({
+      delayMs,
+      onProgress: progress => {
+        if (progress.message) process.stdout.write(`\r${progress.message}   `);
+      }
+    });
+    console.log(`\nSaved ${result.answers_extracted} question/answer pair(s).`);
+    console.log(`Levels: ${result.levels_fetched}/${result.levels_listed} | Lessons: ${result.lessons_fetched}/${result.lessons_found}`);
+    console.log(`Failed pages: ${result.failed_pages} | Count mismatches: ${result.count_mismatches}`);
+    console.log(`Local answer guide: ${result.outputPath}`);
+    console.log('Search it offline with: qureo search "<question words>"');
+  });
+
+
+answers.command('search-python <query>')
+  .description('Search the locally downloaded Python answer reference without network access')
+  .option('--limit <number>', 'Maximum results', '8')
+  .action((query, options) => {
+    const limit = Number.parseInt(options.limit, 10);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error('--limit must be between 1 and 100.');
+    }
+    const results = searchSavedPythonAnswers(query, limit);
+    if (!results.length) return console.log(`No Python guide matches for: ${query}`);
+    for (const [index, result] of results.entries()) {
+      console.log(`\n${index + 1}. ${result.level_title} | ${result.lesson_title}`);
+      console.log(`Question: ${result.question}`);
+      console.log(`Answer:\n${result.answer}`);
+      console.log(`Source: ${result.source_url}`);
+    }
   });
 
 

@@ -77,7 +77,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo export` | Export course, chapter, lesson and assessment data |
 | `qureo search <query>` | Search local questions and answer sources |
 | `qureo answer save ...` | Save a personal answer or solution note |
-| `qureo solve [range]` | Run the sequential chapter solver |
+| `qureo solve [range]` | Choose JavaScript or Python interactively, then run the chapter solver |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
 | `sprix sync` / `progress` | Sync the live curriculum and summarize saved progress |
@@ -86,7 +86,8 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
 | `sprix bank harvest` / `sprix bank build` | Export course questions, then build a local answer bank from a separate answer map |
-| `sprix bank import` / `sprix solve` | Optional local bank import and preview or submit safe matches |
+| `sprix solve` | Solve all remaining SPRIX chapters in order, skipping completed chapters |
+| `sprix bank import` / `sprix bank status` | Import and inspect your local SPRIX answer bank |
 | `sprix login` / `logout` | Sign in with Login ID and password, or remove the encrypted session |
 | `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |

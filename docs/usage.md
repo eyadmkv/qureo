@@ -13,6 +13,19 @@ qureo logout
 
 The password prompt is hidden. The CLI sends credentials to the QUREO login service, verifies the authenticated session and stores the returned cookies encrypted with Windows DPAPI. The password is not saved.
 
+
+## Choose a course and solve chapters
+
+Run \`qureo solve\` to choose JavaScript or Python from an interactive list. You can bypass the menu with \`--course\`:
+
+\`\`\`powershell
+qureo solve
+qureo solve --course python_short_ar --dry-run
+qureo solve --course javascript_ar
+\`\`\`
+
+The solver reads the matching local file under \`answers/\`. Python choice and code-description questions are supported. See the [solver guide](solver.md) for Python assessment prerequisites and answer-bank coverage.
+
 ## Sync and inspect progress
 
 ```powershell
@@ -56,6 +69,17 @@ qureo answers list
 ```
 
 Public guide synchronization stores only material available without bypassing access controls. Personal answer notes are kept in the local database.
+
+### Python public answer reference
+
+Download the publicly available Python course answers:
+
+```powershell
+qureo answers sync-python
+qureo answers search-python "print"
+```
+
+The importer follows the public index, level pages and lesson pages, then saves extracted question/answer pairs to `data/python_short_ar_answer_guide.json`. It also caches the lesson pages for local search. Use `qureo answers search-python "<question or answer>"` to display matching question/answer pairs without network access. The guide currently advertises 25 levels, 116 lessons and 448 answered questions. The downloaded reference is separate from `answers/python_short_ar.json`, which the solver uses by QUREO question ID. Review and map an answer to the exact QUREO question before adding it to that solver file.
 
 ## Local files
 

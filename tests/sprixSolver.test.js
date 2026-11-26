@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, planSprixChapterSelection, solveSprixCourse } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -259,4 +259,164 @@ test('rejects an answer option that does not belong to its question', () => {
     () => buildSprixCourseAnswerBank(source, answerMap),
     /does not belong to question/u
   );
+});
+
+
+test('lists only chapter items in curriculum order and carries completion and unlock state', () => {
+  const chapters = listSprixChapters([
+    {
+      title: 'Unit One',
+      sections: [{
+        items: [
+          { id: 101, item_type: 'chapter', title: 'Chapter One', is_completed: true, is_unlocked: true },
+          { id: 102, item_type: 'review', title: 'Review One' }
+        ]
+      }]
+    },
+    {
+      title: 'Unit Two',
+      items: [
+        { id: 201, item_type: 'chapter', title: 'Chapter Two', is_completed: false, is_unlocked: false },
+        { id: 202, item_type: 'test', title: 'Test Two' }
+      ]
+    }
+  ]);
+
+  assert.deepEqual(chapters.map(chapter => chapter.id), ['101', '201']);
+  assert.deepEqual(chapters.map(chapter => chapter.sequence), [1, 2]);
+  assert.equal(chapters[0].completed, true);
+  assert.equal(chapters[0].unlocked, true);
+  assert.equal(chapters[1].completed, false);
+  assert.equal(chapters[1].unlocked, false);
+  assert.equal(chapters[1].unitTitle, 'Unit Two');
+});
+
+test('plans all unfinished SPRIX chapters from the first unfinished chapter', () => {
+  const chapters = [
+    { id: '101', sequence: 1, completed: true },
+    { id: '201', sequence: 2, completed: false },
+    { id: '301', sequence: 3, completed: false },
+    { id: '401', sequence: 4, completed: true }
+  ];
+
+  const result = planSprixChapterSelection(chapters);
+  assert.deepEqual(result.chapters.map(chapter => chapter.id), ['201', '301']);
+  assert.equal(result.selectionLabel, 'all remaining chapters');
+});
+
+test('supports single-chapter and maximum-chapter SPRIX solve limits', () => {
+  const chapters = [
+    { id: '101', sequence: 1, completed: true },
+    { id: '201', sequence: 2, completed: false },
+    { id: '301', sequence: 3, completed: false }
+  ];
+
+  const single = planSprixChapterSelection(chapters, { single: true });
+  assert.deepEqual(single.chapters.map(chapter => chapter.id), ['201']);
+
+  const limited = planSprixChapterSelection(chapters, { maxChapters: 1 });
+  assert.deepEqual(limited.chapters.map(chapter => chapter.id), ['201']);
+
+  const targeted = planSprixChapterSelection(chapters, { chapterId: '301' });
+  assert.deepEqual(targeted.chapters.map(chapter => chapter.id), ['301']);
+});
+
+test('solves SPRIX chapters in order and refreshes progress to unlock the next chapter', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const units = [{
+    title: 'Unit',
+    items: [
+      { id: 101, item_type: 'chapter', title: 'Chapter One', is_completed: false, is_unlocked: true },
+      { id: 201, item_type: 'chapter', title: 'Chapter Two', is_completed: false, is_unlocked: false }
+    ]
+  }];
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return structuredClone(units);
+    },
+    async getChapterBlocks(chapterId) {
+      return {
+        chapter: { title: 'Chapter ' + chapterId, cleared_block_ids: [] },
+        blocks: [{
+          id: Number(chapterId) + 1,
+          type: 'question',
+          question: { text: 'ما وظيفة المال في المجتمع؟' },
+          options: [
+            { id: Number(chapterId) + 2, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+            { id: Number(chapterId) + 3, text: 'تقتصر وظيفة المال على شراء الذهب' }
+          ]
+        }]
+      };
+    },
+    async answerChapterQuestion(chapterId, blockId, optionId) {
+      calls.push('answer:' + chapterId + ':' + blockId + ':' + optionId);
+      return { data: { is_correct: true } };
+    },
+    async completeChapter(chapterId) {
+      calls.push('complete:' + chapterId);
+      const chapter = units[0].items.find(item => String(item.id) === String(chapterId));
+      chapter.is_completed = true;
+      const next = units[0].items.find(item => item.id > chapter.id && item.item_type === 'chapter');
+      if (next) next.is_unlocked = true;
+      return { data: { star_score: 3 } };
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    onConfirm: async () => true,
+    onProgress: () => {}
+  });
+
+  assert.equal(result.chaptersProcessed, 2);
+  assert.equal(result.chaptersCompleted, 2);
+  assert.equal(result.questionsSubmitted, 2);
+  assert.deepEqual(calls, [
+    'answer:101:102:103',
+    'complete:101',
+    'answer:201:202:203',
+    'complete:201'
+  ]);
+});
+
+test('SPRIX dry-run previews the course without confirmation or state-changing requests', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const session = {
+    async getCurriculum() {
+      return [{
+        title: 'Unit',
+        items: [{ id: 101, item_type: 'chapter', title: 'Chapter One', is_completed: false, is_unlocked: true }]
+      }];
+    },
+    async getChapterBlocks() {
+      return {
+        chapter: { title: 'Chapter One', cleared_block_ids: [] },
+        blocks: [{
+          id: 102,
+          type: 'question',
+          question: { text: 'ما وظيفة المال في المجتمع؟' },
+          options: [
+            { id: 103, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+            { id: 104, text: 'تقتصر وظيفة المال على شراء الذهب' }
+          ]
+        }]
+      };
+    },
+    async answerChapterQuestion() {
+      assert.fail('Dry-run must not submit answers.');
+    },
+    async completeChapter() {
+      assert.fail('Dry-run must not complete chapters.');
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    dryRun: true,
+    onConfirm: async () => assert.fail('Dry-run must not ask for confirmation.'),
+    onProgress: () => {}
+  });
+
+  assert.equal(result.chaptersProcessed, 1);
+  assert.equal(result.chaptersCompleted, 0);
+  assert.equal(result.questionsSubmitted, 0);
 });
