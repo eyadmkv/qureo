@@ -77,7 +77,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo export` | Export course, chapter, lesson and assessment data |
 | `qureo search <query>` | Search local questions and answer sources |
 | `qureo answer save ...` | Save a personal answer or solution note |
-| `qureo solve [range]` | Run the sequential chapter solver |
+| `qureo solve [range]` | Choose JavaScript or Python interactively, then run the chapter solver |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
 | `sprix sync` / `progress` | Sync the live curriculum and summarize saved progress |
