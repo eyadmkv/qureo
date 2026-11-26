@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixCookieHeader, parseSprixCurlRequest, SprixHttpClient } from '../src/sprixHttp.js';
+import { parseSprixCookieHeader, parseSprixCurlRequest, selectSprixSubjectId, SprixHttpClient } from '../src/sprixHttp.js';
 
 test('parses a Cookie request header', () => {
   assert.equal(
@@ -27,6 +27,34 @@ test('rejects missing or multiline cookie values', () => {
 test('restricts the client to HTTPS SPRIX origins', () => {
   assert.throws(() => new SprixHttpClient({ cookie: 'session=x', origin: 'https://example.com' }), /Only HTTPS/u);
   assert.throws(() => new SprixHttpClient({ cookie: 'session=x', origin: 'http://egy.app.spx-learning-square.com' }), /Only HTTPS/u);
+});
+
+test('selects the active Financial Literacy course and ignores game subjects', () => {
+  assert.equal(selectSprixSubjectId([
+    {
+      id: 3,
+      name: 'Financial Literacy',
+      subject_type: 'financial_literacy',
+      course_code: 'financial_literacy',
+      kind: 'normal',
+      status: 'active',
+      total_items: 134
+    },
+    {
+      id: 8,
+      name: 'Global Finance Quest',
+      kind: 'game',
+      status: 'active',
+      total_items: 0
+    }
+  ]), 3);
+});
+
+test('requires an explicit subject when multiple active courses are available', () => {
+  assert.throws(() => selectSprixSubjectId([
+    { id: 3, name: 'Financial Literacy', subject_type: 'financial_literacy', kind: 'normal', status: 'active', total_items: 134 },
+    { id: 9, name: 'Business', kind: 'normal', status: 'active', total_items: 40 }
+  ]), /Choose one with --subject/u);
 });
 
 test('fetches curriculum with the saved cookie and expected origin', async () => {
@@ -119,6 +147,29 @@ test('logs in with a Login ID and password, stores returned cookies in memory, a
         headers: loginHeaders
       });
     }
+    if (url.endsWith('/api/v1/subjects')) {
+      return new Response(JSON.stringify({
+        success: true,
+        data: [
+          {
+            id: 3,
+            name: 'Financial Literacy',
+            subject_type: 'financial_literacy',
+            course_code: 'financial_literacy',
+            kind: 'normal',
+            status: 'active',
+            total_items: 134
+          },
+          {
+            id: 8,
+            name: 'Global Finance Quest',
+            kind: 'game',
+            status: 'active',
+            total_items: 0
+          }
+        ]
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
     return new Response(JSON.stringify({ success: true, data: [{ id: 1, title: 'Unit' }] }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
@@ -131,15 +182,19 @@ test('logs in with a Login ID and password, stores returned cookies in memory, a
     fetchImpl
   });
 
-  assert.equal(requests.length, 2);
+  assert.equal(requests.length, 3);
   assert.equal(requests[0].url, 'https://egy.app.spx-learning-square.com/api/v1/auth/login');
   assert.equal(requests[0].options.method, 'POST');
   assert.deepEqual(JSON.parse(requests[0].options.body), {
     login_id: 'student-code',
     password: 'test-password'
   });
-  assert.equal(new Headers(requests[1].options.headers).get('cookie'),
+  assert.equal(requests[1].url, 'https://egy.app.spx-learning-square.com/api/v1/subjects');
+  assert.equal(requests[2].url, 'https://egy.app.spx-learning-square.com/api/v1/subjects/3/curriculum');
+  assert.equal(new Headers(requests[2].options.headers).get('cookie'),
     'learning_token=learning123; game_token=game123');
+  assert.equal(result.subjectId, 3);
+  assert.equal(result.session.metadata.subjectId, 3);
   assert.equal(result.curriculum.length, 1);
   assert.equal(result.session.cookie.includes('learning_token=learning123'), true);
   assert.equal(result.session.cookie.includes('game_token=game123'), true);
