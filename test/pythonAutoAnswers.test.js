@@ -481,3 +481,50 @@ test('does not include output annotations in submitted Python description code',
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+test('uses the exact matching review lesson when a level contains multiple review sets', () => {
+  const liveQuestions = Array.from({ length: 7 }, (_, index) => ({
+    question: {
+      id: 511008100 + index * 10,
+      type: 'description',
+      content: 'Live midterm question ' + (index + 1)
+    },
+    choices: []
+  }));
+
+  const reviewAnswers = Array.from({ length: 5 }, (_, index) => ({
+    id: 'py-l08-s01-q' + (index + 1),
+    level_id: '08',
+    lesson_id: 'py-l08-s01',
+    lesson_title: 'مراجعة المستويات 5 إلى 7',
+    question_number: index + 1,
+    question: 'Earlier review question ' + (index + 1),
+    answer: 'print(' + (index + 1) + ')'
+  }));
+
+  const midtermAnswers = Array.from({ length: 7 }, (_, index) => ({
+    id: 'py-l08-s02-q' + (index + 1),
+    level_id: '08',
+    lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى',
+    question_number: index + 1,
+    question: 'Different midterm source wording ' + (index + 1),
+    answer: 'print(' + (index + 101) + ')'
+  }));
+
+  const result = matchPythonAssessmentAnswers(
+    liveQuestions,
+    [...reviewAnswers, ...midtermAnswers],
+    '08'
+  );
+
+  assert.equal(result.matches.length, 7);
+  assert.deepEqual(result.unmatched, []);
+  assert.ok(result.matches.every(match => match.strategy === 'review-order'));
+  assert.deepEqual(result.answers, Object.fromEntries(
+    liveQuestions.map((item, index) => [
+      String(item.question.id),
+      { type: 'description', answer_code: 'print(' + (index + 101) + ')' }
+    ])
+  ));
+});
