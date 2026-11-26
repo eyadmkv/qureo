@@ -86,8 +86,8 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
 | `sprix bank harvest` / `sprix bank build` | Export course questions, then build a local answer bank from a separate answer map |
-| `sprix solve` | Solve all remaining SPRIX chapters in order, skipping completed chapters |
-| `sprix bank import` / `sprix bank status` | Import and inspect your local SPRIX answer bank |
+| `sprix solve` | Solve remaining chapters, reviews and tests in curriculum order, skipping completed items |
+| `sprix bank import` / `sprix bank import-english` / `sprix bank status` | Import and inspect local answer maps, including English test mappings |
 | `sprix login` / `logout` | Sign in with Login ID and password, or remove the encrypted session |
 | `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
@@ -102,6 +102,8 @@ The standalone `sprix` command works with the Egyptian second-year Baccalaureate
 Sign in with `sprix login`. The CLI prompts for your Login ID and masks your password, sends the credentials directly to SPRIX, validates the session with a read-only curriculum request, then stores the resulting cookies encrypted with Windows DPAPI. The password is never stored. Cookie import remains available as a fallback.
 
 Account-changing actions require an explicit `--yes` confirmation. The CLI does not brute-force choices, submit dummy test answers to reveal keys, or retry a POST/PUT after a network error. SPRIX's API is separate from QUREO's client and session.
+
+For English Financial Literacy (subject 3), run `sprix bank import-english` to install the chapter and test answer maps. Course-wide `sprix solve` now handles tests in curriculum order: it verifies mapped option IDs against the live attempt, saves answers, submits the test for grading, and continues only after SPRIX confirms a passing result and updates the curriculum. Completed tests are skipped. `sprix solve --dry-run` never starts a test and stops its preview at the first pending test boundary. The public answer mappings are third-party and unverified; the solver fails closed if a mapped option is missing or SPRIX marks it incorrect. `--answers-only` leaves tests unsubmitted.
 
 See the [SPRIX local study guide](docs/sprix.md) and the [SPRIX API CLI guide](docs/sprix-api.md). Captured lessons, sessions, exports, and personal notes stay under `data/sprix/`, which is excluded from Git.
 
