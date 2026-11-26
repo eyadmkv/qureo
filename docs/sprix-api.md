@@ -35,6 +35,25 @@ The previous cookie import remains available if password login is unavailable:
 
 You can also save the copied cURL request in a local UTF-8 file and use `sprix login --cookie-file .\\sprix-session-curl.txt`. Do not commit or share that file, and delete it after importing the session.
 
+
+## Capture an undocumented lesson action safely
+
+Some interactive lesson controls are not represented by the currently documented chapter and review endpoints. To identify one without exposing your session cookie:
+
+1. Open the lesson in Chrome and press **F12**.
+2. Select **Network**, then the **Fetch/XHR** filter. Clear the request list.
+3. Click one **علّم كمراجع** card.
+4. Select the new request, right-click it, and choose **Copy → Copy as cURL**.
+5. In PowerShell, run:
+
+   ~~~powershell
+   sprix inspect-action
+   ~~~
+
+6. Paste only the sanitized JSON printed by the command into your issue or chat. It removes cookies, authorization values, CSRF/XSRF tokens, sensitive URL parameters and sensitive JSON fields. It performs no network request and does not save the copied cURL.
+
+Capture the request produced by the final **راجعت كل حاجة** action separately once that button is enabled. One sample of each action is enough to identify the request patterns; do not share the raw cURL text or browser session data.
+
 ## Read course data
 
 ```powershell

@@ -93,6 +93,165 @@ export function readSprixClipboard() {
   return result.stdout.replace(/^\uFEFF/u, '');
 }
 
+
+function tokenizeCurlCommand(source) {
+  const input = String(source || '').replace(/\\\r?\n/gu, ' ').trim();
+  if (!/^curl(?:\.exe)?(?:\s|$)/iu.test(input)) {
+    throw new Error('Clipboard does not contain a cURL request. In DevTools choose Copy as cURL.');
+  }
+
+  const tokens = [];
+  let token = '';
+  let quote = null;
+  let started = false;
+
+  for (let index = 0; index < input.length; index++) {
+    const character = input[index];
+    if (quote === "'") {
+      if (character === "'") quote = null;
+      else token += character;
+      started = true;
+      continue;
+    }
+    if (quote === '"') {
+      if (character === '"') quote = null;
+      else if (character === '\\' && index + 1 < input.length) token += input[++index];
+      else token += character;
+      started = true;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      started = true;
+    } else if (character === '\\' && index + 1 < input.length) {
+      const next = input[index + 1];
+      if (next === '\r' || next === '\n') {
+        index++;
+        if (next === '\r' && input[index + 1] === '\n') index++;
+      } else {
+        token += input[++index];
+      }
+      started = true;
+    } else if (/\s/u.test(character)) {
+      if (started) tokens.push(token);
+      token = '';
+      started = false;
+    } else {
+      token += character;
+      started = true;
+    }
+  }
+
+  if (quote) throw new Error('The copied cURL command has an unmatched quote.');
+  if (started) tokens.push(token);
+  return tokens.slice(1);
+}
+
+function redactSprixValue(value, key = '') {
+  if (/(?:cookie|token|password|secret|authorization|session|csrf|xsrf|api[_-]?key|email|phone|login[_-]?id)/iu.test(key)) {
+    return '[REDACTED]';
+  }
+  if (Array.isArray(value)) return value.map(item => redactSprixValue(item));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([name, item]) => [
+      name,
+      redactSprixValue(item, name)
+    ]));
+  }
+  return value;
+}
+
+export function parseSprixCurlRequest(source) {
+  const args = tokenizeCurlCommand(source);
+  let method = '';
+  let requestUrl = '';
+  let body = null;
+  let bodyLength = 0;
+  const headers = {};
+  const redactedHeaders = [];
+
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index];
+    const next = args[index + 1];
+    if (argument === '-X' || argument === '--request') {
+      method = String(next || '').toUpperCase();
+      index++;
+    } else if (argument.startsWith('--request=')) {
+      method = argument.slice('--request='.length).toUpperCase();
+    } else if (argument === '--url') {
+      requestUrl = next || '';
+      index++;
+    } else if (argument.startsWith('--url=')) {
+      requestUrl = argument.slice('--url='.length);
+    } else if (argument === '-H' || argument === '--header') {
+      const header = String(next || '');
+      index++;
+      const separator = header.indexOf(':');
+      if (separator > 0) {
+        const name = header.slice(0, separator).trim().toLowerCase();
+        const value = header.slice(separator + 1).trim();
+        if (/^(?:cookie|set-cookie|authorization|proxy-authorization|x-.*(?:token|key|secret)|.*(?:csrf|xsrf).*)$/iu.test(name)) {
+          redactedHeaders.push(name);
+        } else if (['accept', 'content-type', 'origin', 'referer', 'user-agent', 'x-requested-with'].includes(name)) {
+          headers[name] = name === 'referer' ? value.split('?')[0] : value;
+        } else {
+          redactedHeaders.push(name);
+        }
+      }
+    } else if (['-d', '--data', '--data-raw', '--data-binary', '--data-ascii', '--json'].includes(argument)) {
+      body = next ?? '';
+      bodyLength = Buffer.byteLength(body, 'utf8');
+      index++;
+    } else if (/^https?:\/\//iu.test(argument) && !requestUrl) {
+      requestUrl = argument;
+    }
+  }
+
+  if (!requestUrl) throw new Error('Could not find the request URL in the copied cURL command.');
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(requestUrl);
+  } catch {
+    throw new Error('The copied request URL is invalid.');
+  }
+  if (parsedUrl.protocol !== 'https:' ||
+      !(parsedUrl.hostname === 'spx-learning-square.com' || parsedUrl.hostname.endsWith('.spx-learning-square.com')) ||
+      parsedUrl.username || parsedUrl.password) {
+    throw new Error('Only HTTPS SPRIX Learning Square requests can be inspected.');
+  }
+
+  if (!method) method = body === null ? 'GET' : 'POST';
+  parsedUrl.hash = '';
+  for (const key of parsedUrl.searchParams.keys()) {
+    if (/(?:token|key|secret|auth|session|code|signature)/iu.test(key)) {
+      parsedUrl.searchParams.set(key, '[REDACTED]');
+    }
+  }
+
+  let parsedBody = null;
+  let bodyFormat = 'none';
+  if (body !== null) {
+    try {
+      parsedBody = redactSprixValue(JSON.parse(body));
+      bodyFormat = 'json';
+    } catch {
+      parsedBody = '[non-JSON body omitted]';
+      bodyFormat = 'non-json';
+    }
+  }
+
+  return {
+    method,
+    url: parsedUrl.origin + parsedUrl.pathname + parsedUrl.search,
+    headers,
+    redactedHeaders: [...new Set(redactedHeaders)].sort(),
+    bodyFormat,
+    body: parsedBody,
+    bodyLength
+  };
+}
+
+
 function validId(value, label) {
   const text = String(value ?? '');
   const number = Number(text);
