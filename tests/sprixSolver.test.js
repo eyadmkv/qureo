@@ -257,28 +257,41 @@ test('uses exact subject-7 test-question mappings before text matching', () => {
   assert.ok(result.plan.every(row => row.answerSource === 'test-answer-map'));
 });
 
-test('uses exact subject-7 chapter block mappings', () => {
+test('uses exact subject-7 chapter mappings and falls back to its text archive', () => {
+  const localBank = parseSprixAnswerBank(sampleSource());
   const result = buildSprixChapterPlan({
     chapter: { title: 'ما هي الزكاة؟' },
-    blocks: [{
-      id: 6941,
-      type: 'question',
-      question: { text: 'سؤال الزكاة' },
-      options: [
-        { id: 2681, text: 'خيار آخر' },
-        { id: 2680, text: 'الإجابة المعتمدة في الخريطة' }
-      ]
-    }]
+    blocks: [
+      {
+        id: 6941,
+        type: 'question',
+        question: { text: 'سؤال الزكاة' },
+        options: [
+          { id: 2681, text: 'خيار آخر' },
+          { id: 2680, text: 'الإجابة المعتمدة في الخريطة' }
+        ]
+      },
+      {
+        id: 6942,
+        type: 'question',
+        question: { text: 'ما وظيفة المال في المجتمع؟' },
+        options: [
+          { id: 204, text: 'تقتصر وظيفة المال على شراء الذهب' },
+          { id: 203, text: 'يعمل المال كوسيط للتبادل بين الناس' }
+        ]
+      }
+    ]
   }, {
     subjectId: 7,
-    questions: [],
+    questions: localBank.questions,
     blockAnswers: { 6941: 2680 }
   });
 
-  assert.equal(result.plan.length, 1);
-  assert.equal(result.plan[0].optionId, 2680);
+  assert.equal(result.plan.length, 2);
+  assert.deepEqual(result.plan.map(row => row.optionId), [2680, 203]);
   assert.equal(result.unmatched.length, 0);
   assert.match(result.plan[0].bankQuestion, /Arabic subject-7/u);
+  assert.equal(result.plan[1].bankQuestion, 'ما وظيفة المال في المجتمع؟');
 });
 
 test('matches Arabic test questions and answers from a local answer bank', () => {
