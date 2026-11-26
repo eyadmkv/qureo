@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
 import { DATA_DIR } from './paths.js';
 import { SprixHttpClient } from './sprixHttp.js';
 
@@ -253,6 +255,300 @@ function unitSections(unit) {
   if (Array.isArray(unit.sections) && unit.sections.length > 0) return unit.sections;
   if (Array.isArray(unit.items)) return [{ id: null, items: unit.items }];
   return [];
+}
+
+export function listSprixChapters(units) {
+  if (!Array.isArray(units)) throw new Error('SPRIX curriculum did not contain a unit list.');
+
+  const chapters = [];
+  for (const unit of units) {
+    for (const section of unitSections(unit)) {
+      for (const item of section.items || []) {
+        if (String(item.item_type || '').toLowerCase() !== 'chapter') continue;
+        if (item.id === undefined || item.id === null || String(item.id).trim() === '') {
+          throw new Error('A SPRIX chapter is missing its ID. The course run was stopped.');
+        }
+        chapters.push({
+          ...item,
+          id: String(item.id),
+          sequence: chapters.length + 1,
+          title: item.title || item.name || 'Untitled chapter',
+          unitTitle: unit.title || unit.name || 'Unit',
+          completed: item.is_completed === true,
+          unlocked: unit.is_accessible !== false &&
+            item.is_accessible !== false &&
+            item.is_unlocked !== false
+        });
+      }
+    }
+  }
+  return chapters;
+}
+
+export function planSprixChapterSelection(chapters, {
+  chapterId = null,
+  single = false,
+  maxChapters = null,
+  skipCompleted = true
+} = {}) {
+  if (!Array.isArray(chapters) || chapters.length === 0) {
+    throw new Error('No chapters were found in the SPRIX curriculum.');
+  }
+  if (maxChapters !== null && (!Number.isInteger(maxChapters) || maxChapters < 1)) {
+    throw new Error('Maximum chapter count must be a positive integer.');
+  }
+
+  const target = chapterId === null || chapterId === undefined ? '' : String(chapterId).trim();
+  let targetIndex = -1;
+  if (target) {
+    targetIndex = chapters.findIndex(chapter => String(chapter.id) === target);
+    if (targetIndex < 0 && /^\d+$/u.test(target)) {
+      targetIndex = chapters.findIndex(chapter => chapter.sequence === Number(target));
+    }
+    if (targetIndex < 0) throw new Error('Chapter "' + target + '" was not found in the SPRIX curriculum.');
+  }
+
+  const firstUnfinishedIndex = chapters.findIndex(chapter => !chapter.completed);
+  const startIndex = target ? targetIndex : firstUnfinishedIndex;
+  if (startIndex < 0) {
+    return {
+      chapters: [],
+      skippedCompleted: 0,
+      selectionLabel: 'all chapters',
+      summary: 'All SPRIX chapters are already complete.'
+    };
+  }
+
+  const endIndex = target ? targetIndex : single ? startIndex : chapters.length - 1;
+  const candidates = [];
+  let skippedCompleted = 0;
+  for (let index = startIndex; index <= endIndex; index++) {
+    const chapter = chapters[index];
+    if (!chapter) continue;
+    if (skipCompleted && chapter.completed) {
+      skippedCompleted++;
+      continue;
+    }
+    candidates.push(chapter);
+  }
+
+  const selected = maxChapters === null ? candidates : candidates.slice(0, maxChapters);
+  const selectionLabel = target
+    ? 'chapter ' + chapters[targetIndex].sequence
+    : single
+      ? 'the first unfinished chapter'
+      : 'all remaining chapters';
+  const summary = selected.length
+    ? null
+    : target && skipCompleted && chapters[targetIndex].completed
+      ? 'Chapter ' + chapters[targetIndex].sequence + ' is already complete.'
+      : 'No unfinished SPRIX chapters remain.';
+
+  return { chapters: selected, skippedCompleted, selectionLabel, summary };
+}
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function refreshUntilSprixChapterCompleted(session, subjectId, chapterId, completionResponse) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const units = await session.getCurriculum(subjectId);
+    const current = listSprixChapters(units).find(chapter => chapter.id === String(chapterId));
+    if (!current) throw new Error('Chapter ' + chapterId + ' disappeared from the SPRIX curriculum after completion.');
+    if (current.completed ||
+        completionResponse?.data?.is_completed === true ||
+        completionResponse?.data?.completed === true) {
+      return units;
+    }
+    if (attempt < 3) await wait(350);
+  }
+  throw new Error(
+    'SPRIX accepted the completion request for chapter ' + chapterId +
+    ', but the curriculum did not confirm it as completed. Stopping before the next chapter.'
+  );
+}
+
+export async function solveSprixCourse(session, bank, {
+  subjectId = '7',
+  chapterId = null,
+  dryRun = false,
+  single = false,
+  maxChapters = null,
+  skipCompleted = true,
+  complete = true,
+  chapterDelayMs = 0,
+  questionDelayMs = 0,
+  onProgress = message => console.log(message),
+  onConfirm = async () => true
+} = {}) {
+  for (const [name, value] of [['Chapter pause', chapterDelayMs], ['Question pause', questionDelayMs]]) {
+    if (!Number.isInteger(value) || value < 0 || value > 3600000) {
+      throw new Error(name + ' must be between 0 and 3600 seconds.');
+    }
+  }
+
+  let units = await session.getCurriculum(subjectId);
+  const allChapters = listSprixChapters(units);
+  const selection = planSprixChapterSelection(allChapters, {
+    chapterId,
+    single,
+    maxChapters,
+    skipCompleted
+  });
+
+  if (!selection.chapters.length) {
+    const summary = selection.summary || 'No SPRIX chapters were selected.';
+    onProgress(summary);
+    return {
+      summary,
+      chaptersProcessed: 0,
+      chaptersCompleted: 0,
+      questionsSubmitted: 0,
+      skippedCompleted: selection.skippedCompleted
+    };
+  }
+
+  const first = selection.chapters[0];
+  const last = selection.chapters[selection.chapters.length - 1];
+  onProgress(
+    'SPRIX progress: selected ' + selection.selectionLabel + ', chapters ' +
+    first.sequence + ' through ' + last.sequence + ' (' + selection.chapters.length + ' chapter(s)).'
+  );
+  if (selection.skippedCompleted) {
+    onProgress('Skipping ' + selection.skippedCompleted + ' completed chapter(s).');
+  }
+  if (maxChapters !== null) onProgress('Maximum chapter limit: ' + maxChapters + '.');
+  if (dryRun) onProgress('Dry run enabled: no answers or completion requests will be sent.');
+
+  if (!dryRun && !await onConfirm({ chapters: selection.chapters, complete })) {
+    const summary = 'Solve cancelled. No answers were submitted.';
+    onProgress(summary);
+    return {
+      summary,
+      chaptersProcessed: 0,
+      chaptersCompleted: 0,
+      questionsSubmitted: 0,
+      skippedCompleted: selection.skippedCompleted,
+      cancelled: true
+    };
+  }
+
+  let chaptersProcessed = 0;
+  let chaptersCompleted = 0;
+  let questionsSubmitted = 0;
+  let skippedCompleted = selection.skippedCompleted;
+
+  for (let position = 0; position < selection.chapters.length; position++) {
+    const selected = selection.chapters[position];
+    const current = listSprixChapters(units).find(chapter => chapter.id === selected.id);
+    if (!current) {
+      throw new Error('Chapter ' + selected.id + ' is missing from the refreshed SPRIX curriculum. Stopping the run.');
+    }
+    if (skipCompleted && current.completed) {
+      skippedCompleted++;
+      onProgress('Skipping completed chapter ' + current.sequence + ': ' + current.title);
+      continue;
+    }
+    if (!current.unlocked) {
+      const message = 'Chapter ' + current.sequence + ' (' + current.title +
+        ') is still locked or inaccessible. The solver stopped here.';
+      if (dryRun) {
+        onProgress('[locked] ' + message);
+        break;
+      }
+      throw new Error(message + ' Complete the preceding chapter, then rerun sprix solve.');
+    }
+
+    const data = await session.getChapterBlocks(current.id);
+    const result = buildSprixChapterPlan(data, bank);
+    onProgress(
+      '\nChapter ' + current.sequence + '/' + allChapters.length + ': ' + current.title +
+      (current.unitTitle ? ' | ' + current.unitTitle : '') +
+      ' | ' + result.pendingQuestionCount + ' pending question(s), ' +
+      result.plan.length + ' matched answer(s)'
+    );
+
+    for (const entry of result.plan) {
+      onProgress(
+        '\n[match] block #' + entry.blockId + ' -> option #' + entry.optionId +
+        '\n  Question: ' + entry.prompt +
+        '\n  Bank answer: ' + entry.bankAnswer +
+        '\n  Option: ' + entry.optionText +
+        '\n  Confidence: question ' + entry.questionScore.toFixed(3) +
+        ', option ' + entry.optionScore.toFixed(3)
+      );
+    }
+
+    if (result.unmatched.length) {
+      onProgress('\nUnmatched:');
+      for (const item of result.unmatched) {
+        onProgress('  block #' + item.blockId + ': ' + item.reason + (item.prompt ? ' | ' + item.prompt : ''));
+      }
+      if (!dryRun) {
+        throw new Error(
+          'Chapter ' + current.sequence + ' has ' + result.unmatched.length +
+          ' unmatched question(s). No answers were submitted for this chapter. The course run stopped here.'
+        );
+      }
+    }
+
+    if (result.pendingQuestionCount === 0) onProgress('No pending multiple-choice questions were found.');
+
+    if (dryRun) {
+      chaptersProcessed++;
+      continue;
+    }
+
+    for (let index = 0; index < result.plan.length; index++) {
+      const entry = result.plan[index];
+      const response = await session.answerChapterQuestion(current.id, entry.blockId, entry.optionId, 0);
+      if (response.data?.is_correct !== true) {
+        throw new Error(
+          'SPRIX did not confirm block #' + entry.blockId + ' as correct. Accepted ' +
+          index + '/' + result.plan.length + ' answer(s) in this chapter. Stopping the course run.'
+        );
+      }
+      questionsSubmitted++;
+      onProgress('Accepted ' + (index + 1) + '/' + result.plan.length + ': block #' + entry.blockId + '.');
+      if (questionDelayMs > 0 && index < result.plan.length - 1) {
+        onProgress('Waiting ' + (questionDelayMs / 1000).toFixed(1) + 's before the next question.');
+        await wait(questionDelayMs);
+      }
+    }
+
+    if (complete) {
+      onProgress('Completing chapter ' + current.sequence + '...');
+      const completion = await session.completeChapter(current.id);
+      if (completion?.data?.star_score !== undefined) {
+        onProgress('Star score: ' + completion.data.star_score);
+      }
+      units = await refreshUntilSprixChapterCompleted(session, subjectId, current.id, completion);
+      chaptersCompleted++;
+      onProgress('SPRIX confirmed chapter ' + current.sequence + ' as complete.');
+    } else {
+      onProgress('All matched answers were accepted. Chapter completion was not requested.');
+    }
+
+    chaptersProcessed++;
+    if (chapterDelayMs > 0 && position < selection.chapters.length - 1) {
+      onProgress('Waiting ' + (chapterDelayMs / 1000).toFixed(1) + 's before the next chapter.');
+      await wait(chapterDelayMs);
+    }
+  }
+
+  const summary = dryRun
+    ? 'Preview complete: ' + chaptersProcessed + ' chapter(s) inspected; no answers submitted.'
+    : 'Solve run complete: ' + chaptersProcessed + ' chapter(s) processed, ' +
+      questionsSubmitted + ' answer(s) accepted' +
+      (complete ? ', ' + chaptersCompleted + ' chapter(s) completed.' : '.');
+
+  onProgress(summary);
+  return {
+    summary,
+    chaptersProcessed,
+    chaptersCompleted,
+    questionsSubmitted,
+    skippedCompleted
+  };
 }
 
 function countChapterQuestions(data) {
@@ -562,64 +858,79 @@ function registerBankCommands(sprix) {
     });
 }
 
+async function confirmSprixSolve({ chapters, complete }, yes) {
+  if (yes) return true;
+  if (!stdin.isTTY) {
+    throw new Error('SPRIX solve will submit answers. Use --yes to confirm in a non-interactive terminal, or --dry-run to preview.');
+  }
+
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  try {
+    const completionText = complete ? ' and complete each chapter' : '';
+    const response = await rl.question(
+      'This will submit matched answers for ' + chapters.length + ' SPRIX chapter(s)' +
+      completionText + ' and update your course progress. Continue? [y/N] '
+    );
+    return /^(?:y|yes)$/iu.test(response.trim());
+  } finally {
+    rl.close();
+  }
+}
+
+function parseSolvePause(value, label) {
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0 || seconds > 3600) {
+    throw new Error(label + ' must be between 0 and 3600 seconds.');
+  }
+  return Math.round(seconds * 1000);
+}
+
 function registerSolveCommand(sprix) {
-  sprix.command('solve <chapterId>')
-    .description('Match pending chapter questions against your local bank and optionally submit high-confidence answers')
-    .option('--yes', 'Submit the previewed answers to SPRIX')
-    .option('--complete', 'Complete the chapter after all answers are accepted')
+  sprix.command('solve [chapterId]')
+    .description('Solve all remaining SPRIX chapters in curriculum order, or one selected chapter')
+    .option('--subject <id>', 'SPRIX subject ID', '7')
+    .option('--dry-run', 'Preview selected chapters without submitting answers')
+    .option('--yes', 'Confirm the run without an interactive prompt')
+    .option('--single', 'Solve only the first unfinished chapter')
+    .option('--max-chapters <count>', 'Stop after this many chapters')
+    .option('--no-skip-completed', 'Revisit completed chapters in the selected work')
+    .option('--complete', 'Complete an explicitly selected chapter after its answers are accepted')
+    .option('--answers-only', 'Submit answers without completing chapters during a course-wide run')
+    .option('--pause-between-chapters <seconds>', 'Wait between completed chapters', '0')
+    .option('--pause-between-questions <seconds>', 'Wait between submitted answers', '0')
     .action(async (chapterId, options) => {
       const bank = loadSprixAnswerBank();
       const session = SprixHttpClient.loadSession();
-      const data = await session.getChapterBlocks(chapterId);
-      const result = buildSprixChapterPlan(data, bank);
-
-      console.log('Chapter #' + chapterId + (result.chapter ? ' | ' + result.chapter : ''));
-      console.log('Pending questions: ' + result.pendingQuestionCount + ' | Ready to answer: ' + result.plan.length);
-      for (const entry of result.plan) {
-        console.log('\\n[match] block #' + entry.blockId + ' -> option #' + entry.optionId);
-        console.log('  Question: ' + entry.prompt);
-        console.log('  Bank answer: ' + entry.bankAnswer);
-        console.log('  Option: ' + entry.optionText);
-        console.log('  Confidence: question ' + entry.questionScore.toFixed(3) + ', option ' + entry.optionScore.toFixed(3));
+      const maxChapters = options.maxChapters === undefined
+        ? null
+        : Number.parseInt(options.maxChapters, 10);
+      if (options.maxChapters !== undefined &&
+          (!Number.isInteger(maxChapters) || maxChapters < 1 || String(maxChapters) !== String(options.maxChapters).trim())) {
+        throw new Error('--max-chapters must be a positive integer.');
       }
-      if (result.unmatched.length) {
-        console.log('\\nUnmatched:');
-        for (const item of result.unmatched) {
-          console.log('  block #' + item.blockId + ': ' + item.reason + (item.prompt ? ' | ' + item.prompt : ''));
-        }
+      if (options.complete && options.answersOnly) {
+        throw new Error('Use either --complete or --answers-only, not both.');
       }
 
-      if (!options.yes) {
-        console.log('\\nDry run only. No answers were submitted. Review the matches, then repeat with --yes.');
-        return;
-      }
-      if (result.unmatched.length) {
-        throw new Error('At least one pending question could not be matched safely. No answers were submitted.');
-      }
-      if (result.pendingQuestionCount === 0) {
-        console.log('No pending multiple-choice questions were found.');
-      }
+      const complete = chapterId
+        ? Boolean(options.complete)
+        : !Boolean(options.answersOnly);
 
-      for (let index = 0; index < result.plan.length; index++) {
-        const entry = result.plan[index];
-        const response = await session.answerChapterQuestion(chapterId, entry.blockId, entry.optionId, 0);
-        if (response.data?.is_correct !== true) {
-          throw new Error('SPRIX did not confirm block #' + entry.blockId + ' as correct. Stopped after ' + index + ' accepted answer(s).');
-        }
-        console.log('Accepted ' + (index + 1) + '/' + result.plan.length + ': block #' + entry.blockId + '.');
-      }
-
-      if (options.complete) {
-        printCompletion(await session.completeChapter(chapterId), chapterId);
-      } else {
-        console.log('All matched answers were accepted. Run sprix complete ' + chapterId + ' --yes when you are ready.');
-      }
+      const result = await solveSprixCourse(session, bank, {
+        subjectId: options.subject,
+        chapterId: chapterId || null,
+        dryRun: Boolean(options.dryRun),
+        single: Boolean(options.single),
+        maxChapters,
+        skipCompleted: options.skipCompleted !== false,
+        complete,
+        chapterDelayMs: parseSolvePause(options.pauseBetweenChapters, 'Chapter pause'),
+        questionDelayMs: parseSolvePause(options.pauseBetweenQuestions, 'Question pause'),
+        onProgress: message => console.log(message),
+        onConfirm: details => confirmSprixSolve(details, Boolean(options.yes))
+      });
+      return result.summary;
     });
-}
-
-function printCompletion(result, chapterId) {
-  console.log('Chapter ' + chapterId + ' completion request accepted.');
-  if (result.data?.star_score !== undefined) console.log('Star score: ' + result.data.star_score);
 }
 
 export function registerSprixSolverCommands(sprix) {
