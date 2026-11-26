@@ -78,6 +78,75 @@ test('matches chapter questions and option text against the imported bank', () =
   assert.equal(result.plan[0].optionScore, 1);
 });
 
+test('matches Arabic and Western numeral combinations when the answer has no word tokens', () => {
+  const source = {
+    units: [{
+      id: 1,
+      title: 'أساسيات المال والتمويل',
+      levels: [{
+        id: 4,
+        title: 'فهم الزكاة',
+        questions: [{
+          id: 'zakat-scenarios',
+          q: 'من بين السيناريوهات الأربعة التالية، أي منها يصف الزكاة بأفضل شكل؟',
+          a: '(١) و(٣)'
+        }]
+      }]
+    }]
+  };
+  const bank = parseSprixAnswerBank(JSON.stringify(source));
+  const result = buildSprixChapterPlan({
+    chapter: { title: 'ما هي الزكاة؟' },
+    blocks: [{
+      id: 6941,
+      type: 'question',
+      question: { text: 'من بين السيناريوهات الأربعة التالية، أي منها يصف الزكاة بأفضل شكل؟' },
+      options: [
+        { id: 2681, text: '(١) و(٢)' },
+        { id: 2682, text: '(1) and (3)' },
+        { id: 2683, text: '(٢) و(٤)' },
+        { id: 2684, text: '(٣) و(٤)' }
+      ]
+    }]
+  }, bank);
+
+  assert.equal(result.plan.length, 1);
+  assert.equal(result.unmatched.length, 0);
+  assert.equal(result.plan[0].optionId, 2682);
+  assert.equal(result.plan[0].optionScore, 1);
+});
+
+test('keeps numeric option matching fail-closed when more than one option has the same combination', () => {
+  const source = {
+    units: [{
+      id: 1,
+      levels: [{
+        questions: [{
+          q: 'ما الاختياران الصحيحان؟',
+          a: '(١) و(٣)'
+        }]
+      }]
+    }]
+  };
+  const bank = parseSprixAnswerBank(JSON.stringify(source));
+  const result = buildSprixChapterPlan({
+    chapter: {},
+    blocks: [{
+      id: 1,
+      type: 'question',
+      question: { text: 'ما الاختياران الصحيحان؟' },
+      options: [
+        { id: 10, text: '(١) و(٣)' },
+        { id: 11, text: '(3) and (1)' }
+      ]
+    }]
+  }, bank);
+
+  assert.equal(result.plan.length, 0);
+  assert.equal(result.unmatched.length, 1);
+  assert.match(result.unmatched[0].reason, /ambiguous numeric match/u);
+});
+
 test('fails closed when a question has no confident bank match', () => {
   const bank = parseSprixAnswerBank(sampleSource());
   const result = buildSprixChapterPlan({
