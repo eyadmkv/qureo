@@ -95,51 +95,51 @@ The solver uses your local answer bank and the live curriculum. It selects chapt
 
 Import your local answer source if you have not already done so:
 
-\`\`\`powershell
+```powershell
 sprix bank import --file .\\script.js
 sprix bank status
-\`\`\`
+```
 
 Preview every remaining chapter without changing your account:
 
-\`\`\`powershell
+```powershell
 sprix solve --dry-run
-\`\`\`
+```
 
 Run the course solver:
 
-\`\`\`powershell
+```powershell
 sprix solve
-\`\`\`
+```
 
 The command asks once before submitting answers. After every chapter has received confirmed correct answers, it requests chapter completion and refreshes the curriculum before moving on. This lets SPRIX unlock the next chapter in sequence. It stops at the first locked or inaccessible chapter, unmatched question, rejected answer, or unconfirmed completion. It never guesses an option or continues past a failed chapter.
 
-For non-interactive terminals, pass \`--yes\` to confirm the full run:
+For non-interactive terminals, pass `--yes` to confirm the full run:
 
-\`\`\`powershell
+```powershell
 sprix solve --yes
-\`\`\`
+```
 
 Useful limits and controls:
 
-\`\`\`powershell
+```powershell
 sprix solve --single
 sprix solve --max-chapters 5
 sprix solve --pause-between-chapters 2 --pause-between-questions 1
 sprix solve --no-skip-completed
-\`\`\`
+```
 
 To work on one specific chapter instead of the whole course:
 
-\`\`\`powershell
+```powershell
 sprix solve <chapter-id> --dry-run
 sprix solve <chapter-id> --yes
 sprix solve <chapter-id> --complete --yes
-\`\`\`
+```
 
-A specific chapter remains a one-chapter operation. Add \`--complete\` when you also want the command to mark that selected chapter complete. In a course-wide run, chapters are completed automatically so the solver can proceed through the curriculum. Use \`--answers-only\` to submit answers without requesting chapter completion.
+A specific chapter remains a one-chapter operation. Add `--complete` when you also want the command to mark that selected chapter complete. In a course-wide run, chapters are completed automatically so the solver can proceed through the curriculum. Use `--answers-only` to submit answers without requesting chapter completion.
 
-The imported bank is stored at \`data/sprix/answer-bank.json\`. It is ignored by Git and is not included in this repository. The solver stops before submitting any answers in a chapter if one or more pending questions have no confident, unique match.
+The imported bank is stored at `data/sprix/answer-bank.json`. It is ignored by Git and is not included in this repository. The solver stops before submitting any answers in a chapter if one or more pending questions have no confident, unique match.
 
 ## Explicit account-changing actions
 
