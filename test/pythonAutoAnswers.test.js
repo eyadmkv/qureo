@@ -391,3 +391,55 @@ test('extracts a comparison-only answer for a Python fill-in description', () =>
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+test('matches the Chapter 7 elif structure despite title-case keyword in the public guide', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511007010,
+      type: 'choice',
+      content: 'اختر الشكل الصحيح لجملة if و elif.'
+    },
+    choices: [
+      { id: 5110070101, content: 'if condition:\\n    A\\nelif conditions:\\n    B' },
+      { id: 5110070102, content: 'if condition:\\n    A\\nelse if conditions:\\n    B' },
+      { id: 5110070103, content: 'if condition:\\n    A\\nelif:\\n    B' },
+      { id: 5110070104, content: 'elif condition:\\n    A\\nif condition:\\n    B' }
+    ]
+  }], [{
+    id: 'py-l07-s04-q1',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'اكتب شكل if وelif.',
+    answer: 'If condition:\\n    A\\nelif conditions:\\n    B'
+  }], '07');
+
+  assert.deepEqual(result.answers, {
+    '511007010': { type: 'choice', choice_id: 5110070101 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('normalizes title-case Python keywords before submitting description answers', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511007020, type: 'description', content: 'اكتب برنامج if و elif.' },
+    choices: []
+  }], [{
+    id: 'py-l07-s04-q2',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 2,
+    question: 'اكتب البرنامج.',
+    answer: 'If num == 1:\\n    print("One")\\nelif num == 2:\\n    print("Two")'
+  }], '07');
+
+  assert.deepEqual(result.answers, {
+    '511007020': {
+      type: 'description',
+      answer_code: 'if num == 1:\\n    print("One")\\nelif num == 2:\\n    print("Two")'
+    }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
