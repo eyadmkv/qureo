@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "course_id": "python_short_ar",
+  "answers": {
+    "511001010": {
+      "type": "choice",
+      "choice_id": 5110010101
+    },
+    "511001020": {
+      "type": "description",
+      "answer_code": "print(\"Good morning\")"
+    },
+    "511001030": {
+      "type": "description",
+      "answer_code": "print(\"programming\")"
+    },
+    "511001040": {
+      "type": "description",
+      "answer_code": "print(\"hello\")"
+    },
+    "511001050": {
+      "type": "choice",
+      "choice_id": 5110010501
+    },
+    "511001060": {
+      "type": "description",
+      "answer_code": "print(\"Hello\")\nprint(\"My name is\")\n#print(\"Riki\")\nprint(\"Cody\")"
+    }
+  }
+}
