@@ -23,7 +23,7 @@ function itemName(item) {
 }
 
 function sectionsOf(unit) {
-  if (Array.isArray(unit.sections)) return unit.sections;
+  if (Array.isArray(unit.sections) && unit.sections.length > 0) return unit.sections;
   if (Array.isArray(unit.items)) return [{ items: unit.items }];
   return [];
 }
