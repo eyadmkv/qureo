@@ -330,16 +330,16 @@ export class QureoLectureBrowser {
     );
   }
 
-  async waitForApiIdle(timeoutMs = 15000) {
+  async waitForApiIdle(minWaitMs = 1500, timeoutMs = 15000) {
     const startedAt = Date.now();
     while (Date.now() - startedAt < timeoutMs) {
       const elapsed = Date.now() - startedAt;
-      if (elapsed >= 1500 && this.inFlightApi.size === 0 && Date.now() - this.lastApiActivity >= 650) {
-        return;
+      if (elapsed >= minWaitMs && this.inFlightApi.size === 0 && Date.now() - this.lastApiActivity >= 650) {
+        return true;
       }
       await sleep(100);
     }
-    throw new Error(`QUREO lesson page did not become idle; ${this.inFlightApi.size} API request(s) are still active.`);
+    return false;
   }
 
   async evaluate(expression) {
@@ -371,7 +371,10 @@ export class QureoLectureBrowser {
     const navigation = await this.cdp.send('Page.navigate', { url: parsed.href }, this.sessionId);
     if (navigation.errorText) throw new Error(`QUREO lesson navigation failed: ${navigation.errorText}`);
     await loaded;
-    await this.waitForApiIdle();
+    const pageIdle = await this.waitForApiIdle();
+    if (!pageIdle) {
+      this.onProgress(`  lesson ${lessonId}: page API activity did not fully settle; continuing with bounded completion checks`);
+    }
 
     const page = await this.evaluate(`({
       href: location.href,
@@ -384,12 +387,21 @@ export class QureoLectureBrowser {
       throw new Error('The hidden browser was redirected away from the QUREO lesson. Run qureo login to refresh the session.');
     }
 
-    this.onProgress(`  lesson ${lessonId}: QUREO page initialized; submitting completion request`);
-    const result = await this.evaluate(buildLectureCompletionScript(lessonId));
-    if (!result || !Number.isInteger(result.status)) {
-      throw new Error('The hidden browser did not return a valid lesson completion response.');
+    for (let attempt = 0; attempt <= 4; attempt++) {
+      this.onProgress(attempt === 0
+        ? `  lesson ${lessonId}: QUREO page initialized; submitting completion request`
+        : `  lesson ${lessonId}: completion is still unavailable; retry ${attempt}/4 after page initialization`
+      );
+      const result = await this.evaluate(buildLectureCompletionScript(lessonId));
+      if (!result || !Number.isInteger(result.status)) {
+        throw new Error('The hidden browser did not return a valid lesson completion response.');
+      }
+      if (result.ok || result.status === 400 || result.status === 409 || result.status !== 404 || attempt === 4) {
+        return result;
+      }
+      await this.waitForApiIdle(800, 4000);
     }
-    return result;
+    throw new Error('The hidden browser exhausted its lesson completion attempts.');
   }
 
   async close() {
