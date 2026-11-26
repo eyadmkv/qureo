@@ -51,7 +51,7 @@ function extractDataObject(source) {
   const assignment = /(?:var|let|const)\s+DATA\s*=\s*/u.exec(text);
   if (!assignment) throw new Error('Could not find a JSON DATA object in the userscript.');
   const start = assignment.index + assignment[0].length;
-  while (/\s/u.test(text[start] || '')) {}
+  // The DATA assignment regex already consumes optional whitespace before the object.
   if (text[start] !== '{') throw new Error('The DATA assignment is not a JSON object.');
   let depth = 0;
   let quoted = false;
