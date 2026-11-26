@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, parseSprixBlockAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -48,6 +48,92 @@ test('imports a standalone DATA JSON object', () => {
 
 test('rejects userscripts without a DATA object', () => {
   assert.throws(() => parseSprixAnswerBank('// no bank here'), /Could not find/u);
+});
+
+test('imports a subject-3 English block map and ignores test answers', () => {
+  const block = Object.fromEntries(Array.from({ length: 200 }, (_, index) => [
+    String(index + 1),
+    index + 1001
+  ]));
+  const bank = parseSprixBlockAnswerBank(JSON.stringify({
+    block,
+    test: { 1: 9999 }
+  }), 'https://example.test/subject3.json');
+
+  assert.equal(bank.format, 'sprix-block-answer-bank');
+  assert.equal(bank.subject_id, 3);
+  assert.equal(bank.language, 'en');
+  assert.equal(bank.total, 200);
+  assert.equal(bank.answers['1'], 1001);
+  assert.equal(Object.hasOwn(bank, 'test'), false);
+  assert.equal(bank.source_url, 'https://example.test/subject3.json');
+});
+
+test('rejects an incomplete subject-3 block answer map', () => {
+  assert.throws(
+    () => parseSprixBlockAnswerBank(JSON.stringify({ block: { 27: 3 }, test: {} })),
+    /incomplete/u
+  );
+});
+
+test('uses exact English subject-3 block mappings for the first five course questions', () => {
+  const bank = {
+    subjectId: 3,
+    questions: [],
+    blockAnswers: {
+      27: 3,
+      50: 6,
+      73: 11,
+      98: 13,
+      108: 20
+    }
+  };
+  const prompts = [
+    "What do you think was a major reason why barter didn't spread across society as a whole?",
+    'Money was born to solve the limits of barter. Which best describes the role money plays?',
+    'What mainly supports the value of modern paper money?',
+    'What kind of state is "hyperinflation"?',
+    'Which of the following is the most important reason money was born?'
+  ];
+  const optionIds = [3, 6, 11, 13, 20];
+  const result = buildSprixChapterPlan({
+    chapter: { title: 'How Money Began' },
+    blocks: prompts.map((prompt, index) => ({
+      id: [27, 50, 73, 98, 108][index],
+      type: 'question',
+      question: { text: prompt },
+      options: [
+        { id: optionIds[index] + 1000, text: 'Distractor option' },
+        { id: optionIds[index], text: 'Mapped English answer' }
+      ]
+    }))
+  }, bank);
+
+  assert.equal(result.pendingQuestionCount, 5);
+  assert.equal(result.plan.length, 5);
+  assert.equal(result.unmatched.length, 0);
+  assert.deepEqual(result.plan.map(row => row.optionId), optionIds);
+  assert.ok(result.plan.every(row => row.questionScore === 1 && row.optionScore === 1));
+});
+
+test('fails closed when an English block map points to an option absent from live data', () => {
+  const result = buildSprixChapterPlan({
+    chapter: {},
+    blocks: [{
+      id: 27,
+      type: 'question',
+      question: { text: 'English question' },
+      options: [{ id: 4, text: 'Current option' }]
+    }]
+  }, {
+    subjectId: 3,
+    questions: [],
+    blockAnswers: { 27: 3 }
+  });
+
+  assert.equal(result.plan.length, 0);
+  assert.equal(result.unmatched.length, 1);
+  assert.match(result.unmatched[0].reason, /absent from the live options/u);
 });
 
 test('matches chapter questions and option text against the imported bank', () => {
