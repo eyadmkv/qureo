@@ -586,14 +586,14 @@ test('evaluates live Python if/elif output when the guide answer is incomplete o
     question: {
       id: 511008060,
       type: 'choice',
-      content: 'اختر نتيجة الطباعة عند تشغيل البرنامج أدناه.\n\n[[code]]score = 92\nif score == 100:\n    print("Perfect score")\nelif score >= 80:\n    print("Pass")\nelif score >= 60:\n    print("So close")[[/code]]'
-    },
-    choices: [
-      { id: 5110080604, content: 'Nothing is printed' },
-      { id: 5110080601, content: 'Pass' },
-      { id: 5110080602, content: 'Perfect score' },
-      { id: 5110080603, content: 'So close' }
-    ]
+      content: 'اختر نتيجة الطباعة عند تشغيل البرنامج أدناه.\n\n[[code]]score = 92\nif score == 100:\n    print("Perfect score")\nelif score >= 80:\n    print("Pass")\nelif score >= 60:\n    print("So close")[[/code]]',
+      choices: [
+        { id: 5110080604, content: 'Nothing is printed' },
+        { id: 5110080601, content: 'Pass' },
+        { id: 5110080602, content: 'Perfect score' },
+        { id: 5110080603, content: 'So close' }
+      ]
+    }
   }], [{
     id: 'py-l08-s02-q6',
     level_id: '08',
