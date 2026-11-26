@@ -72,6 +72,8 @@ The solver stops when a required lesson, answer submission, or completion check 
 
 Some QUREO lesson completion endpoints return HTTP 404 until the lesson page has initialized. In that case, the CLI requests the exact lesson URL through the saved authenticated QUREO session and retries the completion endpoint in the background. It does not open a browser tab. This request does not execute QUREO's frontend JavaScript, so the API may still reject initialization if the lesson requires client-side setup.
 
+The hidden browser is started once per solve run and reused for later lessons. Its DevTools domains are enabled together, then the saved session cookies and browser identity are applied before navigation. After the lesson load event, the solver waits for tracked QUREO API requests to finish and for a short quiet window. The wait ends immediately once that condition is met; it does not impose an additional fixed startup delay. If lesson completion still returns HTTP 404, the solver retries after subsequent API activity settles.
+
 ## Recovery limitations
 
 The local checkpoint records the last observed course, chapter, lesson, question and run state. If a request times out after QUREO may have accepted it, the checkpoint alone cannot prove the server-side result. Do not assume a timed-out submission failed or blindly retry it. Reconcile the account state before continuing.

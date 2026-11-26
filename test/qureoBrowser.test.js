@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildLectureCompletionScript, toCdpCookie } from '../src/qureoBrowser.js';
+import { buildLectureCompletionScript, toCdpCookie, waitForApiIdle } from '../src/qureoBrowser.js';
 
 test('maps host-only session cookies to an exact HTTPS URL', () => {
   const result = toCdpCookie({
@@ -51,4 +51,61 @@ test('builds a same-origin lesson completion request for the browser page', () =
   assert.match(script, /fetch\('\/api\/study\/students\/lectures\/511002030\/complete'/);
   assert.match(script, /method: 'PUT'/);
   assert.match(script, /credentials: 'include'/);
+});
+
+
+test('returns immediately when API requests have already been quiet long enough', async () => {
+  let sleepCalls = 0;
+  const result = await waitForApiIdle({
+    inFlightApi: new Set(),
+    getLastApiActivity: () => 9000,
+    quietWindowMs: 650,
+    timeoutMs: 1500,
+    now: () => 10000,
+    sleepImpl: async () => { sleepCalls++; }
+  });
+
+  assert.equal(result, true);
+  assert.equal(sleepCalls, 0);
+});
+
+test('waits for active API requests and then the quiet window', async () => {
+  let currentTime = 0;
+  let lastActivity = 0;
+  const inFlightApi = new Set(['request-1']);
+
+  const result = await waitForApiIdle({
+    inFlightApi,
+    getLastApiActivity: () => lastActivity,
+    quietWindowMs: 200,
+    timeoutMs: 1000,
+    pollIntervalMs: 50,
+    now: () => currentTime,
+    sleepImpl: async ms => {
+      currentTime += ms;
+      if (currentTime >= 150 && inFlightApi.size) {
+        inFlightApi.clear();
+        lastActivity = currentTime;
+      }
+    }
+  });
+
+  assert.equal(result, true);
+  assert.equal(currentTime, 350);
+});
+
+test('returns false when API activity never becomes idle before timeout', async () => {
+  let currentTime = 0;
+  const result = await waitForApiIdle({
+    inFlightApi: new Set(['request-1']),
+    getLastApiActivity: () => 0,
+    quietWindowMs: 200,
+    timeoutMs: 250,
+    pollIntervalMs: 50,
+    now: () => currentTime,
+    sleepImpl: async ms => { currentTime += ms; }
+  });
+
+  assert.equal(result, false);
+  assert.equal(currentTime, 250);
 });
