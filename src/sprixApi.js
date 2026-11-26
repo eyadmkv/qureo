@@ -63,7 +63,7 @@ function listBlocks(chapterId, data) {
   console.log('Cleared blocks: ' + cleared.size + ' | Total blocks: ' + blocks.length);
   for (const block of blocks) {
     const question = block.question || {};
-    const prompt = question.text || question.title || question.content || question.prompt || block.text || block.description || '';
+    const prompt = question.question_text || question.text || question.title || question.content || question.prompt || block.text || block.description || '';
     const isQuestion = block.type === 'question' || (question && Array.isArray(block.options));
     console.log('\n' + (cleared.has(block.id) ? '[cleared]' : '[pending]') + ' block #' + block.id + ' | ' + (block.type || question.type || 'content'));
     if (prompt) console.log(String(prompt).replace(/\s+/gu, ' ').trim());

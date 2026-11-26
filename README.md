@@ -85,7 +85,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
-| `sprix bank harvest` | Export all chapter and review questions through read-only API requests |
+| `sprix bank harvest` / `sprix bank build` | Export course questions, then build a local answer bank from a separate answer map |
 | `sprix bank import` / `sprix solve` | Optional local bank import and preview or submit safe matches |
 | `sprix login` / `logout` | Sign in with Login ID and password, or remove the encrypted session |
 | `qureo sprix search` / `export` | Search and export your local SPRIX study data |

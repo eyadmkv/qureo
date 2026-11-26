@@ -161,7 +161,7 @@ function cleanText(value) {
 function blockPrompt(block) {
   const question = block.question || {};
   return cleanText(
-    question.text || question.title || question.content || question.description ||
+    question.question_text || question.text || question.title || question.content || question.description ||
     question.prompt || question.question || block.text || block.description || block.content
   );
 }
@@ -267,6 +267,96 @@ function countReviewQuestions(payload) {
   if (Array.isArray(data?.items)) return data.items.length;
   if (Array.isArray(data?.questions)) return data.questions.length;
   return 0;
+}
+
+export function buildSprixCourseAnswerBank(source, answerMap, sourceName = 'course-source.json') {
+  if (source?.format !== 'sprix-course-source' || !Array.isArray(source.units)) {
+    throw new Error('The source file is not a SPRIX course export. Run sprix bank harvest first.');
+  }
+  if (answerMap?.format !== 'sprix-answer-map' || !answerMap.answers || typeof answerMap.answers !== 'object') {
+    throw new Error('The answer map format is unsupported.');
+  }
+  if (Number(answerMap.subject_id) !== Number(source.subject_id)) {
+    throw new Error('The answer map subject does not match the course export.');
+  }
+
+  const answerIds = new Set(Object.keys(answerMap.answers).map(String));
+  const sourceIds = new Set();
+  const units = [];
+  let chaptersFetched = 0;
+  let testsListed = 0;
+
+  for (const unit of source.units) {
+    const levels = [];
+    for (const section of unitSections(unit)) {
+      for (const item of section.items || []) {
+        if (item.item_type === 'test') testsListed++;
+        if (item.item_type !== 'chapter' || item.source_status !== 'fetched') continue;
+        chaptersFetched++;
+
+        const questions = [];
+        for (const block of item.data?.blocks || []) {
+          const question = block.question || {};
+          const isQuestion = block.type === 'question' || (Array.isArray(block.options) && block.options.length > 0);
+          if (!isQuestion) continue;
+
+          const questionId = String(question.id ?? '');
+          if (!questionId) throw new Error('A chapter question is missing its question ID (block #' + block.id + ').');
+          if (sourceIds.has(questionId)) throw new Error('Duplicate SPRIX question ID in course export: ' + questionId);
+          sourceIds.add(questionId);
+
+          const answer = answerMap.answers[questionId];
+          if (!answer) continue;
+
+          const selectedOptionId = String(answer.choice_id ?? answer.option_id ?? '');
+          const selectedOption = (block.options || []).find(option => String(option.id) === selectedOptionId);
+          if (!selectedOption) {
+            throw new Error('Answer map option #' + selectedOptionId + ' does not belong to question #' + questionId + '.');
+          }
+
+          const prompt = cleanText(
+            question.question_text || question.text || question.title || question.content ||
+            question.description || question.prompt || question.question
+          );
+          const answerText = optionText(selectedOption);
+          if (!prompt || !answerText) {
+            throw new Error('Question #' + questionId + ' is missing its prompt or selected option text.');
+          }
+
+          questions.push({ id: questionId, q: prompt, a: answerText });
+        }
+
+        if (questions.length) levels.push({ id: item.id, title: item.title || '', questions });
+      }
+    }
+    if (levels.length) units.push({ id: unit.id ?? null, title: unit.title || '', levels });
+  }
+
+  const missing = [...sourceIds].filter(id => !answerIds.has(id));
+  const unknown = [...answerIds].filter(id => !sourceIds.has(id));
+  if (missing.length || unknown.length) {
+    const details = [];
+    if (missing.length) details.push(missing.length + ' source question(s) have no mapped option');
+    if (unknown.length) details.push(unknown.length + ' answer-map ID(s) are absent from the source export');
+    throw new Error('The course export and answer map do not match: ' + details.join('; ') + '. No bank was saved.');
+  }
+
+  const bank = parseSprixAnswerBank(JSON.stringify({ units }), sourceName);
+  bank.course_id = answerMap.course_id || 'sprix_subject_' + Number(source.subject_id);
+  bank.subject_id = Number(source.subject_id);
+  bank.source_format = source.format;
+  bank.source_export = path.basename(String(sourceName));
+  bank.answer_basis = answerMap.method || 'Derived from course question wording, hints and option text.';
+  bank.coverage = {
+    units: source.units.length,
+    chapters_fetched: chaptersFetched,
+    chapter_questions: sourceIds.size,
+    mapped_chapter_questions: bank.total,
+    tests_listed: testsListed,
+    test_questions_fetched: 0,
+    test_answers_mapped: 0
+  };
+  return bank;
 }
 
 async function harvestCourseSource(subjectId, outputPath) {
@@ -416,6 +506,38 @@ function registerBankCommands(sprix) {
       console.log('Answer notes: ' + bankData.answered + ' | Missing answers: ' + bankData.unanswered);
       console.log('Saved locally: ' + SPRIX_BANK_PATH);
       console.log('This bank is not committed or uploaded.');
+    });
+
+  bank.command('build')
+    .description('Build a local text-matching bank from the course export and a question-ID answer map')
+    .option('--source <path>', 'Course export JSON path', path.join(SPRIX_DIR, 'course-source.json'))
+    .option('--answers <path>', 'Answer map JSON path', path.join(SPRIX_DIR, 'answer-map.json'))
+    .option('--replace', 'Replace the existing local answer bank')
+    .action(options => {
+      if (fs.existsSync(SPRIX_BANK_PATH) && !options.replace) {
+        throw new Error('A local answer bank already exists. Use --replace to overwrite it.');
+      }
+      const sourcePath = path.resolve(options.source);
+      const answersPath = path.resolve(options.answers);
+      if (!fs.existsSync(sourcePath)) throw new Error('Course export not found: ' + sourcePath);
+      if (!fs.existsSync(answersPath)) throw new Error('SPRIX answer map not found: ' + answersPath);
+
+      let source;
+      let answerMap;
+      try {
+        source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+        answerMap = JSON.parse(fs.readFileSync(answersPath, 'utf8'));
+      } catch {
+        throw new Error('The course export or answer map is not valid JSON.');
+      }
+
+      const bankData = buildSprixCourseAnswerBank(source, answerMap, sourcePath);
+      saveBank(bankData);
+      console.log('Built ' + bankData.answered + ' answered question(s) across ' + bankData.unit_count + ' unit(s).');
+      console.log('Chapter questions mapped: ' + bankData.coverage.mapped_chapter_questions + '/' + bankData.coverage.chapter_questions);
+      console.log('Tests listed but not included: ' + bankData.coverage.tests_listed);
+      console.log('Stored locally: ' + SPRIX_BANK_PATH);
+      console.log('Review the dry-run output from sprix solve <chapter-id> before submitting anything.');
     });
 
   bank.command('harvest')
