@@ -147,6 +147,9 @@ export function captureSprixLesson({ title, unit = '', rawText, source = 'clipbo
   const cleanTitle = String(title || '').trim();
   const body = String(rawText || '').trim();
   if (!cleanTitle) throw new Error('Lesson title is required. Use --title "اسم الدرس".');
+  if (body.length < 40) {
+    throw new Error('Captured text is too short. Copy the lesson content, then run the capture command again.');
+  }
   if (body.length < MIN_LESSON_CHARACTERS && !allowShort) {
     throw new Error(
       'Only ' + body.length + ' characters were read from the clipboard. This looks like a partial selection, not a complete SPRIX lesson. ' +
