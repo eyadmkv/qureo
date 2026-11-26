@@ -12,6 +12,7 @@ import {
 import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
+import { syncCommunityAnswers } from './communityAnswers.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
@@ -664,6 +665,19 @@ answers.command('sync')
       if (p.total) process.stdout.write(`\r${p.message}   `);
     } });
     console.log(`\nSaved ${result.saved} page(s). Discovered ${result.discovered} chapter pages; ${result.failed} failed.`);
+  });
+
+
+answers.command('sync-community')
+  .description('Download the third-party QUREO answer archive into ignored local data for ID-validated fallback matching')
+  .action(async () => {
+    console.log('Source: https://github.com/kky84rgkjy-maker/mohammad/blob/main/qureo_answers.json');
+    console.log('Downloading the pinned public archive. The source data stays in ignored local data and is not copied into the repository.');
+    const result = await syncCommunityAnswers();
+    console.log(`Saved ${result.answerCount} answer(s) across ${result.chapterCount} chapter groups.`);
+    console.log(`Types: ${result.choiceCount} choice | ${result.descriptionCount} code`);
+    console.log(`Local archive: ${result.outputPath}`);
+    console.log('The solver will use these as fallback answers after your course-specific bank. Choice IDs are checked against live options.');
   });
 
 
