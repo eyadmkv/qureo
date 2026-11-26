@@ -109,10 +109,17 @@ test('initializes the selected course page before fetching its learning API data
 });
 
 
-test('initializes a lesson through the observed QUREO lecture API', async () => {
+test('loads lesson content through the observed QUREO lecture endpoint', async () => {
   const calls = [];
-  const lessonId = '511002010';
-  const referer = 'https://me-tp.qureo.education/chapter/511002/lecture/511002010';
+  const lessonId = '511002020';
+  const referer = 'https://me-tp.qureo.education/chapter/511002/lecture/511002020';
+  const lessonContent = {
+    chapter: { id: 511002, name: 'الحسابات والنصوص', question_count: 9 },
+    lecture: { chapter_id: 511002, id: 511002020, seq: 2, title: 'طريقة الحساب' },
+    section: { course_id: 'python_short_ar', id: 106 },
+    summaries: [],
+    talks: [{ id: 51100202001, lecture_id: 511002020, type: 'teacher', body: { serif: 'درس تجريبي' } }]
+  };
   const client = {
     async request(url, options) {
       calls.push({
@@ -121,10 +128,7 @@ test('initializes a lesson through the observed QUREO lecture API', async () => 
         accept: options.headers.Accept,
         referer: options.headers.Referer
       });
-      return new Response(JSON.stringify({
-        lecture: { lecture_id: 511002010, started_at: '2026-11-27T01:23:58.301+09:00' },
-        talks: []
-      }), {
+      return new Response(JSON.stringify(lessonContent), {
         status: 200,
         headers: { 'content-type': 'application/json' }
       });
@@ -133,22 +137,22 @@ test('initializes a lesson through the observed QUREO lecture API', async () => 
 
   const result = await initializeLecture(client, lessonId, referer);
 
-  assert.deepEqual(result, {
-    lecture: { lecture_id: 511002010, started_at: '2026-11-27T01:23:58.301+09:00' },
-    talks: []
-  });
+  assert.deepEqual(result, lessonContent);
   assert.deepEqual(calls, [{
-    url: 'https://me-tp.qureo.education/api/study/students/lectures/511002010',
+    url: 'https://me-tp.qureo.education/api/study/lectures/511002020',
     method: 'GET',
     accept: 'application/json, text/plain, */*',
     referer
   }]);
 });
 
-test('rejects a lecture API response that does not confirm the requested lesson', async () => {
+test('rejects lecture content that belongs to a different lesson', async () => {
   const client = {
     async request() {
-      return new Response(JSON.stringify({ lecture: null, talks: [] }), {
+      return new Response(JSON.stringify({
+        lecture: { id: 511001030 },
+        talks: []
+      }), {
         status: 200,
         headers: { 'content-type': 'application/json' }
       });
@@ -156,7 +160,7 @@ test('rejects a lecture API response that does not confirm the requested lesson'
   };
 
   await assert.rejects(
-    initializeLecture(client, '511001030', 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
+    initializeLecture(client, '511002020', 'https://me-tp.qureo.education/chapter/511002/lecture/511002020'),
     error => error.code === 'LESSON_INIT_UNCONFIRMED'
   );
 });
