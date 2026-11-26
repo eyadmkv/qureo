@@ -211,7 +211,7 @@ export function buildSprixChapterPlan(data, bank) {
 
     const questionResult = bestMatch(prompt, answeredBank, row => row.question, {
       minimumScore: 0.28,
-      minimumMatches: 3,
+      minimumMatches: Math.max(1, Math.min(3, tokens(prompt).length)),
       margin: 0.035
     });
     if (!questionResult.match) {
