@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixCookieHeader, SprixHttpClient } from '../src/sprixHttp.js';
+import { parseSprixCookieHeader, parseSprixCurlRequest, SprixHttpClient } from '../src/sprixHttp.js';
 
 test('parses a Cookie request header', () => {
   assert.equal(
@@ -155,5 +155,52 @@ test('does not accept a successful login response that returns no session cookie
   await assert.rejects(
     () => SprixHttpClient.login({ loginId: 'student-code', password: 'test-password', fetchImpl }),
     /did not return session cookies/u
+  );
+});
+
+
+test('inspects a copied SPRIX cURL request while redacting cookies, CSRF headers and sensitive body fields', () => {
+  const curl = [
+    "curl 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/key-points/501/review?lang=ar&token=private'",
+    "-H 'accept: application/json'",
+    "-H 'content-type: application/json'",
+    "-H 'cookie: session=secret-cookie'",
+    "-H 'x-xsrf-token: secret-xsrf'",
+    "--data-raw '{\"reviewed\":true,\"key_point_id\":501,\"password\":\"secret-password\"}'"
+  ].join(' \\\\\\n  ');
+  const parsed = parseSprixCurlRequest(curl);
+
+  assert.equal(parsed.method, 'POST');
+  assert.equal(parsed.url, 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/key-points/501/review?lang=ar&token=%5BREDACTED%5D');
+  assert.deepEqual(parsed.headers, {
+    accept: 'application/json',
+    'content-type': 'application/json'
+  });
+  assert.deepEqual(parsed.redactedHeaders, ['cookie', 'x-xsrf-token']);
+  assert.deepEqual(parsed.body, {
+    reviewed: true,
+    key_point_id: 501,
+    password: '[REDACTED]'
+  });
+  assert.equal(parsed.bodyFormat, 'json');
+});
+
+test('supports explicit request methods and omits non-JSON bodies', () => {
+  const parsed = parseSprixCurlRequest(
+    "curl 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/read-state' -X PATCH --data-raw 'reviewed=1'"
+  );
+  assert.equal(parsed.method, 'PATCH');
+  assert.equal(parsed.bodyFormat, 'non-json');
+  assert.equal(parsed.body, '[non-JSON body omitted]');
+});
+
+test('rejects cURL requests outside the SPRIX HTTPS origin', () => {
+  assert.throws(
+    () => parseSprixCurlRequest("curl 'https://example.com/api/v1/action' -X POST"),
+    /Only HTTPS SPRIX/u
+  );
+  assert.throws(
+    () => parseSprixCurlRequest("curl 'http://egy.app.spx-learning-square.com/api/v1/action'"),
+    /Only HTTPS SPRIX/u
   );
 });
