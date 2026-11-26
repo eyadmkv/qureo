@@ -10,7 +10,7 @@ import { registerSprixSolverCommands } from './sprixSolver.js';
 
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
 const STORE_PATH = path.join(SPRIX_DIR, 'study.json');
-const SUBJECT_URL = 'https://egy.app.spx-learning-square.com/subjects/7/curriculum';
+const SUBJECT_URL = 'https://egy.app.spx-learning-square.com/dashboard';
 
 export const SPRIX_CURRICULUM = Object.freeze([
   { sequence: 1, title: 'أساسيات المال والتمويل', elements: 28 },
