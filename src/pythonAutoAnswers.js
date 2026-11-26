@@ -112,6 +112,12 @@ function resolveChoice(question, record) {
     }
   }
 
+  const prompt = questionText(question);
+  if (/(?:رمز|علامة)\\s+الضرب|multiplication\\s+(?:operator|symbol)/iu.test(prompt)) {
+    const multiplicationChoices = choices.filter(choice => compact(choiceText(choice)) === '*');
+    if (multiplicationChoices.length === 1) return Number(multiplicationChoices[0].id);
+  }
+
   const answerTokens = tokens(answer);
   const stringAnswer = /\bstring\b|سلسلة|\bstr\b/iu.test(answer) ||
     (answerTokens.includes('نص') && /نوع|data|type/u.test(questionText(question)));
