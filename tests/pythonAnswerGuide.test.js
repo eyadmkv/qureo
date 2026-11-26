@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  buildPythonAnswerGuideResult,
   decodeHtmlEntities,
   htmlToText,
   extractPythonAnswerPairs,
@@ -115,4 +116,26 @@ test('recognizes Arabic-Indic question numbers and invisible direction marks', (
   assert.deepEqual(extractPythonAnswerPairs(body), [
     { question_number: 2, question: 'ما وظيفة الدالة؟', answer: 'print()' }
   ]);
+});
+
+
+test('builds a serializable answer guide summary with count mismatch details', () => {
+  const result = buildPythonAnswerGuideResult({
+    levelUrls: ['level-1'],
+    levels: [{ id: '01', lessons: [] }],
+    lessonsFound: 2,
+    lessonsFetched: 2,
+    emptyLessonPages: [{ url: 'lesson-2' }],
+    answers: [{ question: 'Q', answer: 'A' }],
+    failedPages: [{ url: 'lesson-3', error: 'HTTP 503' }],
+    countMismatches: [{ url: 'lesson-1', expected: 3, extracted: 2 }],
+    exportedAt: '2026-11-26T00:00:00.000Z'
+  });
+
+  assert.equal(result.coverage.answers_extracted, 1);
+  assert.equal(result.coverage.count_mismatches, 1);
+  assert.equal(result.coverage.lessons_without_answer_blocks, 1);
+  assert.equal(result.count_mismatches[0].expected, 3);
+  assert.equal(result.failed_pages[0].error, 'HTTP 503');
+  assert.doesNotThrow(() => JSON.parse(JSON.stringify(result)));
 });
