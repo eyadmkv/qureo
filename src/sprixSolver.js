@@ -7,6 +7,8 @@ import { SprixHttpClient } from './sprixHttp.js';
 
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
 export const SPRIX_BANK_PATH = path.join(SPRIX_DIR, 'answer-bank.json');
+export const SPRIX_ENGLISH_BLOCK_BANK_PATH = path.join(SPRIX_DIR, 'block-answer-bank-subject3.json');
+const SPRIX_ENGLISH_BLOCK_BANK_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/spx_api_bank_subject3.json';
 
 const STOP_WORDS = new Set((
   'اي ايه أي مما يلي من في عن على الى الي هذا هذه تلك ذلك التي الذي الذين اللاتي ' +
@@ -121,7 +123,97 @@ export function parseSprixAnswerBank(source, sourceName = 'userscript') {
   };
 }
 
-export function loadSprixAnswerBank() {
+export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOCK_BANK_URL) {
+  let data;
+  try {
+    data = JSON.parse(String(source || ''));
+  } catch {
+    throw new Error('The public SPRIX block-answer map is not valid JSON.');
+  }
+
+  if (!data || typeof data.block !== 'object' || Array.isArray(data.block)) {
+    throw new Error('The public SPRIX answer map does not contain a block-answer object.');
+  }
+
+  const answers = {};
+  for (const [rawBlockId, rawOptionId] of Object.entries(data.block)) {
+    if (!/^[1-9]\d*$/u.test(rawBlockId)) {
+      throw new Error('The public SPRIX answer map contains an invalid block ID.');
+    }
+    const optionId = Number(rawOptionId);
+    if (!Number.isSafeInteger(optionId) || optionId < 1) {
+      throw new Error('The public SPRIX answer map contains an invalid option ID for block #' + rawBlockId + '.');
+    }
+    answers[rawBlockId] = optionId;
+  }
+
+  const total = Object.keys(answers).length;
+  if (total < 200) {
+    throw new Error('The public English answer map is incomplete (' + total + ' block answers). Nothing was imported.');
+  }
+
+  return {
+    format: 'sprix-block-answer-bank',
+    schema_version: 1,
+    subject_id: 3,
+    language: 'en',
+    imported_at: new Date().toISOString(),
+    source_url: sourceUrl,
+    total,
+    answers
+  };
+}
+
+function saveSprixBlockAnswerBank(bank) {
+  fs.mkdirSync(SPRIX_DIR, { recursive: true });
+  const temporaryPath = SPRIX_ENGLISH_BLOCK_BANK_PATH + '.tmp';
+  fs.writeFileSync(temporaryPath, JSON.stringify(bank, null, 2) + '\n', {
+    encoding: 'utf8',
+    mode: 0o600
+  });
+  fs.renameSync(temporaryPath, SPRIX_ENGLISH_BLOCK_BANK_PATH);
+}
+
+export function loadSprixAnswerBank(subjectId = null) {
+  if (Number(subjectId) === 3) {
+    if (!fs.existsSync(SPRIX_ENGLISH_BLOCK_BANK_PATH)) {
+      throw new Error(
+        'No English SPRIX answer map is installed for subject 3. Run: sprix bank import-english'
+      );
+    }
+
+    let englishBank;
+    try {
+      englishBank = JSON.parse(fs.readFileSync(SPRIX_ENGLISH_BLOCK_BANK_PATH, 'utf8'));
+    } catch {
+      throw new Error('The local English SPRIX answer map is invalid. Run sprix bank import-english again.');
+    }
+
+    if (englishBank?.format !== 'sprix-block-answer-bank' ||
+        englishBank?.schema_version !== 1 ||
+        englishBank?.subject_id !== 3 ||
+        englishBank?.language !== 'en' ||
+        !englishBank.answers ||
+        typeof englishBank.answers !== 'object' ||
+        Array.isArray(englishBank.answers)) {
+      throw new Error('The local English SPRIX answer map has an unsupported format. Run sprix bank import-english again.');
+    }
+
+    return {
+      format: 'sprix-answer-bank',
+      schema_version: 1,
+      subjectId: 3,
+      imported_at: englishBank.imported_at,
+      source: englishBank.source_url,
+      total: englishBank.total,
+      answered: englishBank.total,
+      unanswered: 0,
+      questions: [],
+      blockAnswers: englishBank.answers,
+      blockAnswerSource: englishBank.source_url
+    };
+  }
+
   if (!fs.existsSync(SPRIX_BANK_PATH)) {
     throw new Error('No local SPRIX answer bank. Import your userscript with: sprix bank import --file .\\script.js');
   }
@@ -208,7 +300,12 @@ export function buildSprixChapterPlan(data, bank) {
     !cleared.has(block.id) &&
     (block.type === 'question' || (block.question && Array.isArray(block.options)))
   );
-  const answeredBank = bank.questions.filter(question => question.answer);
+  const answeredBank = Array.isArray(bank.questions)
+    ? bank.questions.filter(question => question.answer)
+    : [];
+  const blockAnswers = Number(bank.subjectId) === 3 && bank.blockAnswers
+    ? bank.blockAnswers
+    : null;
   const plan = [];
   const unmatched = [];
 
@@ -217,6 +314,40 @@ export function buildSprixChapterPlan(data, bank) {
     const options = Array.isArray(block.options) ? block.options : [];
     if (!prompt || !options.length) {
       unmatched.push({ blockId: block.id, prompt, reason: 'question prompt or options are missing' });
+      continue;
+    }
+
+    if (blockAnswers) {
+      const mappedOptionId = blockAnswers[String(block.id)];
+      if (mappedOptionId === undefined) {
+        unmatched.push({
+          blockId: block.id,
+          prompt,
+          reason: 'no English subject-3 answer is available for this block ID'
+        });
+        continue;
+      }
+
+      const mappedOption = options.find(option => String(option.id) === String(mappedOptionId));
+      if (!mappedOption) {
+        unmatched.push({
+          blockId: block.id,
+          prompt,
+          reason: 'English answer map points to option #' + mappedOptionId + ', which is absent from the live options'
+        });
+        continue;
+      }
+
+      plan.push({
+        blockId: block.id,
+        prompt,
+        bankQuestion: 'English subject-3 block answer map',
+        bankAnswer: 'Mapped option #' + mappedOptionId,
+        optionId: mappedOption.id,
+        optionText: optionText(mappedOption),
+        questionScore: 1,
+        optionScore: 1
+      });
       continue;
     }
 
@@ -1096,16 +1227,44 @@ function registerBankCommands(sprix) {
       await harvestCourseSource(options.subject, outputPath);
     });
 
+  bank.command('import-english')
+    .description('Download the public English Financial Literacy subject-3 block answer map into the ignored local data directory')
+    .action(async () => {
+      let response;
+      try {
+        response = await fetch(SPRIX_ENGLISH_BLOCK_BANK_URL, {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(20000)
+        });
+      } catch (error) {
+        throw new Error('Could not download the English SPRIX answer map: ' + error.message);
+      }
+      if (!response.ok) {
+        throw new Error('The public English SPRIX answer map download failed (HTTP ' + response.status + ').');
+      }
+
+      const source = await response.text();
+      const imported = parseSprixBlockAnswerBank(source, SPRIX_ENGLISH_BLOCK_BANK_URL);
+      saveSprixBlockAnswerBank(imported);
+      console.log('Imported ' + imported.total + ' English subject-3 block-answer mappings.');
+      console.log('Source: ' + imported.source_url);
+      console.log('Saved locally: ' + SPRIX_ENGLISH_BLOCK_BANK_PATH);
+      console.log('Test answers were ignored. The solver checks each mapped option ID against the live question before using it.');
+      console.log('This third-party answer data is unverified and is stored locally only.');
+    });
+
   bank.command('status')
     .description('Show counts from the local SPRIX answer bank')
-    .action(() => {
-      const data = loadSprixAnswerBank();
-      console.log('Units: ' + data.unit_count);
-      console.log('Questions: ' + data.total);
-      console.log('With answer notes: ' + data.answered);
-      console.log('Without answer notes: ' + data.unanswered);
-      console.log('Imported from: ' + data.source);
-      console.log('Stored locally: ' + SPRIX_BANK_PATH);
+    .option('--subject <id>', 'SPRIX subject ID')
+    .action(options => {
+      const data = loadSprixAnswerBank(options.subject);
+      console.log('Units: ' + (data.unit_count ?? 'n/a'));
+      console.log('Questions: ' + (data.total ?? 0));
+      console.log('With answer notes: ' + (data.answered ?? 0));
+      console.log('Without answer notes: ' + (data.unanswered ?? 0));
+      console.log('Imported from: ' + (data.source || 'local answer map'));
+      if (data.blockAnswerSource) console.log('Block-answer source: ' + data.blockAnswerSource);
+      console.log('Stored locally: ' + (Number(options.subject) === 3 ? SPRIX_ENGLISH_BLOCK_BANK_PATH : SPRIX_BANK_PATH));
     });
 }
 
@@ -1151,8 +1310,9 @@ function registerSolveCommand(sprix) {
     .option('--pause-between-chapters <seconds>', 'Wait between completed chapters', '0')
     .option('--pause-between-questions <seconds>', 'Wait between submitted answers', '0')
     .action(async (chapterId, options) => {
-      const bank = loadSprixAnswerBank();
       const session = SprixHttpClient.loadSession();
+      const subjectId = await session.resolveSubjectId(options.subject);
+      const bank = loadSprixAnswerBank(subjectId);
       const maxChapters = options.maxChapters === undefined
         ? null
         : Number.parseInt(options.maxChapters, 10);
@@ -1169,7 +1329,7 @@ function registerSolveCommand(sprix) {
         : !Boolean(options.answersOnly);
 
       const result = await solveSprixCourse(session, bank, {
-        subjectId: options.subject,
+        subjectId,
         chapterId: chapterId || null,
         dryRun: Boolean(options.dryRun),
         single: Boolean(options.single),
