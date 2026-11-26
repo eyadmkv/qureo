@@ -235,14 +235,32 @@ export function matchPythonAssessmentAnswers(questionItems, guideAnswers, levelI
     .filter(record => String(record.level_id).padStart(2, '0') === level);
   const reviewAnswers = sortRecords(levelAnswers.filter(isReviewRecord));
   const allAnswers = sortRecords(levelAnswers);
+  const reviewGroups = new Map();
 
-  let candidates = reviewAnswers.length >= questions.length && questions.length
-    ? reviewAnswers
-    : allAnswers;
-  let strategy = 'question-text';
+  for (const record of reviewAnswers) {
+    const key = String(record.lesson_id || record.lesson_title || record.id || '');
+    if (!reviewGroups.has(key)) reviewGroups.set(key, []);
+    reviewGroups.get(key).push(record);
+  }
 
-  if (candidates.length === questions.length && questions.length > 0) {
-    strategy = reviewAnswers.length === questions.length ? 'review-order' : 'level-order';
+  const exactReviewGroups = [...reviewGroups.values()]
+    .map(sortRecords)
+    .filter(records => records.length === questions.length && questions.length > 0);
+
+  let candidates;
+  let strategy;
+  if (exactReviewGroups.length === 1) {
+    candidates = exactReviewGroups[0];
+    strategy = 'review-order';
+  } else {
+    candidates = reviewAnswers.length >= questions.length && questions.length
+      ? reviewAnswers
+      : allAnswers;
+    strategy = 'question-text';
+
+    if (candidates.length === questions.length && questions.length > 0) {
+      strategy = reviewAnswers.length === questions.length ? 'review-order' : 'level-order';
+    }
   }
 
   const assignments = [];
