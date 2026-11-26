@@ -222,6 +222,10 @@ export async function markLectureCompleted(client, chapterId, lesson, dryRun, on
     throw errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
   }
 
+  if (response?.status === 404) {
+    await response.body?.cancel().catch(() => {});
+  }
+
   const reason = networkError
     ? 'the direct completion request failed'
     : 'the completion API returned 404';
