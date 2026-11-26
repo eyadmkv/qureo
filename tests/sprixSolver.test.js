@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, parseSprixBlockAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, parseSprixBlockAnswerBank, buildSprixChapterPlan, buildSprixTestPlan, buildSprixCourseAnswerBank, listSprixChapters, listSprixCourseItems, planSprixChapterSelection, planSprixCourseItemSelection, solveSprixCourse } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -50,14 +50,17 @@ test('rejects userscripts without a DATA object', () => {
   assert.throws(() => parseSprixAnswerBank('// no bank here'), /Could not find/u);
 });
 
-test('imports a subject-3 English block map and ignores test answers', () => {
+test('imports subject-3 English chapter and test answer maps', () => {
   const block = Object.fromEntries(Array.from({ length: 200 }, (_, index) => [
     String(index + 1),
     index + 1001
   ]));
   const bank = parseSprixBlockAnswerBank(JSON.stringify({
     block,
-    test: { 1: 9999 }
+    test: Object.fromEntries(Array.from({ length: 380 }, (_, index) => [
+      String(index + 1),
+      index + 9999
+    ]))
   }), 'https://example.test/subject3.json');
 
   assert.equal(bank.format, 'sprix-block-answer-bank');
@@ -65,7 +68,8 @@ test('imports a subject-3 English block map and ignores test answers', () => {
   assert.equal(bank.language, 'en');
   assert.equal(bank.total, 200);
   assert.equal(bank.answers['1'], 1001);
-  assert.equal(Object.hasOwn(bank, 'test'), false);
+  assert.equal(bank.testTotal, 380);
+  assert.equal(bank.testAnswers['1'], 9999);
   assert.equal(bank.source_url, 'https://example.test/subject3.json');
 });
 
@@ -134,6 +138,59 @@ test('fails closed when an English block map points to an option absent from liv
   assert.equal(result.plan.length, 0);
   assert.equal(result.unmatched.length, 1);
   assert.match(result.unmatched[0].reason, /absent from the live options/u);
+});
+
+test('builds test answer plans from test-question IDs and verifies live option IDs', () => {
+  const result = buildSprixTestPlan({
+    test_questions: [
+      { id: 1, question_id: 62, sort_order: 1 },
+      { id: 2, question_id: 63, sort_order: 2 }
+    ],
+    questions: {
+      62: { question_text: 'Why was barter difficult?' },
+      63: { question_text: 'What supports fiat currency?' }
+    },
+    options: {
+      62: [{ id: 245, text: 'Correct option' }, { id: 247, text: 'Wrong option' }],
+      63: [{ id: 250, text: 'Government and public trust' }]
+    },
+    question_responses: [{ test_question_id: 1, selected_option_id: 247 }]
+  }, {
+    testAnswers: { 1: 245, 2: 250 }
+  });
+
+  assert.equal(result.pendingQuestionCount, 2);
+  assert.equal(result.plan.length, 2);
+  assert.equal(result.unmatched.length, 0);
+  assert.deepEqual(result.plan.map(row => row.optionId), [245, 250]);
+  assert.equal(result.plan[0].alreadySelected, false);
+  assert.equal(result.plan[1].alreadySelected, false);
+  assert.match(result.plan[0].prompt, /barter/u);
+});
+
+test('fails closed when a test map references an option absent from live options', () => {
+  const result = buildSprixTestPlan({
+    test_questions: [{ id: 1, question_id: 62 }],
+    questions: { 62: { question_text: 'Question?' } },
+    options: { 62: [{ id: 246, text: 'Current option' }] },
+    question_responses: []
+  }, { testAnswers: { 1: 245 } });
+
+  assert.equal(result.plan.length, 0);
+  assert.equal(result.unmatched.length, 1);
+  assert.match(result.unmatched[0].reason, /absent from the live test options/u);
+});
+
+test('rejects test mappings explicitly marked incorrect by live SPRIX data', () => {
+  const result = buildSprixTestPlan({
+    test_questions: [{ id: 1, question_id: 62 }],
+    questions: { 62: { question_text: 'Question?' } },
+    options: { 62: [{ id: 245, text: 'Wrong', is_correct: false }] },
+    question_responses: []
+  }, { testAnswers: { 1: 245 } });
+
+  assert.equal(result.plan.length, 0);
+  assert.match(result.unmatched[0].reason, /explicitly marks.*incorrect/u);
 });
 
 test('matches chapter questions and option text against the imported bank', () => {
@@ -476,7 +533,7 @@ test('supports single-chapter and maximum-chapter SPRIX solve limits', () => {
   assert.deepEqual(targeted.chapters.map(chapter => chapter.id), ['301']);
 });
 
-test('lists chapters and reviews in curriculum order while leaving tests out of the solve queue', () => {
+test('lists chapters, reviews and tests in curriculum order', () => {
   const items = listSprixCourseItems([{
     title: 'Unit One',
     sections: [{
@@ -492,10 +549,11 @@ test('lists chapters and reviews in curriculum order while leaving tests out of 
   assert.deepEqual(items.map(item => [item.itemType, item.id]), [
     ['chapter', '101'],
     ['review', '151'],
+    ['test', '201'],
     ['chapter', '202']
   ]);
-  assert.deepEqual(items.map(item => item.sequence), [1, 2, 3]);
-  assert.deepEqual(items.map(item => item.chapterSequence), [1, null, 2]);
+  assert.deepEqual(items.map(item => item.sequence), [1, 2, 3, 4]);
+  assert.deepEqual(items.map(item => item.chapterSequence), [1, null, null, 2]);
   assert.equal(items[1].completed, false);
   assert.equal(items[1].unitTitle, 'Unit One');
 });
@@ -759,6 +817,127 @@ test('solves SPRIX chapters in order and refreshes progress to unlock the next c
     'answer:201:202:203',
     'complete:201'
   ]);
+});
+
+test('solves tests in curriculum order, remaps previously selected answers and unlocks the next chapter', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  bank.testAnswers = { 1: 245 };
+  const units = [{
+    title: 'Unit',
+    items: [
+      { id: 101, item_type: 'chapter', title: 'Completed chapter', is_completed: true, is_unlocked: true },
+      { id: 151, item_type: 'review', title: 'Completed review', is_completed: true, is_unlocked: true },
+      { id: 1, item_type: 'test', title: 'Role of Money', is_completed: false, is_unlocked: true },
+      { id: 201, item_type: 'chapter', title: 'Next chapter', is_completed: false, is_unlocked: false }
+    ]
+  }];
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return structuredClone(units);
+    },
+    async startTest(testId) {
+      calls.push('start-test:' + testId);
+      return {
+        data: {
+          test_questions: [{ id: 1, question_id: 62, sort_order: 1 }],
+          questions: { 62: { question_text: 'Why was barter difficult?' } },
+          options: { 62: [{ id: 245, text: 'Correct option' }, { id: 247, text: 'Wrong option' }] },
+          question_responses: [{ test_question_id: 1, selected_option_id: 247 }]
+        }
+      };
+    },
+    async answerTestQuestion(testId, testQuestionId, optionId) {
+      calls.push('test-answer:' + testId + ':' + testQuestionId + ':' + optionId);
+      return { data: { saved: true } };
+    },
+    async submitTest(testId) {
+      calls.push('submit-test:' + testId);
+      units[0].items.find(item => String(item.id) === String(testId)).is_completed = true;
+      units[0].items.find(item => item.id === 201).is_unlocked = true;
+      return { data: { response: { status: 'completed', passed: true, total_score: 100 } } };
+    },
+    async getChapterBlocks(chapterId) {
+      calls.push('read-chapter:' + chapterId);
+      return {
+        chapter: { title: 'Next chapter', cleared_block_ids: [] },
+        blocks: [{
+          id: 202,
+          type: 'question',
+          question: { text: 'ما وظيفة المال في المجتمع؟' },
+          options: [
+            { id: 203, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+            { id: 204, text: 'تقتصر وظيفة المال على شراء الذهب' }
+          ]
+        }]
+      };
+    },
+    async answerChapterQuestion(chapterId, blockId, optionId) {
+      calls.push('answer:' + chapterId + ':' + blockId + ':' + optionId);
+      return { data: { is_correct: true } };
+    },
+    async completeChapter(chapterId) {
+      calls.push('complete-chapter:' + chapterId);
+      units[0].items.find(item => String(item.id) === String(chapterId)).is_completed = true;
+      return { data: { is_completed: true } };
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    onConfirm: async details => {
+      assert.equal(details.tests.length, 1);
+      assert.equal(details.chapters.length, 1);
+      return true;
+    },
+    onProgress: () => {}
+  });
+
+  assert.equal(result.testsCompleted, 1);
+  assert.equal(result.testAnswersSubmitted, 1);
+  assert.equal(result.chaptersCompleted, 1);
+  assert.deepEqual(calls, [
+    'start-test:1',
+    'test-answer:1:1:245',
+    'submit-test:1',
+    'read-chapter:201',
+    'answer:201:202:203',
+    'complete-chapter:201'
+  ]);
+});
+
+test('stops a dry-run at a test without starting an attempt or touching later locked chapters', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  bank.testAnswers = { 1: 245 };
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return [{
+        title: 'Unit',
+        items: [
+          { id: 1, item_type: 'test', title: 'Role of Money', is_completed: false, is_unlocked: true },
+          { id: 201, item_type: 'chapter', title: 'Locked chapter', is_completed: false, is_unlocked: false }
+        ]
+      }];
+    },
+    async startTest() {
+      calls.push('start');
+      assert.fail('Dry-run must not start tests.');
+    },
+    async getChapterBlocks() {
+      calls.push('chapter');
+      assert.fail('Dry-run should stop at the test boundary.');
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    dryRun: true,
+    onConfirm: async () => assert.fail('Dry-run must not ask for confirmation.'),
+    onProgress: () => {}
+  });
+
+  assert.equal(result.testsProcessed, 1);
+  assert.equal(result.testsCompleted, 0);
+  assert.deepEqual(calls, []);
 });
 
 test('SPRIX dry-run previews the course without confirmation or state-changing requests', async () => {

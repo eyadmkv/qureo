@@ -86,7 +86,7 @@ function renderTest(data) {
     const question = data.questions?.[questionId] || {};
     const options = data.options?.[questionId] || [];
     const response = existing.get(row.id);
-    const prompt = question.text || question.title || question.content || question.prompt || question.question || '';
+    const prompt = question.question_text || question.text || question.title || question.content || question.prompt || question.question || '';
     console.log('\nTest question #' + row.id + ' | source question #' + questionId + (response?.status ? ' | ' + response.status : ''));
     if (prompt) console.log(String(prompt).replace(/\s+/gu, ' ').trim());
     for (const option of options) {

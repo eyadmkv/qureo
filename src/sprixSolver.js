@@ -131,8 +131,13 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
     throw new Error('The public SPRIX block-answer map is not valid JSON.');
   }
 
-  if (!data || typeof data.block !== 'object' || Array.isArray(data.block)) {
-    throw new Error('The public SPRIX answer map does not contain a block-answer object.');
+  if (!data ||
+      typeof data.block !== 'object' ||
+      Array.isArray(data.block) ||
+      !data.test ||
+      typeof data.test !== 'object' ||
+      Array.isArray(data.test)) {
+    throw new Error('The public SPRIX answer map must contain block and test answer objects.');
   }
 
   const answers = {};
@@ -147,9 +152,25 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
     answers[rawBlockId] = optionId;
   }
 
+  const testAnswers = {};
+  for (const [rawTestQuestionId, rawOptionId] of Object.entries(data.test)) {
+    if (!/^[1-9]\d*$/u.test(rawTestQuestionId)) {
+      throw new Error('The public SPRIX answer map contains an invalid test-question ID.');
+    }
+    const optionId = Number(rawOptionId);
+    if (!Number.isSafeInteger(optionId) || optionId < 1) {
+      throw new Error('The public SPRIX answer map contains an invalid option ID for test question #' + rawTestQuestionId + '.');
+    }
+    testAnswers[rawTestQuestionId] = optionId;
+  }
+
   const total = Object.keys(answers).length;
+  const testTotal = Object.keys(testAnswers).length;
   if (total < 200) {
     throw new Error('The public English answer map is incomplete (' + total + ' block answers). Nothing was imported.');
+  }
+  if (testTotal < 100) {
+    throw new Error('The public English test answer map is incomplete (' + testTotal + ' answers). Nothing was imported.');
   }
 
   return {
@@ -160,7 +181,9 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
     imported_at: new Date().toISOString(),
     source_url: sourceUrl,
     total,
-    answers
+    answers,
+    testTotal,
+    testAnswers
   };
 }
 
@@ -210,7 +233,13 @@ export function loadSprixAnswerBank(subjectId = null) {
       unanswered: 0,
       questions: [],
       blockAnswers: englishBank.answers,
-      blockAnswerSource: englishBank.source_url
+      blockAnswerSource: englishBank.source_url,
+      testAnswers: englishBank.testAnswers && typeof englishBank.testAnswers === 'object'
+        ? englishBank.testAnswers
+        : {},
+      testAnswerTotal: Number.isInteger(englishBank.testTotal)
+        ? englishBank.testTotal
+        : Object.keys(englishBank.testAnswers || {}).length
     };
   }
 
@@ -401,6 +430,82 @@ export function buildSprixChapterPlan(data, bank) {
   };
 }
 
+export function buildSprixTestPlan(data, bank) {
+  const questions = Array.isArray(data?.test_questions)
+    ? [...data.test_questions].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    : [];
+  if (!questions.length) {
+    return {
+      pendingQuestionCount: 0,
+      plan: [],
+      unmatched: [{ testQuestionId: null, reason: 'the live test attempt did not return any questions' }]
+    };
+  }
+
+  const responses = new Map((Array.isArray(data.question_responses) ? data.question_responses : [])
+    .map(response => [String(response.test_question_id), response]));
+  const answers = bank?.testAnswers && typeof bank.testAnswers === 'object'
+    ? bank.testAnswers
+    : {};
+  const plan = [];
+  const unmatched = [];
+
+  for (const testQuestion of questions) {
+    const testQuestionId = String(testQuestion.id ?? '');
+    const sourceQuestionId = String(testQuestion.question_id ?? '');
+    const optionId = answers[testQuestionId];
+    if (!testQuestionId || !sourceQuestionId) {
+      unmatched.push({ testQuestionId: testQuestionId || null, reason: 'test question is missing its ID or source question ID' });
+      continue;
+    }
+    if (optionId === undefined) {
+      unmatched.push({
+        testQuestionId,
+        sourceQuestionId,
+        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
+        reason: 'no English answer is available for this test-question ID'
+      });
+      continue;
+    }
+
+    const options = Array.isArray(data.options?.[sourceQuestionId])
+      ? data.options[sourceQuestionId]
+      : [];
+    const selected = options.find(option => String(option.id) === String(optionId));
+    if (!selected) {
+      unmatched.push({
+        testQuestionId,
+        sourceQuestionId,
+        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
+        reason: 'English answer map points to option #' + optionId + ', which is absent from the live test options'
+      });
+      continue;
+    }
+    if (selected.is_correct === false) {
+      unmatched.push({
+        testQuestionId,
+        sourceQuestionId,
+        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
+        reason: 'SPRIX explicitly marks mapped option #' + optionId + ' as incorrect'
+      });
+      continue;
+    }
+
+    const question = data.questions?.[sourceQuestionId] || {};
+    const existing = responses.get(testQuestionId);
+    plan.push({
+      testQuestionId: testQuestion.id,
+      sourceQuestionId,
+      prompt: cleanText(question.question_text || question.text || question.title || question.content || question.prompt || ''),
+      optionId: selected.id,
+      optionText: optionText(selected),
+      alreadySelected: String(existing?.selected_option_id ?? '') === String(selected.id)
+    });
+  }
+
+  return { pendingQuestionCount: questions.length, plan, unmatched };
+}
+
 function saveBank(bank) {
   fs.mkdirSync(SPRIX_DIR, { recursive: true });
   const temporaryPath = SPRIX_BANK_PATH + '.tmp';
@@ -454,7 +559,7 @@ export function listSprixCourseItems(units) {
     for (const section of unitSections(unit)) {
       for (const item of section.items || []) {
         const itemType = String(item.item_type || '').toLowerCase();
-        if (itemType !== 'chapter' && itemType !== 'review') continue;
+        if (itemType !== 'chapter' && itemType !== 'review' && itemType !== 'test') continue;
         if (item.id === undefined || item.id === null || String(item.id).trim() === '') {
           throw new Error('A SPRIX ' + itemType + ' is missing its ID. The course run was stopped.');
         }
@@ -485,7 +590,7 @@ export function planSprixCourseItemSelection(items, {
   skipCompleted = true
 } = {}) {
   if (!Array.isArray(items) || items.length === 0) {
-    throw new Error('No SPRIX chapters or reviews were found in the curriculum.');
+    throw new Error('No SPRIX chapters, reviews or tests were found in the curriculum.');
   }
   if (maxChapters !== null && (!Number.isInteger(maxChapters) || maxChapters < 1)) {
     throw new Error('Maximum chapter count must be a positive integer.');
@@ -497,7 +602,7 @@ export function planSprixCourseItemSelection(items, {
       items: [],
       skippedCompleted: 0,
       selectionLabel: 'all course items',
-      summary: 'All SPRIX chapters and reviews are already complete.'
+      summary: 'All SPRIX chapters, reviews and tests are already complete.'
     };
   }
 
@@ -538,7 +643,7 @@ export function planSprixCourseItemSelection(items, {
   const selectionLabel = single
     ? 'the first unfinished chapter and its preceding reviews'
     : maxChapters === null
-      ? 'all remaining chapters and reviews'
+      ? 'all remaining chapters, reviews and tests'
       : 'up to ' + maxChapters + ' unfinished chapter(s) and their preceding reviews';
 
   return {
@@ -633,6 +738,31 @@ async function refreshUntilSprixReviewCompleted(session, subjectId, reviewId, co
   );
 }
 
+async function refreshUntilSprixTestCompleted(session, subjectId, testId, completionResponse) {
+  const response = completionResponse?.data?.response ?? completionResponse?.data?.result?.response ?? completionResponse?.data;
+  if (response?.passed !== true) {
+    throw new Error(
+      'SPRIX submitted test ' + testId + ' but did not confirm a passing result' +
+      (response?.total_score !== undefined ? ' (score ' + response.total_score + '%)' : '') +
+      '. Stopping before the next course item.'
+    );
+  }
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const units = await session.getCurriculum(subjectId);
+    const current = listSprixCourseItems(units).find(item =>
+      item.itemType === 'test' && item.id === String(testId)
+    );
+    if (!current) throw new Error('Test ' + testId + ' disappeared from the SPRIX curriculum after submission.');
+    if (current.completed) return units;
+    if (attempt < 3) await wait(350);
+  }
+  throw new Error(
+    'SPRIX graded test ' + testId + ' as passed, but the curriculum did not confirm it as completed. ' +
+    'Stopping before the next course item.'
+  );
+}
+
 async function refreshUntilSprixChapterCompleted(session, subjectId, chapterId, completionResponse) {
   for (let attempt = 0; attempt < 4; attempt++) {
     const units = await session.getCurriculum(subjectId);
@@ -715,6 +845,9 @@ export async function solveSprixCourse(session, bank, {
       chaptersCompleted: 0,
       reviewsProcessed: 0,
       reviewsCompleted: 0,
+      testsProcessed: 0,
+      testsCompleted: 0,
+      testAnswersSubmitted: 0,
       questionsSubmitted: 0,
       skippedCompleted: selection.skippedCompleted
     };
@@ -722,11 +855,13 @@ export async function solveSprixCourse(session, bank, {
 
   const selectedChapters = selection.items.filter(item => item.itemType === 'chapter');
   const selectedReviews = selection.items.filter(item => item.itemType === 'review');
+  const selectedTests = selection.items.filter(item => item.itemType === 'test');
   const first = selection.items[0];
   const last = selection.items[selection.items.length - 1];
   onProgress(
     'SPRIX progress: selected ' + selection.selectionLabel +
-    ' (' + selectedChapters.length + ' chapter(s), ' + selectedReviews.length + ' review(s)).'
+    ' (' + selectedChapters.length + ' chapter(s), ' + selectedReviews.length +
+    ' review(s), ' + selectedTests.length + ' test(s)).'
   );
   onProgress(
     'Curriculum range: item ' + first.sequence + ' through ' + last.sequence +
@@ -741,9 +876,10 @@ export async function solveSprixCourse(session, bank, {
   if (!dryRun && !await onConfirm({
     chapters: selectedChapters,
     reviews: selectedReviews,
+    tests: complete ? selectedTests : [],
     complete
   })) {
-    const summary = 'Solve cancelled. No answers or review completions were submitted.';
+    const summary = 'Solve cancelled. No answers, review completions or tests were submitted.';
     onProgress(summary);
     return {
       summary,
@@ -751,6 +887,9 @@ export async function solveSprixCourse(session, bank, {
       chaptersCompleted: 0,
       reviewsProcessed: 0,
       reviewsCompleted: 0,
+      testsProcessed: 0,
+      testsCompleted: 0,
+      testAnswersSubmitted: 0,
       questionsSubmitted: 0,
       skippedCompleted: selection.skippedCompleted,
       cancelled: true
@@ -761,6 +900,9 @@ export async function solveSprixCourse(session, bank, {
   let chaptersCompleted = 0;
   let reviewsProcessed = 0;
   let reviewsCompleted = 0;
+  let testsProcessed = 0;
+  let testsCompleted = 0;
+  let testAnswersSubmitted = 0;
   let questionsSubmitted = 0;
   let skippedCompleted = selection.skippedCompleted;
 
@@ -808,6 +950,117 @@ export async function solveSprixCourse(session, bank, {
       }
 
       reviewsProcessed++;
+      continue;
+    }
+
+    if (current.itemType === 'test') {
+      onProgress(
+        '\nTest ' + current.id + ': ' + current.title +
+        (current.unitTitle ? ' | ' + current.unitTitle : '')
+      );
+
+      if (dryRun) {
+        onProgress('[test] Would start the test, apply mapped answers, and submit it for grading. Dry-run does not create test attempts or send test answers.');
+        testsProcessed++;
+        onProgress('[test] Stopping the preview here because later course items may remain locked until this test is passed.');
+        break;
+      }
+
+      if (!complete) {
+        onProgress('[test] Skipped because --answers-only leaves tests unsubmitted. Stopping before the next course item.');
+        testsProcessed++;
+        break;
+      }
+
+      if (!current.unlocked) {
+        throw new Error(
+          'Test ' + current.id + ' (' + current.title +
+          ') is flagged as locked by the curriculum. No test attempt was started.'
+        );
+      }
+
+      if (!bank.testAnswers || Object.keys(bank.testAnswers).length === 0) {
+        throw new Error('No English test-answer map is installed. Run sprix bank import-english before solving tests.');
+      }
+
+      const started = await session.startTest(current.id);
+      const testData = started?.data ?? started;
+      const testResult = buildSprixTestPlan(testData, bank);
+
+      onProgress(
+        'Test questions: ' + testResult.pendingQuestionCount +
+        ' | mapped: ' + testResult.plan.length
+      );
+      for (const entry of testResult.plan) {
+        onProgress(
+          '\n[match] test question #' + entry.testQuestionId + ' -> option #' + entry.optionId +
+          (entry.prompt ? '\n  Question: ' + entry.prompt : '') +
+          '\n  Option: ' + entry.optionText
+        );
+      }
+
+      if (testResult.unmatched.length) {
+        onProgress('\nUnmatched test questions:');
+        for (const item of testResult.unmatched) {
+          onProgress(
+            '  test question #' + (item.testQuestionId ?? '?') + ': ' + item.reason +
+            (item.prompt ? ' | ' + item.prompt : '')
+          );
+        }
+        throw new Error(
+          'Test ' + current.id + ' has ' + testResult.unmatched.length +
+          ' unmatched question(s). No test answers were submitted. The test attempt may remain open.'
+        );
+      }
+
+      if (!testResult.plan.length || testResult.plan.length !== testResult.pendingQuestionCount) {
+        throw new Error('Test ' + current.id + ' did not produce a complete answer plan. No test answers were submitted.');
+      }
+
+      for (let index = 0; index < testResult.plan.length; index++) {
+        const entry = testResult.plan[index];
+        if (entry.alreadySelected) {
+          onProgress('Already selected test question #' + entry.testQuestionId + '.');
+          continue;
+        }
+        const answer = await session.answerTestQuestion(current.id, entry.testQuestionId, entry.optionId);
+        if (answer?.data?.saved === false) {
+          throw new Error(
+            'SPRIX did not save test question #' + entry.testQuestionId +
+            '. Test answers saved before this point remain in the active attempt.'
+          );
+        }
+        testAnswersSubmitted++;
+        onProgress('Saved test answer ' + (index + 1) + '/' + testResult.plan.length + ': question #' + entry.testQuestionId + '.');
+        if (questionDelayMs > 0 && index < testResult.plan.length - 1) {
+          onProgress('Waiting ' + (questionDelayMs / 1000).toFixed(1) + 's before the next test answer.');
+          await wait(questionDelayMs);
+        }
+      }
+
+      onProgress('Submitting test ' + current.id + ' for grading...');
+      const submission = await session.submitTest(current.id);
+      const graded = submission?.data?.response ?? submission?.data?.result?.response ?? submission?.data;
+      if (graded?.passed !== true) {
+        throw new Error(
+          'Test ' + current.id + ' was submitted but did not pass' +
+          (graded?.total_score !== undefined ? ' (score ' + graded.total_score + '%)' : '') +
+          '. The solver stopped before the next course item.'
+        );
+      }
+
+      units = await refreshUntilSprixTestCompleted(session, resolvedSubjectId, current.id, submission);
+      testsCompleted++;
+      testsProcessed++;
+      onProgress(
+        'SPRIX confirmed test ' + current.id + ' as passed' +
+        (graded.total_score !== undefined ? ' with ' + graded.total_score + '%' : '') + '.'
+      );
+
+      if (chapterDelayMs > 0 && position < selection.items.length - 1) {
+        onProgress('Waiting ' + (chapterDelayMs / 1000).toFixed(1) + 's before the next course item.');
+        await wait(chapterDelayMs);
+      }
       continue;
     }
 
@@ -916,11 +1169,12 @@ export async function solveSprixCourse(session, bank, {
   }
 
   const summary = dryRun
-    ? 'Preview complete: ' + chaptersProcessed + ' chapter(s) and ' + reviewsProcessed +
-      ' review(s) inspected; no answers submitted.'
+    ? 'Preview complete: ' + chaptersProcessed + ' chapter(s), ' + reviewsProcessed +
+      ' review(s), and ' + testsProcessed + ' test(s) inspected; no answers submitted.'
     : 'Solve run complete: ' + chaptersProcessed + ' chapter(s) processed, ' +
-      questionsSubmitted + ' answer(s) accepted, ' + reviewsCompleted + ' review(s) completed' +
-      (complete ? ', ' + chaptersCompleted + ' chapter(s) completed.' : ', chapter and review completion disabled.');
+      questionsSubmitted + ' chapter answer(s) accepted, ' + reviewsCompleted + ' review(s) completed, ' +
+      testsCompleted + ' test(s) passed, and ' + testAnswersSubmitted + ' test answer(s) saved' +
+      (complete ? ', ' + chaptersCompleted + ' chapter(s) completed.' : ', chapter and review completion disabled; tests skipped.');
   onProgress(summary);
   return {
     summary,
@@ -928,6 +1182,9 @@ export async function solveSprixCourse(session, bank, {
     chaptersCompleted,
     reviewsProcessed,
     reviewsCompleted,
+    testsProcessed,
+    testsCompleted,
+    testAnswersSubmitted,
     questionsSubmitted,
     skippedCompleted
   };
@@ -1228,7 +1485,7 @@ function registerBankCommands(sprix) {
     });
 
   bank.command('import-english')
-    .description('Download the public English Financial Literacy subject-3 block answer map into the ignored local data directory')
+    .description('Download the public English Financial Literacy subject-3 chapter and test answer maps into the ignored local data directory')
     .action(async () => {
       let response;
       try {
@@ -1246,10 +1503,11 @@ function registerBankCommands(sprix) {
       const source = await response.text();
       const imported = parseSprixBlockAnswerBank(source, SPRIX_ENGLISH_BLOCK_BANK_URL);
       saveSprixBlockAnswerBank(imported);
-      console.log('Imported ' + imported.total + ' English subject-3 block-answer mappings.');
+      console.log('Imported ' + imported.total + ' English subject-3 chapter block-answer mappings.');
+      console.log('Imported ' + imported.testTotal + ' English subject-3 test-answer mappings.');
       console.log('Source: ' + imported.source_url);
       console.log('Saved locally: ' + SPRIX_ENGLISH_BLOCK_BANK_PATH);
-      console.log('Test answers were ignored. The solver checks each mapped option ID against the live question before using it.');
+      console.log('The solver checks every mapped option ID against the live chapter or test options before using it.');
       console.log('This third-party answer data is unverified and is stored locally only.');
     });
 
@@ -1264,21 +1522,30 @@ function registerBankCommands(sprix) {
       console.log('Without answer notes: ' + (data.unanswered ?? 0));
       console.log('Imported from: ' + (data.source || 'local answer map'));
       if (data.blockAnswerSource) console.log('Block-answer source: ' + data.blockAnswerSource);
+      if (Number(options.subject) === 3) console.log('Test answer mappings: ' + (data.testAnswerTotal ?? Object.keys(data.testAnswers || {}).length));
       console.log('Stored locally: ' + (Number(options.subject) === 3 ? SPRIX_ENGLISH_BLOCK_BANK_PATH : SPRIX_BANK_PATH));
     });
 }
 
-async function confirmSprixSolve({ chapters, reviews, complete }, yes) {
+async function confirmSprixSolve({ chapters, reviews, tests = [], complete }, yes) {
   if (yes) return true;
   if (!stdin.isTTY) {
-    throw new Error('SPRIX solve will submit answers and complete reviews. Use --yes to confirm in a non-interactive terminal, or --dry-run to preview.');
+    throw new Error('SPRIX solve will submit answers, complete reviews, and submit tests for grading. Use --yes to confirm in a non-interactive terminal, or --dry-run to preview.');
   }
 
   const rl = readline.createInterface({ input: stdin, output: stdout });
   try {
-    const actionText = complete
-      ? 'submit matched answers for ' + chapters.length + ' chapter(s), complete ' + chapters.length + ' chapter(s), and complete ' + reviews.length + ' review(s)'
-      : 'submit matched answers for ' + chapters.length + ' chapter(s) and leave chapters and reviews uncompleted';
+    const actions = [];
+    if (chapters.length) {
+      actions.push(
+        complete
+          ? 'submit matched answers for ' + chapters.length + ' chapter(s) and complete them'
+          : 'submit answers for ' + chapters.length + ' chapter(s) without completing them'
+      );
+    }
+    if (complete && reviews.length) actions.push('complete ' + reviews.length + ' review(s)');
+    if (tests.length) actions.push('start, answer, and submit ' + tests.length + ' test(s) for grading');
+    const actionText = actions.length ? actions.join(', ') : 'process the selected course items';
     const response = await rl.question(
       'This will ' + actionText + ' and update your course progress. Continue? [y/N] '
     );
@@ -1298,9 +1565,9 @@ function parseSolvePause(value, label) {
 
 function registerSolveCommand(sprix) {
   sprix.command('solve [chapterId]')
-    .description('Solve all remaining SPRIX chapters in curriculum order, or one selected chapter')
+    .description('Solve chapters, reviews and tests in curriculum order, or one selected chapter')
     .option('--subject <id>', 'SPRIX subject ID (defaults to the saved course)')
-    .option('--dry-run', 'Preview selected chapters without submitting answers')
+    .option('--dry-run', 'Preview chapters, reviews and tests without submitting answers or starting tests')
     .option('--yes', 'Confirm the run without an interactive prompt')
     .option('--single', 'Solve the first unfinished chapter and its preceding reviews')
     .option('--max-chapters <count>', 'Stop after this many chapters')
