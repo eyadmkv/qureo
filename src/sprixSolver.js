@@ -876,7 +876,7 @@ export async function solveSprixCourse(session, bank, {
   if (!dryRun && !await onConfirm({
     chapters: selectedChapters,
     reviews: selectedReviews,
-    tests: selectedTests,
+    tests: complete ? selectedTests : [],
     complete
   })) {
     const summary = 'Solve cancelled. No answers, review completions or tests were submitted.';
