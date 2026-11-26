@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import { Command } from 'commander';
 import {
   SPRIX_ORIGIN,
   SprixHttpClient,
