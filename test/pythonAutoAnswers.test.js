@@ -726,20 +726,20 @@ test('maps Arabic prompts describing logical AND and OR to their matching expres
 });
 
 
-test('preserves the complete official program for Python condition exercises', () => {
+test('submits only the missing condition line for Chapter 9 fill-in exercises', () => {
   const result = matchPythonAssessmentAnswers([
     {
       question: {
         id: 511009040,
         type: 'description',
-        content: 'اكتب شرطًا يتحقق إذا كانت a تساوي 5 أو b تساوي 10.'
+        content: 'عايزين البرنامج يطبع The condition is met لو a بيساوي 5 أو b بيساوي 10. أنهي سطر يتحط مكان الفراغ؟\\na = 5\\nb = 10\\n____\\n    print("The condition is met")'
       }
     },
     {
       question: {
         id: 511009050,
         type: 'description',
-        content: 'اكتب شرطًا يتحقق إذا كانت a أكبر من أو تساوي 2 وb أكبر من أو تساوي 3.'
+        content: 'a فيها 4 و b فيها 3. عايزين الجملة تتطبع لو a >= 2 و b >= 3 مع بعض. كمّل السطر الناقص.\\na = 4\\nb = 3\\n____\\n    print("The condition is met")'
       }
     }
   ], [
@@ -750,7 +750,7 @@ test('preserves the complete official program for Python condition exercises', (
       lesson_title: 'مراجعة المستوى',
       question_number: 4,
       question: 'اكتب شرطًا يتحقق إذا كانت a تساوي 5 أو b تساوي 10.',
-      answer: ['الإجابة', 'a = 5', 'b = 10', 'if a == 5 or b == 10:', '    print("The condition is met")'].join('\n')
+      answer: ['الإجابة', 'a = 5', 'b = 10', 'if a == 5 or b == 10:', '    print("The condition is met")'].join('\\n')
     },
     {
       id: 'py-l09-s03-q5',
@@ -759,19 +759,13 @@ test('preserves the complete official program for Python condition exercises', (
       lesson_title: 'مراجعة المستوى',
       question_number: 5,
       question: 'اكتب شرطًا يتحقق إذا كانت a أكبر من أو تساوي 2 وb أكبر من أو تساوي 3.',
-      answer: ['a = 4', 'b = 3', 'if a >= 2 and b >= 3:', '    print("The condition is met")'].join('\n')
+      answer: ['a = 4', 'b = 3', 'if a >= 2 and b >= 3:', '    print("The condition is met")'].join('\\n')
     }
   ], '09');
 
   assert.deepEqual(result.answers, {
-    '511009040': {
-      type: 'description',
-      answer_code: ['a = 5', 'b = 10', 'if a == 5 or b == 10:', '    print("The condition is met")'].join('\n')
-    },
-    '511009050': {
-      type: 'description',
-      answer_code: ['a = 4', 'b = 3', 'if a >= 2 and b >= 3:', '    print("The condition is met")'].join('\n')
-    }
+    '511009040': { type: 'description', answer_code: 'if a == 5 or b == 10:' },
+    '511009050': { type: 'description', answer_code: 'if a >= 2 and b >= 3:' }
   });
   assert.deepEqual(result.unmatched, []);
 });
