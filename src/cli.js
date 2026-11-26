@@ -15,6 +15,7 @@ import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
+import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
 const program = new Command();
@@ -50,6 +51,35 @@ async function confirmChapter({ chapter, position, total }) {
   try {
     const answer = await rl.question(`Start chapter ${sequence} (${position}/${total}) - ${title}? [Y/n] `);
     return !/^(n|no)$/i.test(answer.trim());
+  } finally {
+    rl.close();
+  }
+}
+
+async function chooseSolveCourse(user) {
+  const courses = listSolvableCourses(
+    user?.available_courses || [],
+    listApiCourses(),
+    courseId => fs.existsSync(path.join(ROOT, 'answers', courseId + '.json'))
+  );
+  if (!courses.length) {
+    throw new Error('No available course has a local answer bank. Run qureo sync and add answers/<course_id>.json before solving.');
+  }
+  if (!input.isTTY) {
+    throw new Error('Course selection requires an interactive PowerShell terminal. Pass --course <id> to choose a course directly.');
+  }
+
+  console.log('\nChoose a QUREO course:');
+  for (const [index, course] of courses.entries()) {
+    console.log(`  ${index + 1}. ${displayCourseName(course)} (${course.id})`);
+  }
+
+  const rl = readline.createInterface({ input, output });
+  try {
+    const answer = await rl.question(`Select a course [1-${courses.length}]: `);
+    const selected = resolveCourseChoice(answer, courses);
+    if (!selected) throw new Error('Invalid course selection. Run qureo solve again and enter one of the listed numbers.');
+    return selected.id;
   } finally {
     rl.close();
   }
@@ -493,8 +523,8 @@ program.command('export')
   }));
 
 program.command('solve [chapterRange]')
-  .description('Solve from your first unfinished chapter, with optional chapter ranges and run limits')
-  .option('--course <id>', 'Course ID to solve', 'javascript_ar')
+  .description('Interactively choose a QUREO course, then solve its remaining chapters')
+  .option('--course <id>', 'Course ID to solve; prompts for a choice when omitted')
   .option('--dry-run', 'Preview selected chapters without submitting answers')
   .option('--single', 'Solve only the current or explicitly selected chapter')
   .option('--max-chapters <count>', 'Stop after this many chapters')
@@ -503,9 +533,10 @@ program.command('solve [chapterRange]')
   .option('--interactive', 'Ask before starting each chapter')
   .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
   .option('--no-resume', 'Ignore the previous local checkpoint')
-  .action(async (chapterRange, options) => withClient(async client => {
+  .action(async (chapterRange, options) => withClient(async (client, user) => {
+    const courseId = options.course || await chooseSolveCourse(user);
     const result = await solveCourse(client, {
-      courseId: options.course,
+      courseId,
       targetChapter: chapterRange || null,
       dryRun: Boolean(options.dryRun),
       single: Boolean(options.single),
