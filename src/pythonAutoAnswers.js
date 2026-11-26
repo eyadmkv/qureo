@@ -136,12 +136,18 @@ function resolvePromptChoice(question, choices) {
 }
 
 function resolveLogicalOperatorChoice(question, choices) {
-  const prompt = compact(questionText(question));
+  const prompt = stripQureoMarkup(questionText(question))
+    .toLocaleLowerCase('ar')
+    .replace(/[\\u064b-\\u065f\\u0670\\u0640]/gu, '')
+    .replace(/[أإآ]/gu, 'ا')
+    .replace(/ى/gu, 'ي')
+    .replace(/\\s+/gu, ' ')
+    .trim();
   let operator = null;
 
-  if (/يتحققاوب(?:معا)?|bothab|aandbtogether/u.test(prompt)) {
+  if (/يتحقق\\s+a\\s*و\\s*b(?:\\s*معا)?|both\\s+a\\s+and\\s+b|a\\s+and\\s+b\\s+together/u.test(prompt)) {
     operator = 'and';
-  } else if (/يتحققااوب|eitheraorb|aorb/u.test(prompt)) {
+  } else if (/يتحقق\\s+a\\s*او\\s*b|either\\s+a\\s+or\\s+b|a\\s+or\\s+b/u.test(prompt)) {
     operator = 'or';
   }
 
