@@ -14,8 +14,30 @@ const STOP_WORDS = new Set((
   'الاربعة اربعة الاثنين الاثنينين نحو حتى حيث جدا مازال'
 ).split(/\s+/u));
 
+const HTML_ENTITIES = new Map([
+  ['amp', '&'],
+  ['apos', "'"],
+  ['gt', '>'],
+  ['lt', '<'],
+  ['nbsp', ' '],
+  ['quot', '"']
+]);
+
+function decodeHtmlEntities(value) {
+  return String(value || '').replace(/&(#(?:x[\da-f]{1,8}|\d{1,10})|[a-z][a-z\d]+);/giu, (entity, code) => {
+    if (code[0] !== '#') return HTML_ENTITIES.get(code.toLowerCase()) ?? entity;
+
+    const hexadecimal = code[1]?.toLowerCase() === 'x';
+    const point = Number.parseInt(code.slice(hexadecimal ? 2 : 1), hexadecimal ? 16 : 10);
+    if (!Number.isInteger(point) || point <= 0 || point > 0x10ffff || (point >= 0xd800 && point <= 0xdfff)) {
+      return '\uFFFD';
+    }
+    return String.fromCodePoint(point);
+  });
+}
+
 function normalize(value) {
-  return String(value || '')
+  return decodeHtmlEntities(value)
     .toLocaleLowerCase('ar')
     .normalize('NFKC')
     .replace(/[\u064B-\u065F\u0670\u0640]/gu, '')
@@ -25,7 +47,6 @@ function normalize(value) {
     .replace(/\s+/gu, ' ')
     .trim();
 }
-
 function tokens(value) {
   return Array.from(new Set(normalize(value).split(/\s+/u)
     .filter(word => (word.length > 2 || /^[\u2460-\u2473]$/u.test(word)) && !STOP_WORDS.has(word))));
@@ -150,10 +171,7 @@ function bestMatch(target, candidates, getText, { minimumScore, minimumMatches, 
 }
 
 function cleanText(value) {
-  return String(value || '')
-    .replace(/<[^>]+>/gu, ' ')
-    .replace(/&nbsp;/giu, ' ')
-    .replace(/&amp;/giu, '&')
+  return decodeHtmlEntities(String(value || '').replace(/<[^>]+>/gu, ' '))
     .replace(/\s+/gu, ' ')
     .trim();
 }
@@ -192,7 +210,7 @@ export function buildSprixChapterPlan(data, bank) {
 
     const questionResult = bestMatch(prompt, answeredBank, row => row.question, {
       minimumScore: 0.28,
-      minimumMatches: 3,
+      minimumMatches: Math.max(1, Math.min(3, tokens(prompt).length)),
       margin: 0.035
     });
     if (!questionResult.match) {

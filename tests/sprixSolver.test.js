@@ -260,3 +260,42 @@ test('rejects an answer option that does not belong to its question', () => {
     /does not belong to question/u
   );
 });
+
+
+test('matches short Arabic questions containing encoded HTML quotation marks', () => {
+  const bank = parseSprixAnswerBank(JSON.stringify({
+    units: [{
+      id: 1,
+      title: 'أساسيات المال والتمويل',
+      levels: [{
+        id: 70,
+        title: 'كيف نشأ المال',
+        questions: [{
+          id: '658',
+          q: 'ما هي حالة &#34;التضخم المفرط&#34;؟',
+          a: 'حالة تستمر فيها الأسعار في الارتفاع بسرعة وتكاد تختفي فيها قيمة المال'
+        }]
+      }]
+    }]
+  }));
+
+  const result = buildSprixChapterPlan({
+    chapter: {},
+    blocks: [{
+      id: 6556,
+      type: 'question',
+      question: { question_text: 'ما هي حالة &#x22;التضخم المفرط&#x22;؟' },
+      options: [
+        { id: 1, text: 'حالة تستمر فيها الأسعار في الارتفاع بسرعة وتكاد تختفي فيها قيمة المال' },
+        { id: 2, text: 'حالة تنخفض فيها الأسعار وتزداد القوة الشرائية' }
+      ]
+    }]
+  }, bank);
+
+  assert.equal(result.pendingQuestionCount, 1);
+  assert.equal(result.plan.length, 1);
+  assert.equal(result.unmatched.length, 0);
+  assert.equal(result.plan[0].optionId, 1);
+  assert.equal(result.plan[0].questionScore, 1);
+  assert.equal(result.plan[0].optionScore, 1);
+});
