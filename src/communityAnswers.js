@@ -6,7 +6,7 @@ export const COMMUNITY_ANSWER_ARCHIVE_URL =
   'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/qureo_answers.json';
 export const COMMUNITY_ANSWER_ARCHIVE_PATH = path.join(DATA_DIR, 'community-qureo-answers.json');
 
-export function parseCommunityAnswerArchive(value) {
+export function parseCommunityAnswerArchive(value, { minimumAnswers = 100 } = {}) {
   const archive = typeof value === 'string' ? JSON.parse(value) : value;
   if (!archive || typeof archive !== 'object' || Array.isArray(archive)) {
     throw new Error('Community answer archive must be a JSON object grouped by chapter ID.');
@@ -54,7 +54,7 @@ export function parseCommunityAnswerArchive(value) {
     }
   }
 
-  if (chapterCount < 1 || Object.keys(answers).length < 100) {
+  if (chapterCount < 1 || Object.keys(answers).length < minimumAnswers) {
     throw new Error('Community answer archive is unexpectedly small or empty; refusing to install it.');
   }
 
