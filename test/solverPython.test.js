@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -218,4 +218,92 @@ test('resolves all nine verified Python chapter 2 answers against QUREO types an
     { type: 'choice', choice_id: 5110020801 },
     { type: 'choice', choice_id: 5110020901 }
   ]);
+});
+
+
+test('opens a lesson in the hidden browser after the direct completion API returns 404', async () => {
+  const requests = [];
+  const browserCalls = [];
+  const client = {
+    async request(url, options) {
+      requests.push({ url, method: options.method });
+      return new Response('Not found', { status: 404 });
+    }
+  };
+  const browser = {
+    async completeLecture(lessonId, lectureUrl) {
+      browserCalls.push({ lessonId, lectureUrl });
+      return { status: 200, ok: true, body: '' };
+    }
+  };
+  const progress = [];
+
+  await markLectureCompleted(
+    client,
+    '511002',
+    { id: 511002030 },
+    false,
+    message => progress.push(message),
+    browser
+  );
+
+  assert.deepEqual(requests, [{
+    url: 'https://me-tp.qureo.education/api/study/students/lectures/511002030/complete',
+    method: 'PUT'
+  }]);
+  assert.deepEqual(browserCalls, [{
+    lessonId: 511002030,
+    lectureUrl: 'https://me-tp.qureo.education/chapter/511002/lecture/511002030'
+  }]);
+  assert.equal(progress.at(-1), '  lesson 511002030: completed');
+});
+
+test('does not open a browser when the direct completion API succeeds', async () => {
+  const client = {
+    async request() {
+      return new Response('', { status: 200 });
+    }
+  };
+  const browser = {
+    async completeLecture() {
+      assert.fail('Browser should not be launched for an already available completion API.');
+    }
+  };
+
+  await markLectureCompleted(
+    client,
+    '511002',
+    { id: 511002010 },
+    false,
+    () => {},
+    browser
+  );
+});
+
+test('does not retry a completion 404 after browser initialization also fails', async () => {
+  let directRequests = 0;
+  const client = {
+    async request() {
+      directRequests++;
+      return new Response('Not found', { status: 404 });
+    }
+  };
+  const browser = {
+    async completeLecture() {
+      return { status: 404, ok: false, body: 'Still unavailable' };
+    }
+  };
+
+  await assert.rejects(
+    markLectureCompleted(
+      client,
+      '511002',
+      { id: 511002030 },
+      false,
+      () => {},
+      browser
+    ),
+    error => error.code === 'LESSON_COMPLETION_FAILED' && error.status === 404
+  );
+  assert.equal(directRequests, 1);
 });
