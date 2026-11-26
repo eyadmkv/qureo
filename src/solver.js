@@ -618,7 +618,7 @@ export async function solveCourse(client, {
         }
 
         if (inferred.unmatched.length) {
-          onProgress(\`  could not map \${inferred.unmatched.length} question(s): \${inferred.unmatched.map(item => item.question_id).join(', ')}\`);
+          onProgress(`  could not map ${inferred.unmatched.length} question(s): ${inferred.unmatched.map(item => item.question_id).join(', ')}`);
           const questionsById = new Map(asArray(questions).map(item => {
             const question = item?.question || item;
             return [String(question?.id ?? ''), item];
@@ -632,7 +632,7 @@ export async function solveCourse(client, {
               .replace(/<[^>]+>/gu, ' ')
               .replace(/\s+/gu, ' ')
               .trim();
-            onProgress(\`    \${unmatched.question_id}: \${prompt || '(prompt unavailable)'}\`);
+            onProgress(`    ${unmatched.question_id}: ${prompt || '(prompt unavailable)'}`);
 
             const choices = asArray(item?.choices || question?.choices);
             for (const choice of choices) {
@@ -641,7 +641,7 @@ export async function solveCourse(client, {
                 .replace(/<[^>]+>/gu, ' ')
                 .replace(/\s+/gu, ' ')
                 .trim();
-              onProgress(\`      [\${choice.id ?? '?'}] \${choiceText}\`);
+              onProgress(`      [${choice.id ?? '?'}] ${choiceText}`);
             }
           }
         }
