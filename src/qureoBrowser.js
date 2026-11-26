@@ -190,14 +190,13 @@ class CdpConnection {
   }
 }
 
-async function waitForDevTools(profileDir, child) {
+async function waitForDevTools(profileDir, child, getStartupError) {
   const activePortFile = path.join(profileDir, 'DevToolsActivePort');
   const deadline = Date.now() + 20000;
+  let exitedAt = null;
 
   while (Date.now() < deadline) {
-    if (child.exitCode !== null) {
-      throw new Error('Chrome exited before its automation interface became ready.');
-    }
+    if (child.exitCode !== null && exitedAt === null) exitedAt = Date.now();
 
     if (fs.existsSync(activePortFile)) {
       const [portText] = fs.readFileSync(activePortFile, 'utf8').trim().split(/\r?\n/);
@@ -214,10 +213,14 @@ async function waitForDevTools(profileDir, child) {
       }
     }
 
+    if (exitedAt !== null && Date.now() - exitedAt >= 2000) {
+      throw new Error(getStartupError());
+    }
+
     await sleep(100);
   }
 
-  throw new Error('Chrome did not expose its local automation interface within 20 seconds.');
+  throw new Error(getStartupError('Chrome did not expose its local automation interface within 20 seconds.'));
 }
 
 export class QureoLectureBrowser {
@@ -269,14 +272,30 @@ export class QureoLectureBrowser {
       'about:blank'
     ];
 
-    this.child = spawn(executable, args, { stdio: 'ignore', windowsHide: true });
+    this.child = spawn(executable, args, { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
+    let stderr = '';
+    this.child.stderr?.setEncoding('utf8');
+    this.child.stderr?.on('data', chunk => {
+      stderr = (stderr + chunk).slice(-6000);
+    });
+    let exitDetails = null;
+    this.child.once('exit', (code, signal) => {
+      exitDetails = { code, signal };
+    });
+    const getStartupError = fallback => {
+      const exit = exitDetails
+        ? `Chrome exited with code ${exitDetails.code ?? 'unknown'}${exitDetails.signal ? ` (signal ${exitDetails.signal})` : ''}.`
+        : fallback || 'Chrome did not start its automation interface.';
+      const diagnostic = stderr.trim();
+      return [exit, diagnostic].filter(Boolean).join(' Chrome output: ');
+    };
     const childError = new Promise((_, reject) => {
       this.child.once('error', reject);
     });
 
     try {
       const debuggerUrl = await Promise.race([
-        waitForDevTools(this.profileDir, this.child),
+        waitForDevTools(this.profileDir, this.child, getStartupError),
         childError
       ]);
       this.cdp = await CdpConnection.connect(debuggerUrl);
