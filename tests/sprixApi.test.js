@@ -160,14 +160,15 @@ test('does not accept a successful login response that returns no session cookie
 
 
 test('inspects a copied SPRIX cURL request while redacting cookies, CSRF headers and sensitive body fields', () => {
+  const body = JSON.stringify({ reviewed: true, key_point_id: 501, password: 'secret-password' });
   const curl = [
     "curl 'https://egy.app.spx-learning-square.com/api/v1/chapters/76/key-points/501/review?lang=ar&token=private'",
     "-H 'accept: application/json'",
     "-H 'content-type: application/json'",
     "-H 'cookie: session=secret-cookie'",
     "-H 'x-xsrf-token: secret-xsrf'",
-    "--data-raw '{\"reviewed\":true,\"key_point_id\":501,\"password\":\"secret-password\"}'"
-  ].join(' \\\\\\n  ');
+    "--data-raw '" + body + "'"
+  ].join(' ');
   const parsed = parseSprixCurlRequest(curl);
 
   assert.equal(parsed.method, 'POST');
