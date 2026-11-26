@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node src/entry.js",
-    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/chapterContext.js && node --check src/courseSelection.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/publicAnswers.js && node --check src/pythonAnswerGuide.js && node --check src/pythonAutoAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --check src/sprix.js && node --check src/sprixHttp.js && node --check src/sprixApi.js && node --check src/sprix-entry.js && node --check src/sprixSolver.js && node --test",
+    "check": "node --check src/entry.js && node --check src/terminal.js && node --check src/cli.js && node --check src/chapterContext.js && node --check src/courseSelection.js && node --check src/db.js && node --check src/http.js && node --check src/solver.js && node --check src/qureoBrowser.js && node --check src/publicAnswers.js && node --check src/pythonAnswerGuide.js && node --check src/pythonAutoAnswers.js && node --check src/hiddenInput.js && node --check src/paths.js && node --check src/solveSelection.js && node --check src/sprix.js && node --check src/sprixHttp.js && node --check src/sprixApi.js && node --check src/sprix-entry.js && node --check src/sprixSolver.js && node --test",
     "test": "node --test"
   },
   "engines": {
