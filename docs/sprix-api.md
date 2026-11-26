@@ -66,21 +66,42 @@ sprix bank harvest --out .\sprix-course-source.json
 
 The export includes all units and learning-item metadata, chapter blocks, question prompts, option IDs and text, review items, and a summary of any failed requests. Test items are listed by ID, but the export does not start test attempts or attempt to extract test answer keys.
 
-This export is source material for building a separate answer bank. It does not fabricate correct answers. Correct answers should be added only when supported by the lesson explanation or an independently verified source.
+This export is source material for building a separate answer bank. It does not contain SPRIX correctness flags. A separate answer map can be matched to the exported question and option IDs, then converted into the solver's local text bank.
+
+## Build a local bank from the course export
+
+The course export contains the prompts and option text, but SPRIX does not return correct-option flags for chapter questions. A separate answer map is therefore required. Keep both JSON files under the ignored local `data/sprix/` directory.
+
+Place the course export at `data/sprix/course-source.json` and the matching answer map at `data/sprix/answer-map.json`, then run:
+
+```powershell
+sprix bank build
+sprix bank status
+```
+
+The builder verifies that every source question has a mapped option ID and that each selected option belongs to that question. It converts the selected option text into the local bank format used by `sprix solve`. An incomplete or mismatched map is rejected without saving a bank.
+
+The answer map is separate from the harvested source and should remain local. Correct choices may be inferred from question wording and hints; SPRIX itself did not provide official answer-key fields. Always review the dry-run plan before submitting. The 22 listed tests are not included because their question sets were not fetched.
+
+To use different paths:
+
+```powershell
+sprix bank build --source .\\tmp\\course-source.json --answers .\\data\\sprix\\answer-map.json
+```
 
 ## Import your userscript answer bank and preview a solve
 
-The userscript import is optional. The course-source export above works independently and does not require a userscript. The `DATA` import remains available only for users who already have a separate local question bank.
+The userscript import remains optional for users who already have a separate local question bank. The `DATA` import is compatible with the same solver.
 
 ```powershell
-sprix bank import --file .\script.js
+sprix bank import --file .\\script.js
 sprix bank status
 ```
 
 Use `--replace` to replace an existing local bank after reviewing the source file:
 
 ```powershell
-sprix bank import --file .\script.js --replace
+sprix bank import --file .\\script.js --replace
 ```
 
 The solver starts in dry-run mode. It fetches the chapter blocks, compares pending questions and option text against the local bank, then prints the planned option IDs and match scores:
