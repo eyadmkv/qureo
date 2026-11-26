@@ -110,7 +110,7 @@ sprix bank build --source .\\tmp\\course-source.json --answers .\\data\\sprix\\a
 
 ## Solve the entire SPRIX course
 
-The solver uses your local answer bank and the live curriculum. It selects chapter items in curriculum order, starts at the first unfinished chapter, and skips chapters already marked complete. Reviews and tests are left alone.
+The solver uses your local answer bank and the live curriculum. It processes chapters and reviews in their curriculum order, starting at the first unfinished item and skipping completed items. When it reaches a review, it fetches the review items and submits the review-completion request automatically. Test items remain untouched.
 
 Import your local answer source if you have not already done so:
 
@@ -131,7 +131,7 @@ Run the course solver:
 sprix solve
 ```
 
-The command asks once before submitting answers. After every chapter has received confirmed correct answers, it requests chapter completion and refreshes the curriculum before moving on. This lets SPRIX unlock the next chapter in sequence. It stops at the first locked or inaccessible chapter, unmatched question, rejected answer, or unconfirmed completion. It never guesses an option or continues past a failed chapter.
+The command asks once before making account changes. It processes chapter and review items in curriculum order. After every chapter has received confirmed correct answers, it requests chapter completion and refreshes the curriculum. At each review, it loads the review items, sends the review-completion request, then refreshes the curriculum and confirms completion before continuing. This allows SPRIX to unlock later items in sequence. It stops at the first locked or inaccessible chapter, unmatched question, rejected answer, or unconfirmed chapter or review completion. It never guesses an option or continues past a failed item.
 
 For non-interactive terminals, pass `--yes` to confirm the full run:
 
@@ -156,7 +156,7 @@ sprix solve <chapter-id> --yes
 sprix solve <chapter-id> --complete --yes
 ```
 
-A specific chapter remains a one-chapter operation. Add `--complete` when you also want the command to mark that selected chapter complete. In a course-wide run, chapters are completed automatically so the solver can proceed through the curriculum. Use `--answers-only` to submit answers without requesting chapter completion.
+A specific chapter remains a one-chapter operation. Add `--complete` when you also want the command to mark that selected chapter complete. In a course-wide run, the solver completes reviews as it encounters them and completes chapters after their answers are accepted. Use `--answers-only` to submit chapter answers while leaving chapter and review completion unchanged.
 
 The imported bank is stored at `data/sprix/answer-bank.json`. It is ignored by Git and is not included in this repository. The solver stops before submitting any answers in a chapter if one or more pending questions have no confident, unique match.
 
