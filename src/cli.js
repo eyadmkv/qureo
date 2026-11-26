@@ -20,7 +20,7 @@ const program = new Command();
 program
   .name('qureo')
   .description('Private QUREO HTTP client, course index and local answer search')
-  .version('0.4.0');
+  .version('0.5.0');
 
 function outputJson(value) { console.log(JSON.stringify(value, null, 2)); }
 

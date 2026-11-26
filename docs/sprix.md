@@ -70,11 +70,21 @@ The default store is `data/sprix/study.json`. It contains captured lesson text, 
 
 ## Scope and limitations
 
-- The tool works with content that is already visible in your browser and that you explicitly copy.
-- It does not request or store SPRIX passwords, session cookies, or browser tokens.
-- It does not use guessed private API endpoints.
-- It does not submit answers, mark lessons complete, reset attempts, or change your SPRIX account.
-- The question parser currently targets four-option A-D questions. Other exercise types remain in the captured lesson text but are not converted into practice questions.
-- If the platform changes its visible wording or option layout, some questions may need to be captured from a text file with minor cleanup.
+- The local study commands work with lesson content that is already visible in your browser and that you explicitly capture.
+- The API commands import your existing browser session from a copied cURL request. They do not request your SPRIX password or read browser cookies directly.
+- Imported cookies are encrypted locally with Windows DPAPI. They are not stored in the repository or sent to ChatGPT.
+- The API client uses the observed same-origin SPRIX routes documented in [sprix-api.md](sprix-api.md). The first login validation performs a read-only curriculum request.
+- Commands that submit answers, complete chapters or reviews, or start/submit tests require `--yes`.
+- The CLI does not brute-force answer options, create dummy test attempts, or retry state-changing requests after network errors.
+- The local question parser currently targets four-option A-D questions. Other exercise types remain in the captured lesson text but are not converted into offline practice questions.
 
-The material is stored on your computer. The QUREO login session and QUREO solver are separate and are not used by these SPRIX commands.
+The QUREO login session and QUREO API client remain separate from the SPRIX session and API client.
+
+
+## Live SPRIX CLI
+
+The standalone `sprix` command now supports live curriculum, chapter, review and test API operations. The same commands are available as `qureo sprix`.
+
+Start with the [SPRIX API CLI guide](sprix-api.md) to import your browser session, inspect live course data, and use explicit confirmed actions. Session cookies are encrypted locally with Windows DPAPI. Commands that submit answers, complete lessons/reviews, or open/submit tests require `--yes`.
+
+The previous local-only commands remain available for lesson text captures, offline question review, personal reference keys, and practice.
