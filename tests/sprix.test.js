@@ -72,3 +72,22 @@ test('ignores incomplete and non-question content', () => {
 test('normalizes Arabic diacritics and letter variants for search', () => {
   assert.equal(normalizeSprixText('إِدَارَةُ الْمَالِ'), 'ادارة المال');
 });
+
+
+test('parses options when labels and option text share a line', () => {
+  const source = [
+    'ما الذي يدعم قيمة الأوراق النقدية الحديثة؟',
+    'اختار إجابة واحدة!',
+    'A جودة الورق الخاص المستخدم والتقنيات المتطورة لمنع التزييف',
+    'B كمية المعادن النادرة مثل الذهب والفضة الموجودة في مادة الورقة النقدية',
+    'C ضمان الحكومة وثقة المجتمع المشتركة بأن يمكن استخدامها لشراء الأشياء',
+    'D حجم شركات الطباعة وسجلّها في إنتاج الأوراق النقدية وإدارتها',
+    'ورّيني تلميح (فاضل 1)',
+    'راجع إجابتي'
+  ].join('\n');
+
+  const questions = parseSprixQuestions(source);
+  assert.equal(questions.length, 1);
+  assert.deepEqual(questions[0].choices.map(choice => choice.label), ['A', 'B', 'C', 'D']);
+  assert.match(questions[0].choices[2].text, /ثقة المجتمع/u);
+});
