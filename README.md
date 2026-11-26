@@ -85,8 +85,9 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
-| `sprix bank harvest` | Export all chapter and review questions through read-only API requests |\n| `sprix bank import` / `sprix solve` | Optional local bank import and preview or submit safe matches |
-| `sprix login` / `logout` | Import or remove your encrypted SPRIX browser session |
+| `sprix bank harvest` | Export all chapter and review questions through read-only API requests |
+| `sprix bank import` / `sprix solve` | Optional local bank import and preview or submit safe matches |
+| `sprix login` / `logout` | Sign in with Login ID and password, or remove the encrypted session |
 | `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
 | `qureo history` | View recent command names and timestamps |
@@ -97,7 +98,7 @@ Run `qureo --help` for the complete command list. See the [usage guide](docs/usa
 
 The standalone `sprix` command works with the Egyptian second-year Baccalaureate financial-literacy course in SPRIX Learning Square. The same API commands are also available under `qureo sprix`. It includes live curriculum and chapter reads, review and test workflows, explicit answer submission, encrypted local session storage, and the existing offline lesson-capture and practice tools.
 
-Import an already-authenticated browser session with `sprix login --clipboard`. The command reads a copied cURL request locally, extracts its Cookie header, validates the session with a read-only curriculum request, then stores it encrypted with Windows DPAPI. Never share the copied cURL command, Cookie header, or session file.
+Sign in with `sprix login`. The CLI prompts for your Login ID and masks your password, sends the credentials directly to SPRIX, validates the session with a read-only curriculum request, then stores the resulting cookies encrypted with Windows DPAPI. The password is never stored. Cookie import remains available as a fallback.
 
 Account-changing actions require an explicit `--yes` confirmation. The CLI does not brute-force choices, submit dummy test answers to reveal keys, or retry a POST/PUT after a network error. SPRIX's API is separate from QUREO's client and session.
 
