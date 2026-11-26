@@ -96,7 +96,7 @@ The solver uses your local answer bank and the live curriculum. It selects chapt
 Import your local answer source if you have not already done so:
 
 ```powershell
-sprix bank import --file .\\script.js
+sprix bank import --file .\script.js
 sprix bank status
 ```
 
