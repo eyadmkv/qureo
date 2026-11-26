@@ -3,6 +3,8 @@ import path from 'node:path';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
+import { loadSavedPythonAnswerGuide, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
+import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
@@ -60,6 +62,22 @@ function loadAnswers(courseId) {
     throw new Error(`Invalid answer bank format: ${file}`);
   }
   return parsed.answers;
+}
+
+function saveAnswers(courseId, answers, sources = {}) {
+  const file = path.join(ANSWER_ROOT, `${courseId}.json`);
+  const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+  parsed.answers = answers;
+  parsed.answer_sources = {
+    ...(parsed.answer_sources || {}),
+    ...sources
+  };
+  const temporaryPath = file + '.tmp';
+  fs.writeFileSync(temporaryPath, JSON.stringify(parsed, null, 2) + '\\n', {
+    encoding: 'utf8',
+    mode: 0o600
+  });
+  fs.renameSync(temporaryPath, file);
 }
 
 export async function fetchCourseData(client, courseId) {
@@ -450,6 +468,7 @@ export async function solveCourse(client, {
   interactive = false,
   shouldContinue = async () => true,
   resume = true,
+  autoAnswers = false,
   onProgress = message => console.log(message)
 } = {}) {
   if (!Number.isInteger(chapterDelayMs) || chapterDelayMs < 0 || chapterDelayMs > 3600000) {
@@ -457,6 +476,30 @@ export async function solveCourse(client, {
   }
   if (!Number.isInteger(questionDelayMs) || questionDelayMs < 0 || questionDelayMs > 3600000) {
     throw new Error('Question pause must be between 0 and 3600 seconds.');
+  }
+
+  if (autoAnswers && courseId !== 'python_short_ar') {
+    throw new Error('--auto-answers is currently supported only for the Python course.');
+  }
+
+  let pythonGuide = null;
+  if (autoAnswers) {
+    pythonGuide = loadSavedPythonAnswerGuide();
+    if (!pythonGuide) {
+      onProgress('No cached Python guide found. Downloading all public Python answers first...');
+      const synced = await syncPythonAnswerGuide({
+        onProgress: progress => {
+          if (progress.message) onProgress(progress.message);
+        }
+      });
+      onProgress(`Downloaded ${synced.answers_extracted} answers across ${synced.levels_fetched} levels and ${synced.lessons_fetched} lessons.`);
+      pythonGuide = loadSavedPythonAnswerGuide();
+    } else {
+      onProgress(`Using cached Python guide: ${pythonGuide.answers.length} answers across ${pythonGuide.coverage?.levels_fetched ?? '?'} levels.`);
+    }
+    if (!pythonGuide?.answers?.length) {
+      throw new Error('The public Python guide is empty. Run qureo answers sync-python and check its output.');
+    }
   }
 
   const answers = loadAnswers(courseId);
@@ -594,12 +637,14 @@ export async function solveCourse(client, {
         if (error.code !== 'PRECONDITION_NOT_FULFILLED') throw error;
 
         const coverage = getChapterAnswerCoverage(chapterMeta, chapterId, answers);
-        if (!coverage.complete || dryRun) {
+        if ((!coverage.complete && !autoAnswers) || dryRun) {
           const expected = coverage.expectedQuestions ?? 'unknown';
           throw new Error(
             `Chapter ${chapterSequence} assessment is locked until its lessons are completed. ` +
             `The local ${courseId} answer bank covers ${coverage.answerQuestions}/${expected} question IDs. ` +
-            'The solver left all lessons and assessment progress unchanged. Add verified answers for every question before rerunning this chapter.'
+            (dryRun
+              ? 'Dry-run mode will not complete lessons or change assessment progress.'
+              : 'The solver left all lessons and assessment progress unchanged. Add verified answers or rerun with --auto-answers.')
           );
         }
 
@@ -611,9 +656,9 @@ export async function solveCourse(client, {
           );
         }
 
-        onProgress(
-          `Assessment is locked until lessons are completed. The local answer bank covers ` +
-          `${coverage.answerQuestions}/${coverage.expectedQuestions} expected question IDs; completing lessons first.`
+        onProgress(autoAnswers && !coverage.complete
+          ? `Automatic answer matching is enabled. Completing ${lectures.length} lesson(s) to unlock the live assessment questions before matching the public guide.`
+          : `Assessment is locked until lessons are completed. The local answer bank covers ${coverage.answerQuestions}/${coverage.expectedQuestions} expected question IDs; completing lessons first.`
         );
         for (const lesson of lectures) {
           const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
@@ -631,6 +676,36 @@ export async function solveCourse(client, {
         }
         lessonsAlreadyCompleted = true;
         questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+      }
+
+      if (autoAnswers) {
+        const levelId = String(chapterSequence).padStart(2, '0');
+        const inferred = matchPythonAssessmentAnswers(questions, pythonGuide.answers, levelId);
+        const sourceEntries = {};
+
+        for (const match of inferred.matches) {
+          answers[match.question_id] = inferred.answers[match.question_id];
+          sourceEntries[match.question_id] = {
+            guide_id: match.guide_id,
+            guide_question: match.guide_question,
+            guide_answer: match.guide_answer,
+            source_url: match.source_url,
+            match_score: match.score,
+            match_strategy: match.strategy,
+            inferred_at: new Date().toISOString()
+          };
+        }
+
+        if (inferred.matches.length) {
+          saveAnswers(courseId, answers, sourceEntries);
+          onProgress(
+            `  auto-matched ${inferred.matches.length}/${questions.length} assessment answers from guide level ${levelId}; saved to answers/${courseId}.json`
+          );
+        }
+
+        if (inferred.unmatched.length) {
+          onProgress(`  could not map ${inferred.unmatched.length} question(s): ${inferred.unmatched.map(item => item.question_id).join(', ')}`);
+        }
       }
 
       const solved = await solveChapter(client, chapter, chapterMeta, questions, answers, {
