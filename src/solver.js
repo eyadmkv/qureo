@@ -179,14 +179,14 @@ async function waitForChapterCompletion(client, sectionId, chapterId, attempts =
 }
 
 export async function initializeLecture(client, lessonId, referer) {
-  const pathname = '/students/lectures/' + encodeURIComponent(lessonId);
+  const pathname = '/lectures/' + encodeURIComponent(lessonId);
   const payload = await requestJson(client, pathname, {
     method: 'GET',
     referer
   });
 
-  if (String(payload?.lecture?.lecture_id ?? '') !== String(lessonId)) {
-    const error = new Error(`QUREO did not confirm initialization for lesson ${lessonId}.`);
+  if (String(payload?.lecture?.id ?? '') !== String(lessonId)) {
+    const error = new Error(`QUREO did not return lesson content for lesson ${lessonId}.`);
     error.code = 'LESSON_INIT_UNCONFIRMED';
     throw error;
   }
