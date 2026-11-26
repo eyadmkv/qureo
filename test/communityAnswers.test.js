@@ -1,0 +1,45 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { parseCommunityAnswerArchive } from '../src/communityAnswers.js';
+
+test('parses community choice and description answers into solver records', () => {
+  const result = parseCommunityAnswerArchive({
+    '90001': {
+      '90001010': ['choice', 900010101],
+      '90001020': ['description', 'console.log("Hello");']
+    },
+    '511001': {
+      '511001010': ['choice', 5110010101]
+    }
+  });
+
+  assert.equal(result.chapterCount, 2);
+  assert.equal(result.answerCount, 3);
+  assert.equal(result.choiceCount, 2);
+  assert.equal(result.descriptionCount, 1);
+  assert.deepEqual(result.answers['90001010'], {
+    type: 'choice',
+    choice_id: 900010101
+  });
+  assert.deepEqual(result.answers['90001020'], {
+    type: 'description',
+    answer_code: 'console.log("Hello");'
+  });
+});
+
+test('rejects malformed or unexpectedly small community archives', () => {
+  assert.throws(() => parseCommunityAnswerArchive({}), /unexpectedly small or empty/);
+  assert.throws(() => parseCommunityAnswerArchive({
+    '90001': { '90001010': ['unknown', 'answer'] }
+  }), /Unsupported answer type/);
+  assert.throws(() => parseCommunityAnswerArchive({
+    '90001': { '90001010': ['choice', 'not-an-id'] }
+  }), /Invalid choice ID/);
+});
+
+test('rejects conflicting duplicate question IDs', () => {
+  assert.throws(() => parseCommunityAnswerArchive({
+    '90001': { '90001010': ['choice', 900010101] },
+    '90002': { '90001010': ['choice', 900010102] }
+  }), /Conflicting duplicate answer/);
+});
