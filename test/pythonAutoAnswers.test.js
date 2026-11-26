@@ -340,3 +340,30 @@ test('resolves all five Chapter 6 review answers from live questions and guide o
   assert.deepEqual(result.unmatched, []);
   assert.ok(result.matches.every(match => match.strategy === 'review-order'));
 });
+
+
+test('does not guess when a prompt-derived Python choice is ambiguous', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511006099,
+      type: 'choice',
+      content: 'اختر البرنامج الذي يحتوي على التعبير الشرطي "قيمة المتغير num أكبر من 30".'
+    },
+    choices: [
+      { id: 5110060991, content: 'num > 30' },
+      { id: 5110060992, content: 'num > 30' },
+      { id: 5110060993, content: 'num < 30' }
+    ]
+  }], [{
+    id: 'py-l06-s06-q1',
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'مقارنة رقمية',
+    answer: 'لا توجد إجابة مطابقة'
+  }], '06');
+
+  assert.deepEqual(result.answers, {});
+  assert.equal(result.unmatched[0].question_id, '511006099');
+});
