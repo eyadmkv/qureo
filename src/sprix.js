@@ -160,9 +160,14 @@ export function captureSprixLesson({ title, unit = '', rawText, source = 'clipbo
   if (body.length > 2_000_000) throw new Error('Captured lesson exceeds the 2 MB limit.');
 
   const store = loadSprixStore();
-  const captureId = 'lesson_' + digest(normalizeSprixText(unit) + '|' + normalizeSprixText(cleanTitle));
+  const normalizedUnit = normalizeSprixText(unit);
+  const normalizedTitle = normalizeSprixText(cleanTitle);
+  const captureId = 'lesson_' + digest(normalizedUnit + '|' + normalizedTitle);
   const questions = parseSprixQuestions(body);
-  const existingCapture = store.captures.findIndex(item => item.id === captureId);
+  const existingCapture = store.captures.findIndex(item =>
+    item.id === captureId ||
+    (normalizeSprixText(item.title) === normalizedTitle && normalizeSprixText(item.unit) === normalizedUnit)
+  );
   const previousCapture = existingCapture >= 0 ? store.captures[existingCapture] : null;
   const capture = {
     id: captureId,
