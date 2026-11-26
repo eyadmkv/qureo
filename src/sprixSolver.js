@@ -137,7 +137,35 @@ export function loadSprixAnswerBank() {
   return bank;
 }
 
-function bestMatch(target, candidates, getText, { minimumScore, minimumMatches, margin } = {}) {
+function numericSignature(value) {
+  const ascii = String(value || '')
+    .replace(/[٠-٩]/gu, digit => String(digit.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/gu, digit => String(digit.charCodeAt(0) - 0x06f0));
+  const values = ascii.match(/\\d+/gu) || [];
+  if (values.length < 2) return null;
+  return values
+    .map(value => value.replace(/^0+(?=\\d)/u, ''))
+    .sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+}
+
+function bestMatch(target, candidates, getText, { minimumScore, minimumMatches, margin, numericMatch = false } = {}) {
+  if (numericMatch) {
+    const expectedNumbers = numericSignature(target);
+    if (expectedNumbers) {
+      const expectedKey = JSON.stringify(expectedNumbers);
+      const exactNumericMatches = candidates.filter(item => {
+        const candidateNumbers = numericSignature(getText(item));
+        return candidateNumbers && JSON.stringify(candidateNumbers) === expectedKey;
+      });
+      if (exactNumericMatches.length === 1) {
+        return { match: exactNumericMatches[0], score: 1, matches: expectedNumbers.length, numeric: true };
+      }
+      if (exactNumericMatches.length > 1) {
+        return { match: null, reason: 'ambiguous numeric match', bestScore: 1 };
+      }
+    }
+  }
+
   const ranked = candidates.map(item => ({ item, ...wordSimilarity(target, getText(item)) }))
     .sort((a, b) => b.score - a.score || b.matches - a.matches);
   const best = ranked[0];
@@ -206,7 +234,8 @@ export function buildSprixChapterPlan(data, bank) {
     const optionResult = bestMatch(questionResult.match.answer, options, optionText, {
       minimumScore: 0.24,
       minimumMatches: Math.min(2, answerTokens.length || 1),
-      margin: 0.025
+      margin: 0.025,
+      numericMatch: true
     });
     if (!optionResult.match) {
       unmatched.push({
