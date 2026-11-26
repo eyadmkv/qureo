@@ -15,6 +15,7 @@ import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
+import { resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
@@ -381,11 +382,20 @@ program.command('export')
     const targetChapter = options.chapter ? String(options.chapter) : null;
 
     if (targetChapter) {
+      const chapterContext = await resolveChapterContext(client, accountCourses, targetChapter);
+      if (!chapterContext) {
+        throw new Error(
+          `Could not find chapter ${targetChapter} in the available account courses. ` +
+          'Pass --course <id> to select its course explicitly, or run qureo sync to refresh the course list.'
+        );
+      }
+      report.course_id = chapterContext.courseId;
+
       let chapterRaw;
       try {
         chapterRaw = await client.json(`/chapters/${encodeURIComponent(targetChapter)}`);
       } catch (error) {
-        throw new Error(`Could not fetch chapter ${targetChapter}: ${error.message}`);
+        throw new Error(`Could not fetch chapter ${targetChapter} after initializing course ${chapterContext.courseId}: ${error.message}`);
       }
       const questionsRaw = await client.json(`/chapters/${encodeURIComponent(targetChapter)}/test`).catch(error => ({ __error: error.message }));
       const qList = asArray(questionsRaw);
