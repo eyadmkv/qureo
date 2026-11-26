@@ -78,22 +78,24 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo solve [range]` | Run the sequential chapter solver |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
-| `qureo sprix curriculum` | List the six financial-literacy units |
+| `sprix curriculum` / `qureo sprix curriculum` | Fetch live SPRIX curriculum and progress |
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
-| `qureo sprix search` / `export` | Search and export your local SPRIX study data |
+| `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |\n| `sprix login` / `logout` | Import or remove your encrypted SPRIX browser session |\n| `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
 | `qureo history` | View recent command names and timestamps |
 
 Run `qureo --help` for the complete command list. See the [usage guide](docs/usage.md), [solver guide](docs/solver.md) and [terminal experience guide](docs/terminal-experience.md) for detailed command examples and behavior.
 
-## SPRIX financial-literacy study companion
+## SPRIX financial-literacy CLI
 
-The `qureo sprix` command group supports the Egyptian second-year Baccalaureate financial-literacy course shown in the SPRIX Learning Square portal. Its curriculum index contains six units and 134 learning elements.
+The standalone `sprix` command works with the Egyptian second-year Baccalaureate financial-literacy course in SPRIX Learning Square. The same API commands are also available under `qureo sprix`. It includes live curriculum and chapter reads, review and test workflows, explicit answer submission, encrypted local session storage, and the existing offline lesson-capture and practice tools.
 
-SPRIX lesson pages are interactive and use a different platform from QUREO. This companion captures text that is already visible to you in the signed-in browser. It does not collect SPRIX credentials, read browser cookies, call guessed private endpoints, submit answers, or change course progress.
+Import an already-authenticated browser session with `sprix login --clipboard`. The command reads a copied cURL request locally, extracts its Cookie header, validates the session with a read-only curriculum request, then stores it encrypted with Windows DPAPI. Never share the copied cURL command, Cookie header, or session file.
 
-See the [SPRIX guide](docs/sprix.md) for capture, question review, local answer keys and practice commands. Captured content and personal notes stay under `data/sprix/`, which is excluded from Git.
+Account-changing actions require an explicit `--yes` confirmation. The CLI does not brute-force choices, submit dummy test answers to reveal keys, or retry a POST/PUT after a network error. SPRIX's API is separate from QUREO's client and session.
+
+See the [SPRIX local study guide](docs/sprix.md) and the [SPRIX API CLI guide](docs/sprix-api.md). Captured lessons, sessions, exports, and personal notes stay under `data/sprix/`, which is excluded from Git.
 
 ## Solver safety
 
