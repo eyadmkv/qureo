@@ -8,7 +8,16 @@ const pythonAnswers = {
   '511001030': { type: 'description', answer_code: 'print("programming")' },
   '511001040': { type: 'description', answer_code: 'print("hello")' },
   '511001050': { type: 'choice', choice_id: 5110010501 },
-  '511001060': { type: 'description', answer_code: 'print("Hello")' }
+  '511001060': { type: 'description', answer_code: 'print("Hello")' },
+  '511002010': { type: 'choice', choice_id: 5110020101 },
+  '511002020': { type: 'choice', choice_id: 5110020201 },
+  '511002030': { type: 'description', answer_code: 'print(19 + 40)' },
+  '511002040': { type: 'description', answer_code: 'print(7 - 2)' },
+  '511002050': { type: 'description', answer_code: 'print(15 / 5)' },
+  '511002060': { type: 'choice', choice_id: 5110020601 },
+  '511002070': { type: 'description', answer_code: 'print("The answer is " + str(2 * 5))' },
+  '511002080': { type: 'choice', choice_id: 5110020801 },
+  '511002090': { type: 'choice', choice_id: 5110020901 }
 };
 
 test('resolves Python choice questions against their actual option IDs', () => {
@@ -63,8 +72,8 @@ test('checks answer-bank coverage before unlocking a Python chapter assessment',
   });
   assert.deepEqual(secondChapter, {
     expectedQuestions: 9,
-    answerQuestions: 0,
-    complete: false
+    answerQuestions: 9,
+    complete: true
   });
 });
 
@@ -134,4 +143,47 @@ test('reports an unsuccessful background lesson-page initialization', async () =
     initializeLecturePage(client, 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
     error => error.code === 'LESSON_PAGE_INIT_FAILED' && error.status === 404
   );
+});
+
+
+test('resolves all nine verified Python chapter 2 answers against QUREO types and option IDs', () => {
+  const questions = [
+    {
+      question: { id: 511002010, type: 'choice' },
+      choices: [{ id: 5110020101 }, { id: 5110020102 }, { id: 5110020103 }, { id: 5110020104 }]
+    },
+    {
+      question: { id: 511002020, type: 'choice' },
+      choices: [{ id: 5110020201 }, { id: 5110020202 }, { id: 5110020203 }, { id: 5110020204 }]
+    },
+    { question: { id: 511002030, type: 'description' }, choices: [] },
+    { question: { id: 511002040, type: 'description' }, choices: [] },
+    { question: { id: 511002050, type: 'description' }, choices: [] },
+    {
+      question: { id: 511002060, type: 'choice' },
+      choices: [{ id: 5110020601 }, { id: 5110020602 }, { id: 5110020603 }, { id: 5110020604 }]
+    },
+    { question: { id: 511002070, type: 'description' }, choices: [] },
+    {
+      question: { id: 511002080, type: 'choice' },
+      choices: [{ id: 5110020801 }, { id: 5110020802 }, { id: 5110020803 }]
+    },
+    {
+      question: { id: 511002090, type: 'choice' },
+      choices: [{ id: 5110020901 }, { id: 5110020902 }, { id: 5110020903 }, { id: 5110020904 }]
+    }
+  ];
+
+  const resolved = questions.map(item => getQuestionAnswer(item, pythonAnswers));
+  assert.deepEqual(resolved, [
+    { type: 'choice', choice_id: 5110020101 },
+    { type: 'choice', choice_id: 5110020201 },
+    { type: 'description', answer_code: 'print(19 + 40)' },
+    { type: 'description', answer_code: 'print(7 - 2)' },
+    { type: 'description', answer_code: 'print(15 / 5)' },
+    { type: 'choice', choice_id: 5110020601 },
+    { type: 'description', answer_code: 'print("The answer is " + str(2 * 5))' },
+    { type: 'choice', choice_id: 5110020801 },
+    { type: 'choice', choice_id: 5110020901 }
+  ]);
 });
