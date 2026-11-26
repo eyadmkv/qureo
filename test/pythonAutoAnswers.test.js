@@ -443,3 +443,41 @@ test('normalizes title-case Python keywords before submitting description answer
   });
   assert.deepEqual(result.unmatched, []);
 });
+test('matches a choice from a guide answer with an explicit Arabic output annotation', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511008020, type: 'choice', content: 'ما ناتج مقارنة num مع 10؟' },
+    choices: [
+      { id: 5110080201, content: 'False' },
+      { id: 5110080202, content: 'True' },
+      { id: 5110080203, content: '10' },
+      { id: 5110080204, content: 'num == 10' }
+    ]
+  }], [{
+    id: 'py-l08-s02-q2', level_id: '08', lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى', question_number: 2,
+    question: 'ما ناتج مقارنة num=10 مع 10؟',
+    answer: 'num = 10\nprint(num == 10)\nالناتج: True'
+  }], '08');
+
+  assert.deepEqual(result.answers, {
+    '511008020': { type: 'choice', choice_id: 5110080202 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('does not include output annotations in submitted Python description code', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511008030, type: 'description', content: 'اكتب البرنامج الذي يقارن num مع 10.' },
+    choices: []
+  }], [{
+    id: 'py-l08-s02-q2', level_id: '08', lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى', question_number: 2,
+    question: 'ما ناتج مقارنة num=10 مع 10؟',
+    answer: 'num = 10\nprint(num == 10)\nالناتج: True'
+  }], '08');
+
+  assert.deepEqual(result.answers, {
+    '511008030': { type: 'description', answer_code: 'num = 10\nprint(num == 10)' }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
