@@ -12,7 +12,7 @@ import {
 import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
-import { syncPythonAnswerGuide } from './pythonAnswerGuide.js';
+import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
 import { registerSprixCommands } from './sprix.js';
@@ -646,6 +646,25 @@ answers.command('sync-python')
     console.log(`Failed pages: ${result.failed_pages} | Count mismatches: ${result.count_mismatches}`);
     console.log(`Local answer guide: ${result.outputPath}`);
     console.log('Search it offline with: qureo search "<question words>"');
+  });
+
+
+answers.command('search-python <query>')
+  .description('Search the locally downloaded Python answer reference without network access')
+  .option('--limit <number>', 'Maximum results', '8')
+  .action((query, options) => {
+    const limit = Number.parseInt(options.limit, 10);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error('--limit must be between 1 and 100.');
+    }
+    const results = searchSavedPythonAnswers(query, limit);
+    if (!results.length) return console.log(`No Python guide matches for: ${query}`);
+    for (const [index, result] of results.entries()) {
+      console.log(`\n${index + 1}. ${result.level_title} | ${result.lesson_title}`);
+      console.log(`Question: ${result.question}`);
+      console.log(`Answer:\n${result.answer}`);
+      console.log(`Source: ${result.source_url}`);
+    }
   });
 
 
