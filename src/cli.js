@@ -543,6 +543,7 @@ program.command('solve [chapterRange]')
   .option('--interactive', 'Ask before starting each chapter')
   .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
   .option('--no-resume', 'Ignore the previous local checkpoint')
+  .option('--auto-answers', 'Download/cache the public Python guide and infer missing assessment mappings')
   .action(async (chapterRange, options) => withClient(async (client, user) => {
     const courseId = options.course || await chooseSolveCourse(user);
     const result = await solveCourse(client, {
@@ -559,6 +560,7 @@ program.command('solve [chapterRange]')
       shouldContinue: confirmChapter,
       skipCompleted: options.skipCompleted !== false,
       resume: options.resume !== false,
+      autoAnswers: Boolean(options.autoAnswers),
       onProgress: message => console.log(message)
     });
     console.log(result.summary);
