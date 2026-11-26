@@ -249,8 +249,8 @@ test('matches symbol-only choices when the guide wraps the answer in a Markdown 
 });
 
 
-test('resolves Chapter 6 if/else review choices from the live prompt and options', () => {
-  const result = matchPythonAssessmentAnswers([
+test('resolves all five Chapter 6 review answers from live questions and guide order', () => {
+  const questions = [
     {
       question: {
         id: 511006010,
@@ -263,6 +263,14 @@ test('resolves Chapter 6 if/else review choices from the live prompt and options
         { id: 5110060104, content: '[[bdi]]else:\n    B\nif condition:\n    A[[/bdi]]' },
         { id: 5110060101, content: '[[bdi]]if condition:\n    A\nelse:\n    B[[/bdi]]' }
       ]
+    },
+    {
+      question: {
+        id: 511006020,
+        type: 'description',
+        content: 'أنشئ برنامجا كما يلي: num = 5 ثم إذا كان num يساوي 10 اطبع Win وإلا اطبع No prize.'
+      },
+      choices: []
     },
     {
       question: {
@@ -289,60 +297,46 @@ test('resolves Chapter 6 if/else review choices from the live prompt and options
         { id: 5110060404, content: '[[bdi]]num >= 30[[/bdi]]' },
         { id: 5110060402, content: '[[bdi]]num == 30[[/bdi]]' }
       ]
+    },
+    {
+      question: {
+        id: 511006050,
+        type: 'description',
+        content: 'إذا كانت score تساوي 60 أو أكبر، أدخل التعبير الشرطي في المربع الملون.'
+      },
+      choices: []
     }
-  ], [
-    {
-      id: 'py-l06-s06-q1',
-      level_id: '06',
-      lesson_id: 'py-l06-s06',
-      lesson_title: 'مراجعة المستوى',
-      question_number: 1,
-      question: 'سؤال مراجعة عن if و else',
-      answer: 'إجابة عن شكل if و else'
-    },
-    {
-      id: 'py-l06-s06-q2',
-      level_id: '06',
-      lesson_id: 'py-l06-s06',
-      lesson_title: 'مراجعة المستوى',
-      question_number: 2,
-      question: 'سؤال عن نتيجة البرنامج',
-      answer: 'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")'
-    },
-    {
-      id: 'py-l06-s06-q3',
-      level_id: '06',
-      lesson_id: 'py-l06-s06',
-      lesson_title: 'مراجعة المستوى',
-      question_number: 3,
-      question: 'سؤال عن المقارنة',
-      answer: 'num <= 80'
-    },
-    {
-      id: 'py-l06-s06-q4',
-      level_id: '06',
-      lesson_id: 'py-l06-s06',
-      lesson_title: 'مراجعة المستوى',
-      question_number: 4,
-      question: 'سؤال عن المقارنة',
-      answer: 'num > 30'
-    },
-    {
-      id: 'py-l06-s06-q5',
-      level_id: '06',
-      lesson_id: 'py-l06-s06',
-      lesson_title: 'مراجعة المستوى',
-      question_number: 5,
-      question: 'سؤال عن الشرط',
-      answer: 'score >= 60'
-    }
-  ], '06');
+  ];
 
-  assert.equal(result.matches.length, 3);
+  const guide = [1, 2, 3, 4, 5].map((question_number) => ({
+    id: 'py-l06-s06-q' + question_number,
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number,
+    question: 'دليل إجابة سؤال مراجعة ' + question_number,
+    answer: [
+      'if condition:\nA\nelse:\nB',
+      'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")',
+      'num <= 80',
+      'num > 30',
+      'score >= 60'
+    ][question_number - 1]
+  }));
+
+  const result = matchPythonAssessmentAnswers(questions, guide, '06');
+
+  assert.equal(result.matches.length, 5);
   assert.deepEqual(result.answers, {
     '511006010': { type: 'choice', choice_id: 5110060101 },
+    '511006020': {
+      type: 'description',
+      answer_code: 'num = 5\nif num == 10:\n    print("Win")\nelse:\n    print("No prize")'
+    },
     '511006030': { type: 'choice', choice_id: 5110060301 },
-    '511006040': { type: 'choice', choice_id: 5110060401 }
+    '511006040': { type: 'choice', choice_id: 5110060401 },
+    '511006050': { type: 'description', answer_code: 'score >= 60' }
   });
   assert.deepEqual(result.unmatched, []);
+  assert.ok(result.matches.every(match => match.strategy === 'review-order'));
 });
