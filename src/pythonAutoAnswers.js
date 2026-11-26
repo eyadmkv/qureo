@@ -64,28 +64,34 @@ function compact(value) {
     .replace(/ى/gu, 'ي');
 }
 
+function normalizePythonKeywordCase(code) {
+  return String(code ?? '').replace(
+    /^(\s*)(print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/gimu,
+    (_match, indentation, keyword) => indentation + keyword.toLowerCase()
+  );
+}
 function extractCodeAnswer(answer) {
   const source = String(answer ?? '').replace(/\r/gu, '');
   const fenced = [...source.matchAll(/```(?:python)?\s*([\s\S]*?)```/giu)]
     .map(match => match[1].trim())
     .filter(Boolean);
-  if (fenced.length) return fenced.join('\n');
+  if (fenced.length) return normalizePythonKeywordCase(fenced.join('\n'));
 
   const lines = source.split('\n').map(line => line.trimEnd());
   const start = lines.findIndex(line => {
     const clean = line.trim();
-    return /^(?:print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/u.test(clean) ||
+    return /^(?:print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/iu.test(clean) ||
       /^#[^!]/u.test(clean) ||
       /^[A-Za-z_][\w]*\s*(?:=|\+=|-=|\*=|\/=|==|!=|<=|>=|<|>)/u.test(clean);
   });
   if (start >= 0) {
     const code = [];
     for (const line of lines.slice(start)) {
-      if (/^(?:نسخ|السؤال\s*\d+|Made with intention|إعلان)/u.test(line.trim())) break;
+      if (/^(?:نسخ|السؤال\s*\d+|الناتج|النتيجة|output)\s*[:：]?/iu.test(line.trim()) || /^(?:Made with intention|إعلان)/u.test(line.trim())) break;
       code.push(line);
     }
     while (code.length && !code.at(-1).trim()) code.pop();
-    if (code.length) return code.join('\n').trim();
+    if (code.length) return normalizePythonKeywordCase(code.join('\n').trim());
   }
 
   const inline = source.match(/(?:print\(|type\(|str\(|int\(|float\(|round\(|max\(|min\(|random\.|math\.)[^\n]*/u);
@@ -129,6 +135,11 @@ function resolvePromptChoice(question, choices) {
   return matches.length === 1 ? Number(matches[0].id) : null;
 }
 
+function extractOutputAnswer(answer) {
+  const match = String(answer ?? '').match(/^(?:الناتج|النتيجة|output)\s*[:：]\s*(.+?)\s*$/imu);
+  return match?.[1]?.trim() || '';
+}
+
 function resolveChoice(question, record) {
   const questionRow = question?.question || question || {};
   const choices = Array.isArray(question?.choices) ? question.choices :
@@ -138,7 +149,8 @@ function resolveChoice(question, record) {
   const answer = String(record.answer ?? '').trim();
   const answerLines = answer.split('\n').map(line => line.trim()).filter(Boolean);
   const code = extractCodeAnswer(answer);
-  const variants = [...new Set([...answerLines, code].filter(Boolean))];
+  const output = extractOutputAnswer(answer);
+  const variants = [...new Set([...answerLines, code, output].filter(Boolean))];
 
   for (const choice of choices) {
     const text = choiceText(choice);
@@ -223,14 +235,32 @@ export function matchPythonAssessmentAnswers(questionItems, guideAnswers, levelI
     .filter(record => String(record.level_id).padStart(2, '0') === level);
   const reviewAnswers = sortRecords(levelAnswers.filter(isReviewRecord));
   const allAnswers = sortRecords(levelAnswers);
+  const reviewGroups = new Map();
 
-  let candidates = reviewAnswers.length >= questions.length && questions.length
-    ? reviewAnswers
-    : allAnswers;
-  let strategy = 'question-text';
+  for (const record of reviewAnswers) {
+    const key = String(record.lesson_id || record.lesson_title || record.id || '');
+    if (!reviewGroups.has(key)) reviewGroups.set(key, []);
+    reviewGroups.get(key).push(record);
+  }
 
-  if (candidates.length === questions.length && questions.length > 0) {
-    strategy = reviewAnswers.length === questions.length ? 'review-order' : 'level-order';
+  const exactReviewGroups = [...reviewGroups.values()]
+    .map(sortRecords)
+    .filter(records => records.length === questions.length && questions.length > 0);
+
+  let candidates;
+  let strategy;
+  if (exactReviewGroups.length === 1) {
+    candidates = exactReviewGroups[0];
+    strategy = 'review-order';
+  } else {
+    candidates = reviewAnswers.length >= questions.length && questions.length
+      ? reviewAnswers
+      : allAnswers;
+    strategy = 'question-text';
+
+    if (candidates.length === questions.length && questions.length > 0) {
+      strategy = reviewAnswers.length === questions.length ? 'review-order' : 'level-order';
+    }
   }
 
   const assignments = [];

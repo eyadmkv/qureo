@@ -391,3 +391,140 @@ test('extracts a comparison-only answer for a Python fill-in description', () =>
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+test('matches the Chapter 7 elif structure despite title-case keyword in the public guide', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511007010,
+      type: 'choice',
+      content: 'اختر الشكل الصحيح لجملة if و elif.'
+    },
+    choices: [
+      { id: 5110070101, content: 'if condition:\n    A\nelif conditions:\n    B' },
+      { id: 5110070102, content: 'if condition:\n    A\nelse if conditions:\n    B' },
+      { id: 5110070103, content: 'if condition:\n    A\nelif:\n    B' },
+      { id: 5110070104, content: 'elif condition:\n    A\nif condition:\n    B' }
+    ]
+  }], [{
+    id: 'py-l07-s04-q1',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 1,
+    question: 'اكتب شكل if وelif.',
+    answer: 'If condition:\n    A\nelif conditions:\n    B'
+  }], '07');
+
+  assert.deepEqual(result.answers, {
+    '511007010': { type: 'choice', choice_id: 5110070101 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('normalizes title-case Python keywords before submitting description answers', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511007020, type: 'description', content: 'اكتب برنامج if و elif.' },
+    choices: []
+  }], [{
+    id: 'py-l07-s04-q2',
+    level_id: '07',
+    lesson_id: 'py-l07-s04',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 2,
+    question: 'اكتب البرنامج.',
+    answer: 'If num == 1:\n    print("One")\nelif num == 2:\n    print("Two")'
+  }], '07');
+
+  assert.deepEqual(result.answers, {
+    '511007020': {
+      type: 'description',
+      answer_code: 'if num == 1:\n    print("One")\nelif num == 2:\n    print("Two")'
+    }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+test('matches a choice from a guide answer with an explicit Arabic output annotation', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511008020, type: 'choice', content: 'ما ناتج مقارنة num مع 10؟' },
+    choices: [
+      { id: 5110080201, content: 'False' },
+      { id: 5110080202, content: 'True' },
+      { id: 5110080203, content: '10' },
+      { id: 5110080204, content: 'num == 10' }
+    ]
+  }], [{
+    id: 'py-l08-s02-q2', level_id: '08', lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى', question_number: 2,
+    question: 'ما ناتج مقارنة num=10 مع 10؟',
+    answer: 'num = 10\nprint(num == 10)\nالناتج: True'
+  }], '08');
+
+  assert.deepEqual(result.answers, {
+    '511008020': { type: 'choice', choice_id: 5110080202 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('does not include output annotations in submitted Python description code', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: { id: 511008030, type: 'description', content: 'اكتب البرنامج الذي يقارن num مع 10.' },
+    choices: []
+  }], [{
+    id: 'py-l08-s02-q2', level_id: '08', lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى', question_number: 2,
+    question: 'ما ناتج مقارنة num=10 مع 10؟',
+    answer: 'num = 10\nprint(num == 10)\nالناتج: True'
+  }], '08');
+
+  assert.deepEqual(result.answers, {
+    '511008030': { type: 'description', answer_code: 'num = 10\nprint(num == 10)' }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
+
+test('uses the exact matching review lesson when a level contains multiple review sets', () => {
+  const liveQuestions = Array.from({ length: 7 }, (_, index) => ({
+    question: {
+      id: 511008100 + index * 10,
+      type: 'description',
+      content: 'Live midterm question ' + (index + 1)
+    },
+    choices: []
+  }));
+
+  const reviewAnswers = Array.from({ length: 5 }, (_, index) => ({
+    id: 'py-l08-s01-q' + (index + 1),
+    level_id: '08',
+    lesson_id: 'py-l08-s01',
+    lesson_title: 'مراجعة المستويات 5 إلى 7',
+    question_number: index + 1,
+    question: 'Earlier review question ' + (index + 1),
+    answer: 'print(' + (index + 1) + ')'
+  }));
+
+  const midtermAnswers = Array.from({ length: 7 }, (_, index) => ({
+    id: 'py-l08-s02-q' + (index + 1),
+    level_id: '08',
+    lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى',
+    question_number: index + 1,
+    question: 'Different midterm source wording ' + (index + 1),
+    answer: 'print(' + (index + 101) + ')'
+  }));
+
+  const result = matchPythonAssessmentAnswers(
+    liveQuestions,
+    [...reviewAnswers, ...midtermAnswers],
+    '08'
+  );
+
+  assert.equal(result.matches.length, 7);
+  assert.deepEqual(result.unmatched, []);
+  assert.ok(result.matches.every(match => match.strategy === 'review-order'));
+  assert.deepEqual(result.answers, Object.fromEntries(
+    liveQuestions.map((item, index) => [
+      String(item.question.id),
+      { type: 'description', answer_code: 'print(' + (index + 101) + ')' }
+    ])
+  ));
+});
