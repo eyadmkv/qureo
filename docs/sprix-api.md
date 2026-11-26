@@ -41,6 +41,41 @@ The curriculum lists unit learning items and their item types, IDs, unlock state
 
 Add `--json` to `sprix curriculum`, `sprix chapter`, or `sprix review items` for the complete response data.
 
+## Import your userscript answer bank and preview a solve
+
+Your userscript stores its question bank in a JavaScript `DATA` object. You can import that object directly from your local script file. The CLI copies only question text and your saved answer notes into the ignored local data directory.
+
+```powershell
+sprix bank import --file .\script.js
+sprix bank status
+```
+
+Use `--replace` to replace an existing local bank after reviewing the source file:
+
+```powershell
+sprix bank import --file .\script.js --replace
+```
+
+The solver starts in dry-run mode. It fetches the chapter blocks, compares pending questions and option text against the local bank, then prints the planned option IDs and match scores:
+
+```powershell
+sprix solve <chapter-id>
+```
+
+Review every match. To submit the entire plan, repeat it with `--yes`. If any pending question has no confident, unique question and option match, the solver stops before sending any answer:
+
+```powershell
+sprix solve <chapter-id> --yes
+```
+
+Chapter completion is a separate action. Add `--complete` only when you also intend to mark the chapter completed:
+
+```powershell
+sprix solve <chapter-id> --yes --complete
+```
+
+The imported bank is stored at `data/sprix/answer-bank.json`. It is ignored by Git and is not included in this repository. The solver never guesses through answer options, retries answer submissions, or continues after SPRIX fails to confirm an answer as correct.
+
 ## Explicit account-changing actions
 
 Every command that changes course state requires `--yes`. Review the IDs and the displayed content before running it.
