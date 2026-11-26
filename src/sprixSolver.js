@@ -447,58 +447,131 @@ export function buildSprixTestPlan(data, bank) {
   const answers = bank?.testAnswers && typeof bank.testAnswers === 'object'
     ? bank.testAnswers
     : {};
+  const answeredBank = Array.isArray(bank?.questions)
+    ? bank.questions.filter(question => question && question.answer)
+    : [];
   const plan = [];
   const unmatched = [];
 
   for (const testQuestion of questions) {
     const testQuestionId = String(testQuestion.id ?? '');
     const sourceQuestionId = String(testQuestion.question_id ?? '');
-    const optionId = answers[testQuestionId];
     if (!testQuestionId || !sourceQuestionId) {
       unmatched.push({ testQuestionId: testQuestionId || null, reason: 'test question is missing its ID or source question ID' });
       continue;
     }
-    if (optionId === undefined) {
+
+    const question = data.questions?.[sourceQuestionId] || {};
+    const prompt = cleanText(question.question_text || question.text || question.title || question.content || question.prompt || '');
+    const options = Array.isArray(data.options?.[sourceQuestionId])
+      ? data.options[sourceQuestionId]
+      : [];
+    if (!options.length) {
       unmatched.push({
         testQuestionId,
         sourceQuestionId,
-        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
-        reason: 'no English answer is available for this test-question ID'
+        prompt,
+        reason: 'the live test question has no available options'
       });
       continue;
     }
 
-    const options = Array.isArray(data.options?.[sourceQuestionId])
-      ? data.options[sourceQuestionId]
-      : [];
-    const selected = options.find(option => String(option.id) === String(optionId));
-    if (!selected) {
-      unmatched.push({
-        testQuestionId,
-        sourceQuestionId,
-        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
-        reason: 'English answer map points to option #' + optionId + ', which is absent from the live test options'
+    const existing = responses.get(testQuestionId);
+    const mappedOptionId = answers[testQuestionId];
+    let selected;
+    let bankQuestion;
+    let bankAnswer;
+    let questionScore = 1;
+    let optionScore = 1;
+    let answerSource = 'test-answer-map';
+
+    if (mappedOptionId !== undefined) {
+      selected = options.find(option => String(option.id) === String(mappedOptionId));
+      if (!selected) {
+        unmatched.push({
+          testQuestionId,
+          sourceQuestionId,
+          prompt,
+          reason: 'test answer map points to option #' + mappedOptionId + ', which is absent from the live test options'
+        });
+        continue;
+      }
+    } else {
+      if (!prompt || !answeredBank.length) {
+        unmatched.push({
+          testQuestionId,
+          sourceQuestionId,
+          prompt,
+          reason: 'no test-answer mapping or answered local question bank is available'
+        });
+        continue;
+      }
+
+      const questionResult = bestMatch(prompt, answeredBank, row => row.question, {
+        minimumScore: 0.28,
+        minimumMatches: 3,
+        margin: 0.035
       });
-      continue;
+      if (!questionResult.match) {
+        unmatched.push({
+          testQuestionId,
+          sourceQuestionId,
+          prompt,
+          reason: 'local answer-bank question ' + questionResult.reason
+        });
+        continue;
+      }
+
+      bankQuestion = questionResult.match.question;
+      bankAnswer = questionResult.match.answer;
+      const answerTokens = tokens(bankAnswer);
+      const optionResult = bestMatch(bankAnswer, options, optionText, {
+        minimumScore: 0.24,
+        minimumMatches: Math.min(2, answerTokens.length || 1),
+        margin: 0.025,
+        numericMatch: true
+      });
+      if (!optionResult.match) {
+        unmatched.push({
+          testQuestionId,
+          sourceQuestionId,
+          prompt,
+          bankQuestion,
+          bankAnswer,
+          reason: 'local answer-bank option ' + optionResult.reason
+        });
+        continue;
+      }
+
+      selected = optionResult.match;
+      questionScore = questionResult.score;
+      optionScore = optionResult.score;
+      answerSource = 'local-question-bank';
     }
+
     if (selected.is_correct === false) {
       unmatched.push({
         testQuestionId,
         sourceQuestionId,
-        prompt: cleanText(data.questions?.[sourceQuestionId]?.question_text || ''),
-        reason: 'SPRIX explicitly marks mapped option #' + optionId + ' as incorrect'
+        prompt,
+        bankQuestion,
+        bankAnswer,
+        reason: 'SPRIX explicitly marks selected option #' + selected.id + ' as incorrect'
       });
       continue;
     }
 
-    const question = data.questions?.[sourceQuestionId] || {};
-    const existing = responses.get(testQuestionId);
     plan.push({
       testQuestionId: testQuestion.id,
       sourceQuestionId,
-      prompt: cleanText(question.question_text || question.text || question.title || question.content || question.prompt || ''),
+      prompt,
       optionId: selected.id,
       optionText: optionText(selected),
+      bankQuestion,
+      bankAnswer,
+      answerSource,
+      questionScore,
+      optionScore,
       alreadySelected: String(existing?.selected_option_id ?? '') === String(selected.id)
     });
   }
@@ -979,8 +1052,13 @@ export async function solveSprixCourse(session, bank, {
         );
       }
 
-      if (!bank.testAnswers || Object.keys(bank.testAnswers).length === 0) {
-        throw new Error('No English test-answer map is installed. Run sprix bank import-english before solving tests.');
+      const hasTestAnswerMap = bank.testAnswers && Object.keys(bank.testAnswers).length > 0;
+      const hasAnsweredQuestionBank = Array.isArray(bank.questions) &&
+        bank.questions.some(question => question && question.answer);
+      if (!hasTestAnswerMap && !hasAnsweredQuestionBank) {
+        throw new Error(
+          'No usable SPRIX test-answer source is installed. Import a subject-specific test map or an answered local question bank before solving tests.'
+        );
       }
 
       const started = await session.startTest(current.id);
@@ -995,7 +1073,12 @@ export async function solveSprixCourse(session, bank, {
         onProgress(
           '\n[match] test question #' + entry.testQuestionId + ' -> option #' + entry.optionId +
           (entry.prompt ? '\n  Question: ' + entry.prompt : '') +
-          '\n  Option: ' + entry.optionText
+          (entry.bankQuestion ? '\n  Bank question: ' + entry.bankQuestion : '') +
+          (entry.bankAnswer ? '\n  Bank answer: ' + entry.bankAnswer : '') +
+          '\n  Option: ' + entry.optionText +
+          (entry.answerSource === 'local-question-bank'
+            ? '\n  Confidence: question ' + entry.questionScore.toFixed(3) + ', option ' + entry.optionScore.toFixed(3)
+            : '')
         );
       }
 

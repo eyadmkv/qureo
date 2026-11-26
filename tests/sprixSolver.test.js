@@ -168,6 +168,62 @@ test('builds test answer plans from test-question IDs and verifies live option I
   assert.match(result.plan[0].prompt, /barter/u);
 });
 
+test('matches Arabic test questions and answers from a local answer bank', () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const result = buildSprixTestPlan({
+    test_questions: [{ id: 10, question_id: 62, sort_order: 1 }],
+    questions: { 62: { question_text: 'ما وظيفة المال في المجتمع؟' } },
+    options: {
+      62: [
+        { id: 245, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+        { id: 247, text: 'تقتصر وظيفة المال على شراء الذهب' }
+      ]
+    },
+    question_responses: [{ test_question_id: 10, selected_option_id: 247 }]
+  }, bank);
+
+  assert.equal(result.pendingQuestionCount, 1);
+  assert.equal(result.plan.length, 1);
+  assert.equal(result.unmatched.length, 0);
+  assert.equal(result.plan[0].optionId, 245);
+  assert.equal(result.plan[0].answerSource, 'local-question-bank');
+  assert.equal(result.plan[0].bankQuestion, 'ما وظيفة المال في المجتمع؟');
+  assert.equal(result.plan[0].bankAnswer, 'يعمل المال كوسيط للتبادل بين الناس');
+  assert.equal(result.plan[0].questionScore, 1);
+  assert.equal(result.plan[0].optionScore, 1);
+  assert.equal(result.plan[0].alreadySelected, false);
+});
+
+test('fails closed when a local test question has ambiguous answer-bank matches', () => {
+  const source = 'var DATA = ' + JSON.stringify({
+    units: [{
+      id: 1,
+      levels: [{
+        questions: [
+          { id: 'q1', q: 'ما وظيفة المال في المجتمع؟', a: 'يعمل المال كوسيط للتبادل بين الناس' },
+          { id: 'q2', q: 'ما وظيفة المال في المجتمع؟', a: 'تقتصر وظيفة المال على شراء الذهب' }
+        ]
+      }]
+    }]
+  }) + ';';
+  const bank = parseSprixAnswerBank(source);
+  const result = buildSprixTestPlan({
+    test_questions: [{ id: 10, question_id: 62 }],
+    questions: { 62: { question_text: 'ما وظيفة المال في المجتمع؟' } },
+    options: {
+      62: [
+        { id: 245, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+        { id: 247, text: 'تقتصر وظيفة المال على شراء الذهب' }
+      ]
+    },
+    question_responses: []
+  }, bank);
+
+  assert.equal(result.plan.length, 0);
+  assert.equal(result.unmatched.length, 1);
+  assert.match(result.unmatched[0].reason, /ambiguous match/u);
+});
+
 test('fails closed when a test map references an option absent from live options', () => {
   const result = buildSprixTestPlan({
     test_questions: [{ id: 1, question_id: 62 }],
@@ -819,9 +875,8 @@ test('solves SPRIX chapters in order and refreshes progress to unlock the next c
   ]);
 });
 
-test('solves tests in curriculum order, remaps previously selected answers and unlocks the next chapter', async () => {
+test('solves tests in curriculum order from a local Arabic answer bank and unlocks the next chapter', async () => {
   const bank = parseSprixAnswerBank(sampleSource());
-  bank.testAnswers = { 1: 245 };
   const units = [{
     title: 'Unit',
     items: [
@@ -841,8 +896,13 @@ test('solves tests in curriculum order, remaps previously selected answers and u
       return {
         data: {
           test_questions: [{ id: 1, question_id: 62, sort_order: 1 }],
-          questions: { 62: { question_text: 'Why was barter difficult?' } },
-          options: { 62: [{ id: 245, text: 'Correct option' }, { id: 247, text: 'Wrong option' }] },
+          questions: { 62: { question_text: 'ما وظيفة المال في المجتمع؟' } },
+          options: {
+            62: [
+              { id: 245, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+              { id: 247, text: 'تقتصر وظيفة المال على شراء الذهب' }
+            ]
+          },
           question_responses: [{ test_question_id: 1, selected_option_id: 247 }]
         }
       };
