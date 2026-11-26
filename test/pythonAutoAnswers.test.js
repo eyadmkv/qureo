@@ -726,7 +726,7 @@ test('maps Arabic prompts describing logical AND and OR to their matching expres
 });
 
 
-test('submits only the missing if line for condition-only exercises', () => {
+test('preserves the complete official program for Python condition exercises', () => {
   const result = matchPythonAssessmentAnswers([
     {
       question: {
@@ -764,8 +764,14 @@ test('submits only the missing if line for condition-only exercises', () => {
   ], '09');
 
   assert.deepEqual(result.answers, {
-    '511009040': { type: 'description', answer_code: 'if a == 5 or b == 10:' },
-    '511009050': { type: 'description', answer_code: 'if a >= 2 and b >= 3:' }
+    '511009040': {
+      type: 'description',
+      answer_code: ['a = 5', 'b = 10', 'if a == 5 or b == 10:', '    print("The condition is met")'].join('\n')
+    },
+    '511009050': {
+      type: 'description',
+      answer_code: ['a = 4', 'b = 3', 'if a >= 2 and b >= 3:', '    print("The condition is met")'].join('\n')
+    }
   });
   assert.deepEqual(result.unmatched, []);
 });
