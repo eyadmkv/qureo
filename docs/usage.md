@@ -81,6 +81,14 @@ qureo answers search-python "print"
 
 The importer follows the public index, level pages and lesson pages, then saves extracted question/answer pairs to `data/python_short_ar_answer_guide.json`. It also caches the lesson pages for local search. Use `qureo answers search-python "<question or answer>"` to display matching question/answer pairs without network access. The guide currently advertises 25 levels, 116 lessons and 448 answered questions. The downloaded reference is separate from `answers/python_short_ar.json`, which the solver uses by QUREO question ID. Review and map an answer to the exact QUREO question before adding it to that solver file.
 
+To automatically match the downloaded guide to live assessment IDs and solve the remaining Python chapters, run:
+
+```powershell
+qureo solve --course python_short_ar --auto-answers
+```
+
+The guide is downloaded only when the local cache is missing. The solver saves each new question-ID mapping and source in \`answers/python_short_ar.json\`. If a chapter assessment is locked, this mode completes that chapter's lessons to unlock its question set. It stops before submitting if any question cannot be mapped or a choice answer does not match an actual option.
+
 ## Local files
 
 - `data/qureo.db`: course metadata, cached questions and personal answer notes.
