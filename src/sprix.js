@@ -74,7 +74,9 @@ export function parseSprixQuestions(rawText) {
       if (ACTION_LINE.test(line) || QUESTION_MARKER.test(line)) break;
 
       const option = parseOptionLine(line);
-      const expected = String.fromCharCode(65 + choices.length);
+      const expected = current
+        ? String.fromCharCode(current.label.charCodeAt(0) + 1)
+        : String.fromCharCode(65 + choices.length);
       if (option && option.label === expected) {
         if (current) choices.push({ label: current.label, text: current.text.join('\n').trim() });
         current = { label: option.label, text: option.text ? [option.text] : [] };
