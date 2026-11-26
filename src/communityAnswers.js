@@ -98,3 +98,7 @@ export function loadCommunityAnswers(filePath = COMMUNITY_ANSWER_ARCHIVE_PATH) {
   if (!fs.existsSync(filePath)) return {};
   return parseCommunityAnswerArchive(fs.readFileSync(filePath, 'utf8')).answers;
 }
+
+export function mergeCommunityAnswers(primaryAnswers, communityAnswers) {
+  return { ...communityAnswers, ...primaryAnswers };
+}
