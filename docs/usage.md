@@ -63,10 +63,10 @@ Download the publicly available Python course answers:
 
 ```powershell
 qureo answers sync-python
-qureo search "print"
+qureo answers search-python "print"
 ```
 
-The importer follows the public index, level pages and lesson pages, then saves extracted question/answer pairs to `data/python_short_ar_answer_guide.json`. It also caches the lesson pages for local `qureo search`. The guide currently advertises 25 levels, 116 lessons and 448 answered questions. The downloaded reference is separate from `answers/python_short_ar.json`, which the solver uses by QUREO question ID. Review and map an answer to the exact QUREO question before adding it to that solver file.
+The importer follows the public index, level pages and lesson pages, then saves extracted question/answer pairs to `data/python_short_ar_answer_guide.json`. It also caches the lesson pages for local search. Use `qureo answers search-python "<question or answer>"` to display matching question/answer pairs without network access. The guide currently advertises 25 levels, 116 lessons and 448 answered questions. The downloaded reference is separate from `answers/python_short_ar.json`, which the solver uses by QUREO question ID. Review and map an answer to the exact QUREO question before adding it to that solver file.
 
 ## Local files
 
