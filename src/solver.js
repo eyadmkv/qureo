@@ -619,6 +619,31 @@ export async function solveCourse(client, {
 
         if (inferred.unmatched.length) {
           onProgress(`  could not map ${inferred.unmatched.length} question(s): ${inferred.unmatched.map(item => item.question_id).join(', ')}`);
+          const questionsById = new Map(asArray(questions).map(item => {
+            const question = item?.question || item;
+            return [String(question?.id ?? ''), item];
+          }));
+
+          for (const unmatched of inferred.unmatched) {
+            const item = questionsById.get(String(unmatched.question_id));
+            const question = item?.question || item || {};
+            const prompt = String(question.content || question.text || question.prompt || '')
+              .replace(/\[\[(?:\/?bdi|\/?bold|\/?code|\/?italic|\/?underline|br)\]\]/giu, ' ')
+              .replace(/<[^>]+>/gu, ' ')
+              .replace(/\s+/gu, ' ')
+              .trim();
+            onProgress(`    ${unmatched.question_id}: ${prompt || '(prompt unavailable)'}`);
+
+            const choices = asArray(item?.choices || question?.choices);
+            for (const choice of choices) {
+              const choiceText = String(choice?.content ?? choice?.text ?? choice?.label ?? choice?.name ?? '')
+                .replace(/\[\[(?:\/?bdi|\/?bold|\/?code|\/?italic|\/?underline|br)\]\]/giu, ' ')
+                .replace(/<[^>]+>/gu, ' ')
+                .replace(/\s+/gu, ' ')
+                .trim();
+              onProgress(`      [${choice.id ?? '?'}] ${choiceText}`);
+            }
+          }
         }
       }
 

@@ -135,6 +135,46 @@ function resolvePromptChoice(question, choices) {
   return matches.length === 1 ? Number(matches[0].id) : null;
 }
 
+function pythonConditionalShape(value) {
+  const lines = normalizePythonKeywordCase(
+    stripQureoMarkup(value).replace(/\r/gu, '')
+  ).split('\n');
+  const clauses = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim().replace(/^(?:[A-Da-d][.)]|\d{1,2}[.)])\s*/u, '');
+    const match = line.match(/^(else\s+if|elif|if|else)\b(.*)$/iu);
+    if (!match) continue;
+
+    const kind = match[1].toLocaleLowerCase('en').replace(/\s+/gu, ' ');
+    const tail = match[2].trim();
+    const colonIndex = tail.indexOf(':');
+    const header = colonIndex >= 0 ? tail.slice(0, colonIndex).trim() : '';
+    clauses.push({
+      kind,
+      hasCondition: Boolean(header)
+    });
+  }
+
+  return clauses;
+}
+
+function resolveConditionalStructureChoice(answer, choices) {
+  const expected = pythonConditionalShape(answer);
+  if (!expected.some(clause => clause.kind === 'elif')) return null;
+
+  const matches = choices.filter(choice => {
+    const actual = pythonConditionalShape(choiceText(choice));
+    return actual.length === expected.length &&
+      actual.every((clause, index) =>
+        clause.kind === expected[index].kind &&
+        clause.hasCondition === expected[index].hasCondition
+      );
+  });
+
+  return matches.length === 1 ? Number(matches[0].id) : null;
+}
+
 function extractOutputAnswer(answer) {
   const match = String(answer ?? '').match(/^(?:الناتج|النتيجة|output)\s*[:：]\s*(.+?)\s*$/imu);
   return match?.[1]?.trim() || '';
@@ -169,6 +209,9 @@ function resolveChoice(question, record) {
 
   const promptChoice = resolvePromptChoice(question, choices);
   if (Number.isSafeInteger(promptChoice)) return promptChoice;
+
+  const conditionalChoice = resolveConditionalStructureChoice(code || answer, choices);
+  if (Number.isSafeInteger(conditionalChoice)) return conditionalChoice;
 
   const answerTokens = tokens(answer);
   const stringAnswer = /\bstring\b|سلسلة|\bstr\b/iu.test(answer) ||
