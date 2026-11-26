@@ -687,7 +687,7 @@ program.command('result <chapterId>')
         if (hasResultData) {
           result = candidate;
           resultPath = pathname;
-          if (hasAnswerData || !hasAnswerData) break;
+          if (hasAnswerData) break;
         }
       } catch (error) {
         failures.push(`${resultType}: ${error.message}`);
