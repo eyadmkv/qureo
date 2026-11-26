@@ -14,15 +14,37 @@ const STOP_WORDS = new Set((
   'الاربعة اربعة الاثنين الاثنينين نحو حتى حيث جدا مازال'
 ).split(/\s+/u));
 
+const HTML_ENTITIES = new Map([
+  ['amp', '&'],
+  ['apos', "'"],
+  ['gt', '>'],
+  ['lt', '<'],
+  ['nbsp', ' '],
+  ['quot', '"']
+]);
+
+function decodeHtmlEntities(value) {
+  return String(value || '').replace(/&(#(?:x[\\da-f]{1,8}|\\d{1,10})|[a-z][a-z\\d]+);/giu, (entity, code) => {
+    if (code[0] !== '#') return HTML_ENTITIES.get(code.toLowerCase()) ?? entity;
+
+    const hexadecimal = code[1]?.toLowerCase() === 'x';
+    const point = Number.parseInt(code.slice(hexadecimal ? 2 : 1), hexadecimal ? 16 : 10);
+    if (!Number.isInteger(point) || point <= 0 || point > 0x10ffff || (point >= 0xd800 && point <= 0xdfff)) {
+      return '\\uFFFD';
+    }
+    return String.fromCodePoint(point);
+  });
+}
+
 function normalize(value) {
-  return String(value || '')
+  return decodeHtmlEntities(value)
     .toLocaleLowerCase('ar')
     .normalize('NFKC')
-    .replace(/[\u064B-\u065F\u0670\u0640]/gu, '')
+    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/gu, '')
     .replace(/[أإآ]/gu, 'ا')
     .replace(/ى/gu, 'ي')
-    .replace(/[^\u0600-\u06FF\u2460-\u2473a-z0-9\s]/gu, ' ')
-    .replace(/\s+/gu, ' ')
+    .replace(/[^\\u0600-\\u06FF\\u2460-\\u2473a-z0-9\\s]/gu, ' ')
+    .replace(/\\s+/gu, ' ')
     .trim();
 }
 
@@ -150,11 +172,8 @@ function bestMatch(target, candidates, getText, { minimumScore, minimumMatches, 
 }
 
 function cleanText(value) {
-  return String(value || '')
-    .replace(/<[^>]+>/gu, ' ')
-    .replace(/&nbsp;/giu, ' ')
-    .replace(/&amp;/giu, '&')
-    .replace(/\s+/gu, ' ')
+  return decodeHtmlEntities(String(value || '').replace(/<[^>]+>/gu, ' '))
+    .replace(/\\s+/gu, ' ')
     .trim();
 }
 
