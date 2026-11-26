@@ -132,7 +132,7 @@ function registerSessionCommands(sprix) {
     .option('--clipboard', 'Import a copied authenticated request as a fallback')
     .option('--cookie-file <path>', 'Import a Cookie header or cURL command from a UTF-8 file')
     .option('--origin <url>', 'SPRIX origin', SPRIX_ORIGIN)
-    .option('--subject <id>', 'Subject ID to validate', '7')
+    .option('--subject <id>', 'Subject ID to validate (auto-detected when omitted)')
     .action(async options => {
       const cookieMode = Boolean(options.clipboard || options.cookieFile);
       if (cookieMode && (Boolean(options.clipboard) === Boolean(options.cookieFile) || options.loginId)) {
@@ -153,11 +153,11 @@ function registerSessionCommands(sprix) {
             subjectId: options.subject
           });
           result.session.saveSession({
-            subjectId: Number(options.subject),
+            subjectId: result.subjectId,
             validated: true,
             authMethod: 'password'
           });
-          printLoginSuccess(options.subject, result.curriculum.length);
+          printLoginSuccess(result.subjectId, result.curriculum.length);
         } finally {
           password = '';
         }
@@ -169,13 +169,14 @@ function registerSessionCommands(sprix) {
         : fs.readFileSync(options.cookieFile, 'utf8');
       const cookie = parseSprixCookieHeader(raw);
       const session = new SprixHttpClient({ cookie, origin: options.origin });
-      const curriculum = await session.getCurriculum(options.subject);
+      const subjectId = await session.resolveSubjectId(options.subject);
+      const curriculum = await session.getCurriculum(subjectId);
       session.saveSession({
-        subjectId: Number(options.subject),
+        subjectId,
         validated: true,
         authMethod: 'browser-cookie-import'
       });
-      printLoginSuccess(options.subject, curriculum.length);
+      printLoginSuccess(subjectId, curriculum.length);
     });
 
   sprix.command('logout')
@@ -188,12 +189,14 @@ function registerSessionCommands(sprix) {
   const session = sprix.command('session').description('Inspect the saved SPRIX session');
   session.command('status')
     .description('Validate the local session with a read-only curriculum request')
-    .option('--subject <id>', 'Subject ID to check', '7')
+    .option('--subject <id>', 'Subject ID to check (defaults to the saved course)')
     .action(async options => {
       if (!SprixHttpClient.hasSession()) return console.log('No saved SPRIX session. Run sprix login.');
-      const curriculum = await client().getCurriculum(options.subject);
+      const session = client();
+      const subjectId = await session.resolveSubjectId(options.subject);
+      const curriculum = await session.getCurriculum(subjectId);
       console.log('SPRIX session: valid');
-      console.log('Subject ' + options.subject + ': ' + curriculum.length + ' unit(s).');
+      console.log('Subject ' + subjectId + ': ' + curriculum.length + ' unit(s).');
     });
 }
 
@@ -201,13 +204,15 @@ function registerSyncCommands(sprix) {
   sprix.command('sync [subjectId]')
     .description('Fetch live SPRIX curriculum and save a local progress snapshot')
     .option('--json', 'Print the synced curriculum JSON')
-    .action(async (subjectId = '7', options) => {
-      const units = await client().getCurriculum(subjectId);
+    .action(async (subjectId, options) => {
+      const session = client();
+      const resolvedSubjectId = await session.resolveSubjectId(subjectId);
+      const units = await session.getCurriculum(resolvedSubjectId);
       fs.mkdirSync(SPRIX_DIR, { recursive: true });
       const snapshot = {
         format: 'sprix-curriculum-snapshot',
         schema_version: 1,
-        subject_id: Number(subjectId),
+        subject_id: resolvedSubjectId,
         synced_at: new Date().toISOString(),
         units
       };
@@ -220,7 +225,7 @@ function registerSyncCommands(sprix) {
       const itemCount = units.reduce((count, unit) => count + sectionsOf(unit).reduce(
         (sectionCount, section) => sectionCount + (section.items || []).length, 0
       ), 0);
-      console.log('Synced subject ' + subjectId + ': ' + units.length + ' unit(s), ' + itemCount + ' learning item(s).');
+      console.log('Synced subject ' + resolvedSubjectId + ': ' + units.length + ' unit(s), ' + itemCount + ' learning item(s).');
       console.log('Saved locally: ' + CURRICULUM_CACHE);
       if (options.json) printJson(snapshot);
     });
@@ -255,7 +260,7 @@ function registerReadCommands(sprix) {
   sprix.command('curriculum [subjectId]')
     .description('Fetch the live SPRIX subject curriculum and completion state')
     .option('--json', 'Print the full JSON response')
-    .action(async (subjectId = '7', options) => {
+    .action(async (subjectId, options) => {
       const units = await client().getCurriculum(subjectId);
       if (options.json) printJson(units);
       else listCurriculum(units);

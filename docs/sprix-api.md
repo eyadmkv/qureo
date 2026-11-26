@@ -4,7 +4,7 @@ The repository now exposes a standalone `sprix` command and the same API command
 
 ## Sign in with Login ID and password
 
-The CLI supports the same Login ID + Password flow shown on the SPRIX sign-in page. It sends a JSON request to `POST /api/v1/auth/login` with `login_id` and `password`, then validates the returned session with a read-only curriculum request.
+The CLI supports the same Login ID + Password flow shown on the SPRIX sign-in page. It sends a JSON request to `POST /api/v1/auth/login` with `login_id` and `password`, fetches `GET /api/v1/subjects`, selects the active Financial Literacy course, and validates the session with a read-only curriculum request. The selected subject ID is saved with the encrypted session and reused by later commands.
 
 Run:
 
@@ -13,6 +13,8 @@ sprix login
 ```
 
 Enter your Login ID when prompted, then type your password at the hidden password prompt. The password is sent directly to SPRIX for authentication and is not saved to disk or included in command history. The resulting session cookies are encrypted with Windows DPAPI in `data/sprix/session.dpapi`.
+
+When the account has multiple active courses, the CLI stops and asks you to choose one. Pass `--subject <id>` to select a specific subject. To validate a different course later, pass the same option to the relevant command.
 
 You can pass the Login ID as an option while keeping the password prompt hidden:
 
@@ -28,7 +30,7 @@ The previous cookie import remains available if password login is unavailable:
 
 1. Sign in to SPRIX normally in your browser.
 2. Open Developer Tools with **F12**, then select **Network**.
-3. Select an authenticated request to `/api/v1/subjects/7/curriculum`.
+3. Select an authenticated request to `/api/v1/subjects` or another SPRIX API endpoint.
 4. Right-click it and choose **Copy → Copy as cURL**.
 5. Keep that copied command private. It contains your session cookie.
 6. In PowerShell, run `sprix login --clipboard` without copying anything else first.
@@ -58,14 +60,14 @@ Capture the request produced by the final **راجعت كل حاجة** action se
 
 ```powershell
 sprix session status
-sprix sync 7
+sprix sync
 sprix progress
-sprix curriculum 7
+sprix curriculum
 sprix chapter <chapter-id>
 sprix review items <review-id>
 ```
 
-The curriculum lists unit learning items and their item types, IDs, unlock state, and completion state. Use those IDs with the matching chapter, review, or test command. The `sync` command saves a local snapshot under `data/sprix/`; `progress` summarizes the latest snapshot.
+The curriculum lists unit learning items and their item types, IDs, unlock state, and completion state. These commands default to the subject saved by `sprix login`. Pass an explicit subject ID only when switching courses. Use the returned item IDs with the matching chapter, review, or test command. The `sync` command saves a local snapshot under `data/sprix/`; `progress` summarizes the latest snapshot.
 
 Add `--json` to `sprix curriculum`, `sprix chapter`, or `sprix review items` for the complete response data.
 
