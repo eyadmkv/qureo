@@ -18,13 +18,16 @@ The course page is [SPRIX Learning Square](https://egy.app.spx-learning-square.c
 
 ## Capture a lesson
 
-Open a learning element in your signed-in browser. Copy its visible text with **Ctrl+A**, then **Ctrl+C**. In PowerShell, run:
+Open a learning element in your signed-in browser. Click inside the lesson dialogue/content area, then copy its visible text with **Ctrl+A**, followed by **Ctrl+C**. Before saving, check what Windows actually copied:
 
 ```powershell
+qureo sprix clipboard
 qureo sprix capture --title "كيف نشأ المال" --unit "أساسيات المال والتمويل"
 ```
 
-The command reads the clipboard through PowerShell, saves the full text locally, and extracts multiple-choice blocks that use the lesson's visible “اختار إجابة واحدة” prompt and A-D options.
+The clipboard diagnostic prints the character count, non-empty line count, question count and a short preview. A full interactive lesson is expected to be substantially longer than 500 characters. Captures under 500 characters are rejected by default so a selection containing only one dialogue line is not mistaken for a complete lesson. Use `--allow-short` only for an intentional excerpt.
+
+The command reads the clipboard through PowerShell, saves the full text locally, and extracts multiple-choice blocks that use the lesson's visible “اختار إجابة واحدة” prompt and A-D options. It supports both standalone option labels and labels followed by option text on the same line. Re-capturing a lesson with the same title and unit updates its existing record.
 
 To capture a text file instead:
 
