@@ -5,6 +5,7 @@ import readline from 'node:readline/promises';
 import { spawnSync } from 'node:child_process';
 import { stdin, stdout } from 'node:process';
 import { DATA_DIR } from './paths.js';
+import { registerSprixApiCommands } from './sprixApi.js';
 
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
 const STORE_PATH = path.join(SPRIX_DIR, 'study.json');
@@ -263,10 +264,13 @@ function printQuestion(question, includeKey = true) {
   }
 }
 
-export function registerSprixCommands(program) {
-  const sprix = program.command('sprix').description('Local study tools for the SPRIX financial-literacy course');
+export function registerSprixCommands(program, { standalone = false } = {}) {
+  const sprix = standalone
+    ? program
+    : program.command('sprix').description('SPRIX Learning Square CLI and local study tools');
+  registerSprixApiCommands(sprix);
 
-  sprix.command('curriculum')
+  sprix.command('catalog')
     .description('List the six units in the second-year Baccalaureate financial-literacy course')
     .action(() => {
       console.log('الثقافة المالية | تانية بكالوريا');
