@@ -367,3 +367,27 @@ test('does not guess when a prompt-derived Python choice is ambiguous', () => {
   assert.deepEqual(result.answers, {});
   assert.equal(result.unmatched[0].question_id, '511006099');
 });
+
+test('extracts a comparison-only answer for a Python fill-in description', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511006050,
+      type: 'description',
+      content: 'أدخل التعبير الشرطي الذي يجعل score أكبر من أو يساوي 60.'
+    },
+    choices: []
+  }], [{
+    id: 'py-l06-s06-q5',
+    level_id: '06',
+    lesson_id: 'py-l06-s06',
+    lesson_title: 'مراجعة المستوى',
+    question_number: 5,
+    question: 'أدخل التعبير الشرطي',
+    answer: 'score >= 60'
+  }], '06');
+
+  assert.deepEqual(result.answers, {
+    '511006050': { type: 'description', answer_code: 'score >= 60' }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
