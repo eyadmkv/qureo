@@ -64,6 +64,12 @@ function compact(value) {
     .replace(/ى/gu, 'ي');
 }
 
+function normalizePythonKeywordCase(code) {
+  return String(code ?? '').replace(
+    /^(\\s*)(print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\\b/gimu,
+    (_match, indentation, keyword) => indentation + keyword.toLowerCase()
+  );
+}
 function extractCodeAnswer(answer) {
   const source = String(answer ?? '').replace(/\r/gu, '');
   const fenced = [...source.matchAll(/```(?:python)?\s*([\s\S]*?)```/giu)]
