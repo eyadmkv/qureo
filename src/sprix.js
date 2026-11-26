@@ -19,6 +19,7 @@ export const SPRIX_CURRICULUM = Object.freeze([
   { sequence: 6, title: 'الذكاء الاصطناعي والتمويل ومستقبل الأعمال', elements: 14 }
 ]);
 
+const MIN_LESSON_CHARACTERS = 500;
 const ACTION_LINE = /^(?:ورّيني تلميح|وريني تلميح|راجع إجابتي|المحاولات السابقة|التالي|ممتاز!?|تمام!?|خلصت ده قبل كده)(?:\s*\(.*\))?$/u;
 const QUESTION_MARKER = /^(?:اختار|اختر|اختاري)\s+(?:إجابة|الاجابة|الإجابة)/u;
 
@@ -38,12 +39,10 @@ export function normalizeSprixText(value = '') {
     .replace(/\s+/gu, ' ');
 }
 
-function isOptionLabel(line) {
-  return /^[A-D](?:[.)،:]|[\s-]+)?$/iu.test(line.trim());
-}
-
-function optionLetter(line) {
-  return line.trim().match(/^([A-D])/iu)?.[1]?.toUpperCase() || null;
+function parseOptionLine(line) {
+  const match = String(line).trim().match(/^([A-D])(?:[.)،:]|[\s-]+)?(.*)$/iu);
+  if (!match) return null;
+  return { label: match[1].toUpperCase(), text: (match[2] || '').trim() };
 }
 
 export function parseSprixQuestions(rawText) {
@@ -63,8 +62,8 @@ export function parseSprixQuestions(rawText) {
     if (prompt.length < 5) continue;
 
     let firstOption = index + 1;
-    while (firstOption < lines.length && firstOption <= index + 8 && !isOptionLabel(lines[firstOption])) firstOption++;
-    if (!isOptionLabel(lines[firstOption] || '')) continue;
+    while (firstOption < lines.length && firstOption <= index + 8 && !parseOptionLine(lines[firstOption])) firstOption++;
+    if (!parseOptionLine(lines[firstOption] || '')) continue;
 
     const choices = [];
     let current = null;
@@ -72,17 +71,19 @@ export function parseSprixQuestions(rawText) {
 
     for (; cursor < lines.length && cursor < firstOption + 100; cursor++) {
       const line = lines[cursor];
-      if (ACTION_LINE.test(line)) break;
+      if (ACTION_LINE.test(line) || QUESTION_MARKER.test(line)) break;
 
-      if (isOptionLabel(line)) {
+      const option = parseOptionLine(line);
+      const expected = String.fromCharCode(65 + choices.length);
+      if (option && option.label === expected) {
         if (current) choices.push({ label: current.label, text: current.text.join('\n').trim() });
-        const label = optionLetter(line);
-        if (label !== String.fromCharCode(65 + choices.length)) {
-          current = null;
-          break;
-        }
-        current = { label, text: [] };
+        current = { label: option.label, text: option.text ? [option.text] : [] };
         continue;
+      }
+
+      if (option && option.label !== expected) {
+        current = null;
+        break;
       }
 
       if (current && line) current.text.push(line);
@@ -142,17 +143,24 @@ export function saveSprixStore(store) {
   fs.renameSync(temporaryPath, STORE_PATH);
 }
 
-export function captureSprixLesson({ title, unit = '', rawText, source = 'clipboard' }) {
+export function captureSprixLesson({ title, unit = '', rawText, source = 'clipboard', allowShort = false }) {
   const cleanTitle = String(title || '').trim();
   const body = String(rawText || '').trim();
   if (!cleanTitle) throw new Error('Lesson title is required. Use --title "اسم الدرس".');
-  if (body.length < 40) throw new Error('Captured text is too short. Copy the lesson content, then run the capture command again.');
+  if (body.length < MIN_LESSON_CHARACTERS && !allowShort) {
+    throw new Error(
+      'Only ' + body.length + ' characters were read from the clipboard. This looks like a partial selection, not a complete SPRIX lesson. ' +
+      'Click inside the lesson content, press Ctrl+A then Ctrl+C, and verify with "qureo sprix clipboard". ' +
+      'Use --allow-short only when you intentionally want to save a short excerpt.'
+    );
+  }
   if (body.length > 2_000_000) throw new Error('Captured lesson exceeds the 2 MB limit.');
 
   const store = loadSprixStore();
-  const captureId = 'lesson_' + digest(normalizeSprixText(unit) + '|' + normalizeSprixText(cleanTitle) + '|' + body);
+  const captureId = 'lesson_' + digest(normalizeSprixText(unit) + '|' + normalizeSprixText(cleanTitle));
   const questions = parseSprixQuestions(body);
   const existingCapture = store.captures.findIndex(item => item.id === captureId);
+  const previousCapture = existingCapture >= 0 ? store.captures[existingCapture] : null;
   const capture = {
     id: captureId,
     title: cleanTitle,
@@ -167,6 +175,18 @@ export function captureSprixLesson({ title, unit = '', rawText, source = 'clipbo
 
   if (existingCapture >= 0) store.captures[existingCapture] = capture;
   else store.captures.push(capture);
+
+  const currentQuestionIds = new Set(questions.map(question => question.id));
+  const retainedByOtherCapture = new Set(store.captures
+    .filter(item => item.id !== captureId)
+    .flatMap(item => item.question_ids || []));
+  if (previousCapture) {
+    store.questions = store.questions.filter(question =>
+      !previousCapture.question_ids.includes(question.id) ||
+      currentQuestionIds.has(question.id) ||
+      retainedByOtherCapture.has(question.id)
+    );
+  }
 
   for (const question of questions) {
     const existing = store.questions.find(item => item.id === question.id);
@@ -201,7 +221,21 @@ function readClipboard() {
   ], { encoding: 'utf8', windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error((result.stderr || 'Could not read the Windows clipboard.').trim());
-  return result.stdout;
+  return result.stdout.replace(/^\uFEFF/u, '');
+}
+
+function inspectClipboard() {
+  const text = readClipboard();
+  const lines = text.split(/\r?\n/u).filter(line => line.trim());
+  const questions = parseSprixQuestions(text);
+  console.log('Clipboard characters: ' + text.length.toLocaleString('en-US'));
+  console.log('Non-empty lines: ' + lines.length.toLocaleString('en-US'));
+  console.log('Questions detected: ' + questions.length);
+  console.log('Preview (first 700 characters):');
+  console.log(text.slice(0, 700) || '(clipboard is empty)');
+  if (text.length < MIN_LESSON_CHARACTERS) {
+    console.log('\nClipboard looks too short. Click inside the lesson dialogue, press Ctrl+A, then Ctrl+C.');
+  }
 }
 
 function findQuestion(store, id) {
@@ -247,11 +281,16 @@ export function registerSprixCommands(program) {
       console.log('Platform submissions: none');
     });
 
+  sprix.command('clipboard')
+    .description('Inspect the current Windows clipboard before capturing a lesson')
+    .action(inspectClipboard);
+
   sprix.command('capture')
     .description('Capture visible lesson text from the clipboard or a UTF-8 text file')
     .requiredOption('--title <title>', 'Lesson title, for example "كيف نشأ المال"')
     .option('--unit <unit>', 'Unit title')
     .option('--file <path>', 'Read lesson text from a UTF-8 text file instead of the clipboard')
+    .option('--allow-short', 'Allow capturing fewer than 500 characters as an excerpt')
     .action(options => {
       const source = options.file ? path.resolve(options.file) : 'clipboard';
       if (options.file && !fs.existsSync(source)) throw new Error('Input file not found: ' + source);
@@ -260,12 +299,16 @@ export function registerSprixCommands(program) {
         title: options.title,
         unit: options.unit || '',
         rawText,
-        source: options.file ? source : 'clipboard'
+        source: options.file ? source : 'clipboard',
+        allowShort: Boolean(options.allowShort)
       });
       console.log('Captured: ' + result.capture.title);
       console.log('Unit: ' + (result.capture.unit || '(not set)'));
       console.log('Characters: ' + result.capture.character_count.toLocaleString('en-US'));
       console.log('Questions detected: ' + result.questions.length);
+      if (result.capture.character_count < MIN_LESSON_CHARACTERS) {
+        console.log('Warning: this is a short excerpt and may not contain the lesson questions.');
+      }
       console.log('Saved locally: ' + STORE_PATH);
       if (!result.questions.length) console.log('No four-option questions matched the current parser. The full lesson text was still saved.');
     });
