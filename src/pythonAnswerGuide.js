@@ -99,32 +99,59 @@ export function extractPythonLessonUrls(html, levelUrl) {
 }
 
 export function extractPythonAnswerPairs(body) {
-  const lines = String(body ?? '').split(/\r?\n/u).map(line => line.trim());
+  const invisible = /[\u200e\u200f\u202a-\u202e\u2066-\u2069\u200b-\u200d\ufeff]/gu;
+  const toWesternDigits = value => value.replace(/[٠-٩]/gu, digit =>
+    String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+  );
+  const lines = String(body ?? '')
+    .normalize('NFKC')
+    .replace(invisible, '')
+    .replace(/\u00a0/gu, ' ')
+    .split(/\r?\n/u)
+    .map(line => line.trim());
   const records = [];
 
   for (let index = 0; index < lines.length; index++) {
-    const marker = lines[index].match(/^السؤال\s*(\d+)\s*[:：]?$/u);
+    const marker = /السؤال\s*([0-9٠-٩]+)/u.exec(lines[index]);
     if (!marker) continue;
 
-    let questionIndex = index + 1;
-    while (questionIndex < lines.length && !lines[questionIndex]) questionIndex++;
-    const question = (lines[questionIndex] ?? '').replace(/^#+\s*/u, '').trim();
+    const inlineQuestion = lines[index]
+      .slice(marker.index + marker[0].length)
+      .replace(/^\s*[:：.)-]?\s*/u, '')
+      .replace(/^#+\s*/u, '')
+      .trim();
+
+    let question = inlineQuestion;
+    let questionIndex = index;
+    if (!question) {
+      questionIndex = index + 1;
+      while (questionIndex < lines.length && !lines[questionIndex]) questionIndex++;
+      question = (lines[questionIndex] ?? '').replace(/^#+\s*/u, '').trim();
+    }
     if (!question) continue;
 
     const answerLines = [];
     for (let cursor = questionIndex + 1; cursor < lines.length; cursor++) {
       const line = lines[cursor];
-      if (/^السؤال\s*\d+\s*[:：]?$/u.test(line) ||
-          /^نسخ\s+(?:كل\s+)?الإجابات?/u.test(line) ||
+      if (/السؤال\s*[0-9٠-٩]+/u.test(line) ||
+          /^نسخ(?:\s|$)/u.test(line) ||
           /^←\s*السابق/u.test(line) ||
           /^التالي\s*:/u.test(line) ||
           /^Made with intention\.?$/iu.test(line) ||
           /^إعلان/u.test(line)) break;
-      if (line) answerLines.push(line);
+
+      const withoutCopyLabel = line.replace(/\s+نسخ\s+الإجابة.*$/u, '').trim();
+      if (withoutCopyLabel) answerLines.push(withoutCopyLabel);
     }
 
     const answer = answerLines.join('\n').trim();
-    if (answer) records.push({ question_number: Number(marker[1]), question, answer });
+    if (answer) {
+      records.push({
+        question_number: Number(toWesternDigits(marker[1])),
+        question,
+        answer
+      });
+    }
   }
 
   return records;
@@ -132,7 +159,7 @@ export function extractPythonAnswerPairs(body) {
 
 
 export function searchPythonAnswers(records, query, limit = 8) {
-  const terms = normalizeText(query).split(/\\s+/u).filter(term => term.length > 1);
+  const terms = normalizeText(query).split(/\s+/u).filter(term => term.length > 1);
   if (!terms.length || !Array.isArray(records)) return [];
 
   return records.map(record => {
