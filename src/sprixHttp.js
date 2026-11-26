@@ -261,6 +261,58 @@ function validId(value, label) {
   return number;
 }
 
+
+export function selectSprixSubjectId(subjects, requestedSubjectId = null) {
+  if (requestedSubjectId !== null &&
+      requestedSubjectId !== undefined &&
+      String(requestedSubjectId).trim() !== '' &&
+      String(requestedSubjectId).toLowerCase() !== 'auto') {
+    return validId(requestedSubjectId, 'Subject ID');
+  }
+
+  if (!Array.isArray(subjects)) {
+    throw new Error('SPRIX subjects response did not contain a subject list.');
+  }
+
+  const activeCourses = subjects.filter(subject =>
+    subject &&
+    subject.status === 'active' &&
+    subject.kind !== 'game' &&
+    Number(subject.total_items) > 0
+  );
+  const financialLiteracyCourses = activeCourses.filter(subject =>
+    subject.subject_type === 'financial_literacy' ||
+    subject.course_code === 'financial_literacy'
+  );
+  const candidates = financialLiteracyCourses.length > 0
+    ? financialLiteracyCourses
+    : activeCourses;
+
+  if (candidates.length === 1) {
+    return validId(candidates[0].id, 'Subject ID');
+  }
+
+  const available = subjects
+    .filter(subject => subject && subject.id !== undefined)
+    .map(subject => '#' + subject.id + ' ' + (subject.name || subject.subject_type || 'Unnamed subject'))
+    .join(', ');
+
+  if (candidates.length === 0) {
+    throw new Error(
+      'No active SPRIX learning course with items was found. Available subjects: ' +
+      (available || 'none') +
+      '. Check the account in the browser or pass --subject <id> explicitly.'
+    );
+  }
+
+  const matches = candidates
+    .map(subject => '#' + subject.id + ' ' + (subject.name || subject.subject_type || 'Unnamed subject'))
+    .join(', ');
+  throw new Error(
+    'More than one SPRIX course is available. Choose one with --subject <id>: ' + matches
+  );
+}
+
 function mergeSetCookies(current, response) {
   const headers = response.headers.getSetCookie?.() || [];
   if (!headers.length) return current;
@@ -300,7 +352,7 @@ export class SprixHttpClient {
     this.metadata = metadata && typeof metadata === 'object' ? metadata : {};
   }
 
-  static async login({ loginId, password, origin = SPRIX_ORIGIN, fetchImpl = globalThis.fetch, timeoutMs = 30000, subjectId = 7 } = {}) {
+  static async login({ loginId, password, origin = SPRIX_ORIGIN, fetchImpl = globalThis.fetch, timeoutMs = 30000, subjectId = null } = {}) {
     const username = String(loginId || '').trim();
     if (!username) throw new Error('SPRIX Login ID is required.');
     if (typeof password !== 'string' || !password) throw new Error('SPRIX password is required.');
@@ -363,8 +415,9 @@ export class SprixHttpClient {
       fetchImpl,
       timeoutMs
     });
-    const curriculum = await session.getCurriculum(subjectId);
-    return { session, curriculum };
+    const resolvedSubjectId = await session.resolveSubjectId(subjectId);
+    const curriculum = await session.getCurriculum(resolvedSubjectId);
+    return { session, curriculum, subjectId: resolvedSubjectId };
   }
 
   static hasSession() {
@@ -410,7 +463,7 @@ export class SprixHttpClient {
         headers: {
           Accept: 'application/json, text/plain, */*',
           Origin: this.origin,
-          Referer: referer || this.origin + '/subjects/7/curriculum',
+          Referer: referer || this.origin + '/dashboard',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36',
           ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
           ...headers,
@@ -464,8 +517,39 @@ export class SprixHttpClient {
     return payload;
   }
 
-  async getCurriculum(subjectId = 7) {
-    const id = validId(subjectId, 'Subject ID');
+  async getSubjects() {
+    const payload = await this.request('/api/v1/subjects');
+    if (!Array.isArray(payload.data)) {
+      throw new SprixHttpError('SPRIX subjects response did not contain a data array.', {
+        code: 'INVALID_RESPONSE',
+        status: 200,
+        payload
+      });
+    }
+    return payload.data;
+  }
+
+  async resolveSubjectId(subjectId = null) {
+    if (subjectId !== null &&
+        subjectId !== undefined &&
+        String(subjectId).trim() !== '' &&
+        String(subjectId).toLowerCase() !== 'auto') {
+      return validId(subjectId, 'Subject ID');
+    }
+
+    if (this.metadata.subjectId !== undefined && this.metadata.subjectId !== null) {
+      return validId(this.metadata.subjectId, 'Saved subject ID');
+    }
+
+    const subjects = await this.getSubjects();
+    const resolvedSubjectId = selectSprixSubjectId(subjects);
+    this.metadata.subjectId = resolvedSubjectId;
+    if (this.persistSession) this.saveSession();
+    return resolvedSubjectId;
+  }
+
+  async getCurriculum(subjectId = null) {
+    const id = await this.resolveSubjectId(subjectId);
     const payload = await this.request('/api/v1/subjects/' + id + '/curriculum');
     if (!Array.isArray(payload.data)) throw new SprixHttpError('Curriculum response did not contain a data array.', { code: 'INVALID_RESPONSE', status: 200, payload });
     return payload.data;
@@ -517,7 +601,8 @@ export class SprixHttpClient {
     return this.request('/api/v1/tests/' + validId(testId, 'Test ID') + '/submit', { method: 'POST', body: {} });
   }
 
-  unlockAchievements(subjectId = 7) {
-    return this.request('/api/v1/subjects/' + validId(subjectId, 'Subject ID') + '/achievements/unlock', { method: 'POST', body: {} });
+  async unlockAchievements(subjectId = null) {
+    const id = await this.resolveSubjectId(subjectId);
+    return this.request('/api/v1/subjects/' + id + '/achievements/unlock', { method: 'POST', body: {} });
   }
 }
