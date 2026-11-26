@@ -4,6 +4,7 @@ import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
 import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
+import { QureoLectureBrowser } from './qureoBrowser.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
@@ -216,7 +217,7 @@ function writeSolveCheckpoint(value) {
   fs.renameSync(temporaryPath, CHECKPOINT_PATH);
 }
 
-async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress) {
+export async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgress, lectureBrowser) {
   const lessonId = lesson?.id ?? lesson?.lecture_id;
   if (lessonId === undefined || lessonId === null) return;
 
@@ -227,24 +228,15 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     return;
   }
 
-  const deadline = Date.now() + LESSON_RETRY_TIMEOUT_MS;
-  const submitCompletion = () => {
-    const remainingMs = deadline - Date.now();
-    if (remainingMs <= 0) throw new Error('Lesson completion retry window expired.');
-    return client.request(API_BASE + endpoint, {
-      method: 'PUT',
-      headers: { Accept: 'application/json, */*', Referer: referer },
-      timeoutMs: Math.min(LESSON_REQUEST_TIMEOUT_MS, remainingMs)
-    });
-  };
-
   let response = null;
-  let lastNetworkError = null;
+  let networkError = null;
   try {
-    response = await submitCompletion();
+    response = await client.request(API_BASE + endpoint, {
+      method: 'PUT',
+      headers: { Accept: 'application/json, */*', Referer: referer }
+    });
   } catch (error) {
-    if (!isRetryableNetworkError(error)) throw error;
-    lastNetworkError = error;
+    networkError = error;
   }
 
   if (response?.ok) {
@@ -255,88 +247,38 @@ async function markLectureCompleted(client, chapterId, lesson, dryRun, onProgres
     onProgress('  lesson ' + lessonId + ': already completed');
     return;
   }
-  if (response && !isRetryableResponse(response) && !lastNetworkError) {
+  if (response && response.status !== 404) {
     const body = await response.text().catch(() => '');
     throw errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
   }
 
-  const needsPageInitialization = !response || response.status === 404;
-  if (needsPageInitialization) {
-    const reason = lastNetworkError ? 'temporary network failure' : 'API returned 404 before the lesson was initialized';
-    onProgress('  lesson ' + lessonId + ': ' + reason + '; initializing the lesson through the saved QUREO session');
-    try {
-      await initializeLecture(client, lessonId, referer);
-      onProgress('  lesson ' + lessonId + ': initialized through the QUREO lecture API; retrying completion');
-    } catch (error) {
-      if (!isRetryableNetworkError(error)) throw error;
-      lastNetworkError = error;
-      onProgress('  lesson ' + lessonId + ': background page request failed temporarily; retrying the completion API');
-    }
+  const reason = networkError
+    ? 'the direct completion request failed'
+    : 'the completion API returned 404';
+  onProgress('  lesson ' + lessonId + ': ' + reason + '; opening the actual QUREO lesson in a hidden browser');
+
+  if (!lectureBrowser) {
+    throw new Error('Hidden browser initialization is unavailable. Install Chrome or Edge and rerun the solver.');
   }
 
-  for (let attempt = 1; attempt <= LESSON_RETRY_ATTEMPTS && Date.now() < deadline; attempt++) {
-    try {
-      response = await submitCompletion();
-      lastNetworkError = null;
-    } catch (error) {
-      if (!isRetryableNetworkError(error)) throw error;
-      response = null;
-      lastNetworkError = error;
-    }
-
-    if (response && !isRetryableResponse(response)) break;
-
-    const remainingMs = deadline - Date.now();
-    if (attempt < LESSON_RETRY_ATTEMPTS && remainingMs > 0) {
-      const delayMs = Math.min(
-        response?.status === 404 ? LESSON_INIT_POLL_INTERVAL_MS : LESSON_RETRY_INTERVAL_MS,
-        remainingMs
-      );
-      const reason = lastNetworkError
-        ? 'network error (' + lastNetworkError.message + ')'
-        : response?.status === 404
-          ? 'lesson page is still initializing'
-          : 'HTTP ' + response.status;
-      onProgress('  lesson ' + lessonId + ': ' + reason + '; retry ' + attempt + '/' + LESSON_RETRY_ATTEMPTS + ' in ' + Math.ceil(delayMs / 1000) + 's');
-      await wait(delayMs);
-    }
-  }
-
-  if (response?.ok) {
+  const browserResult = await lectureBrowser.completeLecture(lessonId, referer);
+  if (browserResult.ok) {
     onProgress('  lesson ' + lessonId + ': completed');
     return;
   }
-  if (response?.status === 400 || response?.status === 409) {
+  if (browserResult.status === 400 || browserResult.status === 409) {
     onProgress('  lesson ' + lessonId + ': already completed');
     return;
   }
 
-  if (!response && lastNetworkError) {
-    const error = new Error(
-      'Lesson ' + lessonId + ' could not be completed because the network kept failing during the ' +
-      Math.ceil(LESSON_RETRY_TIMEOUT_MS / 1000) +
-      's retry window. Check your connection and rerun the solver. Later lessons and the chapter assessment were not started.'
-    );
-    error.code = 'LESSON_NETWORK_TIMEOUT';
-    error.lessonId = String(lessonId);
-    error.cause = lastNetworkError;
-    throw error;
-  }
-
-  if (response?.status === 404) {
-    const error = new Error(
-      'Lesson ' + lessonId + ' still returns HTTP 404 after ' +
-      Math.ceil(LESSON_RETRY_TIMEOUT_MS / 1000) +
-      's of retries. The authenticated background page request did not initialize this lesson. Run qureo login to refresh the saved session, then rerun the solver. Later lessons and the chapter assessment were not started.'
-    );
-    error.code = 'LESSON_NOT_AVAILABLE';
-    error.status = 404;
-    error.lessonId = String(lessonId);
-    throw error;
-  }
-
-  const body = response ? await response.text().catch(() => '') : '';
-  const error = errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
+  const error = new Error(
+    'QUREO still rejected completion after the lesson page initialized in Chrome: ' +
+    endpoint + ' (HTTP ' + browserResult.status + '). ' +
+    String(browserResult.body || '').slice(0, 250)
+  );
+  error.code = 'LESSON_COMPLETION_FAILED';
+  error.status = browserResult.status;
+  error.lessonId = String(lessonId);
   throw error;
 }
 async function solveChapter(client, chapter, chapterMeta, questions, answers, {
@@ -344,7 +286,8 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
   onProgress,
   onCheckpoint = () => {},
   questionDelayMs = 0,
-  lessonsAlreadyCompleted = false
+  lessonsAlreadyCompleted = false,
+  lectureBrowser
 }) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
@@ -385,7 +328,7 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
     for (const lesson of lectures) {
       const lessonId = String(lesson?.id ?? lesson?.lecture_id ?? '');
       onCheckpoint({ stage: 'lesson-start', lesson_id: lessonId, question_id: null, question_index: null });
-      await markLectureCompleted(client, chapterId, lesson, false, onProgress);
+      await markLectureCompleted(client, chapterId, lesson, false, onProgress, lectureBrowser);
       onCheckpoint({ stage: 'lesson-completed', lesson_id: lessonId });
     }
   }
@@ -560,6 +503,7 @@ export async function solveCourse(client, {
 
   let chaptersCompleted = 0;
   let questionsSubmitted = 0;
+  const lectureBrowser = new QureoLectureBrowser(client, { onProgress });
   let lastCheckpoint = {
     schema_version: 1,
     course_id: courseId,
@@ -667,7 +611,7 @@ export async function solveCourse(client, {
             question_id: null,
             question_index: null
           });
-          await markLectureCompleted(client, chapterId, lesson, false, onProgress);
+          await markLectureCompleted(client, chapterId, lesson, false, onProgress, lectureBrowser);
           checkpoint({ stage: 'lesson-completed', lesson_id: lessonId });
         }
         lessonsAlreadyCompleted = true;
@@ -709,6 +653,7 @@ export async function solveCourse(client, {
         onProgress,
         questionDelayMs,
         lessonsAlreadyCompleted,
+        lectureBrowser,
         onCheckpoint: patch => checkpoint({
           ...patch,
           chapter_id: chapterId,
@@ -766,6 +711,8 @@ export async function solveCourse(client, {
       questions_submitted: Math.max(questionsSubmitted, Number(lastCheckpoint.questions_submitted || 0))
     });
     throw error;
+  } finally {
+    await lectureBrowser.close();
   }
 
   const summary = dryRun
