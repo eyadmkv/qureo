@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { stdin, stdout } from 'node:process';
 import { DATA_DIR } from './paths.js';
 import { registerSprixApiCommands } from './sprixApi.js';
+import { registerSprixSolverCommands } from './sprixSolver.js';
 
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
 const STORE_PATH = path.join(SPRIX_DIR, 'study.json');
@@ -269,6 +270,7 @@ export function registerSprixCommands(program, { standalone = false } = {}) {
     ? program
     : program.command('sprix').description('SPRIX Learning Square CLI and local study tools');
   registerSprixApiCommands(sprix);
+  registerSprixSolverCommands(sprix);
 
   sprix.command('catalog')
     .description('List the six units in the second-year Baccalaureate financial-literacy course')
