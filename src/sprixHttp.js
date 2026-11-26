@@ -129,13 +129,14 @@ export class SprixHttpError extends Error {
 }
 
 export class SprixHttpClient {
-  constructor({ cookie, origin = SPRIX_ORIGIN, fetchImpl = globalThis.fetch, timeoutMs = 30000, persistSession = false } = {}) {
+  constructor({ cookie, origin = SPRIX_ORIGIN, fetchImpl = globalThis.fetch, timeoutMs = 30000, persistSession = false, metadata = {} } = {}) {
     if (typeof fetchImpl !== 'function') throw new Error('Fetch is unavailable in this Node.js runtime.');
     this.origin = normalizeOrigin(origin);
     this.cookie = normalizeCookie(cookie);
     this.fetchImpl = fetchImpl;
     this.timeoutMs = Math.min(120000, Math.max(1000, Number(timeoutMs) || 30000));
     this.persistSession = Boolean(persistSession);
+    this.metadata = metadata && typeof metadata === 'object' ? metadata : {};
   }
 
   static hasSession() {
@@ -148,12 +149,13 @@ export class SprixHttpClient {
     try { payload = JSON.parse(unprotect(fs.readFileSync(SESSION_PATH, 'utf8'))); }
     catch { throw new Error('Could not decrypt the SPRIX session. Import it again on this Windows account.'); }
     if (payload?.version !== 1 || typeof payload.cookie !== 'string') throw new Error('Saved SPRIX session is invalid.');
-    return new SprixHttpClient({ cookie: payload.cookie, origin: payload.origin || SPRIX_ORIGIN, ...options, persistSession: true });
+    return new SprixHttpClient({ cookie: payload.cookie, origin: payload.origin || SPRIX_ORIGIN, metadata: payload.metadata || {}, ...options, persistSession: true });
   }
 
   saveSession(metadata = {}) {
     fs.mkdirSync(SESSION_DIR, { recursive: true });
-    const payload = JSON.stringify({ version: 1, origin: this.origin, cookie: this.cookie, savedAt: new Date().toISOString(), metadata });
+    this.metadata = { ...this.metadata, ...metadata };
+    const payload = JSON.stringify({ version: 1, origin: this.origin, cookie: this.cookie, savedAt: new Date().toISOString(), metadata: this.metadata });
     const temp = SESSION_PATH + '.tmp';
     fs.writeFileSync(temp, protect(payload), { encoding: 'utf8', mode: 0o600 });
     fs.renameSync(temp, SESSION_PATH);
