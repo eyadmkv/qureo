@@ -108,14 +108,15 @@ export function extractPythonAnswerPairs(body) {
     .replace(invisible, '')
     .replace(/\u00a0/gu, ' ')
     .split(/\r?\n/u)
-    .map(line => line.trim());
+    .map(line => line.replace(/[ \t]+$/u, ''));
   const records = [];
 
   for (let index = 0; index < lines.length; index++) {
-    const marker = /السؤال\s*([0-9٠-٩]+)/u.exec(lines[index]);
+    const currentLine = lines[index].trim();
+    const marker = /السؤال\s*([0-9٠-٩]+)/u.exec(currentLine);
     if (!marker) continue;
 
-    const inlineQuestion = lines[index]
+    const inlineQuestion = currentLine
       .slice(marker.index + marker[0].length)
       .replace(/^\s*[:：.)-]?\s*/u, '')
       .replace(/^#+\s*/u, '')
@@ -125,23 +126,26 @@ export function extractPythonAnswerPairs(body) {
     let questionIndex = index;
     if (!question) {
       questionIndex = index + 1;
-      while (questionIndex < lines.length && !lines[questionIndex]) questionIndex++;
-      question = (lines[questionIndex] ?? '').replace(/^#+\s*/u, '').trim();
+      while (questionIndex < lines.length && !lines[questionIndex].trim()) questionIndex++;
+      question = (lines[questionIndex] ?? '').trim().replace(/^#+\s*/u, '').trim();
     }
     if (!question) continue;
 
     const answerLines = [];
     for (let cursor = questionIndex + 1; cursor < lines.length; cursor++) {
       const line = lines[cursor];
-      if (/السؤال\s*[0-9٠-٩]+/u.test(line) ||
-          /^نسخ(?:\s|$)/u.test(line) ||
-          /^←\s*السابق/u.test(line) ||
-          /^التالي\s*:/u.test(line) ||
-          /^Made with intention\.?$/iu.test(line) ||
-          /^إعلان/u.test(line)) break;
+      const trimmedLine = line.trim();
+      if (/^السؤال\s*[0-9٠-٩]+/u.test(trimmedLine) ||
+          /^نسخ(?:\s|$)/u.test(trimmedLine) ||
+          /^←\s*السابق/u.test(trimmedLine) ||
+          /^التالي\s*:/u.test(trimmedLine) ||
+          /^Made with intention\.?$/iu.test(trimmedLine) ||
+          /^إعلان/u.test(trimmedLine)) break;
 
-      const withoutCopyLabel = line.replace(/\s+نسخ\s+الإجابة.*$/u, '').trim();
-      if (withoutCopyLabel) answerLines.push(withoutCopyLabel);
+      const withoutCopyLabel = line
+        .replace(/\s+نسخ\s+الإجابة.*$/u, '')
+        .replace(/[ \t]+$/u, '');
+      if (withoutCopyLabel.trim()) answerLines.push(withoutCopyLabel);
     }
 
     const answer = answerLines.join('\n').trim();
