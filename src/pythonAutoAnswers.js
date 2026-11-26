@@ -215,7 +215,7 @@ function splitPythonBoolean(expression, operator) {
     else if (character === ')') depth--;
 
     if (depth === 0) {
-      const match = expression.slice(index).match(new RegExp('^\s+' + operator + '\s+', 'u'));
+      const match = expression.slice(index).match(new RegExp('^\\s+' + operator + '\\s+', 'u'));
       if (match) {
         parts.push(expression.slice(start, index).trim());
         index += match[0].length - 1;
