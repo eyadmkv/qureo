@@ -116,12 +116,11 @@ export function formatPythonAnswerForQuestion(question, answer) {
   const expectsBlankLine = /_{2,}|(?:سطر|السطر).{0,40}(?:الفراغ|ناقص|المفقود)|(?:الفراغ).{0,40}(?:سطر|شرط)|(?:fill|complete).{0,30}blank|blank.{0,30}(?:line|statement|condition)/iu.test(prompt);
   if (!expectsBlankLine) return code;
 
-  const conditionalLines = code.split('\\n')
+  const conditionalLines = code.split('\n')
     .map(line => line.trim())
-    .filter(line => /^(?:if|elif|else)\\b.*:\\s*$/iu.test(line));
+    .filter(line => /^(?:if|elif|else)\b.*:\s*$/iu.test(line));
   return conditionalLines.length === 1 ? conditionalLines[0] : '';
 }
-
 function resolvePromptChoice(question, choices) {
   const prompt = stripQureoMarkup(questionText(question))
     .replace(/\s+/gu, ' ')
