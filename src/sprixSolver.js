@@ -8,7 +8,12 @@ import { SprixHttpClient } from './sprixHttp.js';
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
 export const SPRIX_BANK_PATH = path.join(SPRIX_DIR, 'answer-bank.json');
 export const SPRIX_ENGLISH_BLOCK_BANK_PATH = path.join(SPRIX_DIR, 'block-answer-bank-subject3.json');
+export const SPRIX_ARABIC_BLOCK_BANK_PATH = path.join(SPRIX_DIR, 'block-answer-bank-subject7.json');
+export const SPRIX_ARABIC_ARCHIVE_PATH = path.join(SPRIX_DIR, 'answer-archive-subject7.json');
+const SPRIX_ANSWER_SOURCE_BASE_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/main';
 const SPRIX_ENGLISH_BLOCK_BANK_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/spx_api_bank_subject3.json';
+const SPRIX_ARABIC_BLOCK_BANK_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/spx_api_bank.json';
+const SPRIX_ARABIC_ARCHIVE_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/answers_archive.json';
 
 const STOP_WORDS = new Set((
   'اي ايه أي مما يلي من في عن على الى الي هذا هذه تلك ذلك التي الذي الذين اللاتي ' +
@@ -81,6 +86,58 @@ function extractDataObject(source) {
   throw new Error('The DATA object appears to be incomplete.');
 }
 
+export function parseSprixAnswerArchive(source, sourceName = SPRIX_ARABIC_ARCHIVE_URL) {
+  let archive;
+  try {
+    archive = JSON.parse(String(source || ''));
+  } catch {
+    throw new Error('The Arabic SPRIX answer archive is not valid JSON.');
+  }
+
+  if (!archive || !Array.isArray(archive.lessons)) {
+    throw new Error('The Arabic SPRIX answer archive must contain a lessons array.');
+  }
+
+  const questions = [];
+  const seen = new Set();
+  for (const lesson of archive.lessons) {
+    for (const row of lesson.questions || []) {
+      const prompt = typeof row.question === 'string' ? row.question.trim() : '';
+      const answer = typeof row.answer?.text === 'string' ? row.answer.text.trim() : '';
+      if (!prompt || !answer) continue;
+
+      const key = normalize(prompt) + '|' + normalize(answer);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      questions.push({
+        id: String(row.id || ''),
+        question: prompt,
+        answer,
+        unitId: lesson.id ?? null,
+        unit: lesson.title || lesson.name || '',
+        levelId: null,
+        level: ''
+      });
+    }
+  }
+
+  if (!questions.length) {
+    throw new Error('The Arabic SPRIX answer archive contains no answered questions.');
+  }
+
+  return {
+    format: 'sprix-answer-bank',
+    schema_version: 1,
+    imported_at: new Date().toISOString(),
+    source: String(sourceName || 'answers_archive.json'),
+    unit_count: archive.lessons.length,
+    total: questions.length,
+    answered: questions.length,
+    unanswered: 0,
+    questions
+  };
+}
+
 export function parseSprixAnswerBank(source, sourceName = 'userscript') {
   const data = extractDataObject(source);
   if (!Array.isArray(data.units)) throw new Error('The imported DATA object has no units array.');
@@ -123,7 +180,17 @@ export function parseSprixAnswerBank(source, sourceName = 'userscript') {
   };
 }
 
-export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOCK_BANK_URL) {
+export function parseSprixBlockAnswerBank(
+  source,
+  sourceUrl = SPRIX_ENGLISH_BLOCK_BANK_URL,
+  subjectId = 3
+) {
+  const resolvedSubjectId = Number(subjectId);
+  if (resolvedSubjectId !== 3 && resolvedSubjectId !== 7) {
+    throw new Error('SPRIX block-answer maps are only configured for subjects 3 and 7.');
+  }
+  const language = resolvedSubjectId === 7 ? 'ar' : 'en';
+  const languageLabel = resolvedSubjectId === 7 ? 'Arabic' : 'English';
   let data;
   try {
     data = JSON.parse(String(source || ''));
@@ -167,17 +234,17 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
   const total = Object.keys(answers).length;
   const testTotal = Object.keys(testAnswers).length;
   if (total < 200) {
-    throw new Error('The public English answer map is incomplete (' + total + ' block answers). Nothing was imported.');
+    throw new Error('The public ' + languageLabel + ' answer map is incomplete (' + total + ' block answers). Nothing was imported.');
   }
   if (testTotal < 100) {
-    throw new Error('The public English test answer map is incomplete (' + testTotal + ' answers). Nothing was imported.');
+    throw new Error('The public ' + languageLabel + ' test answer map is incomplete (' + testTotal + ' answers). Nothing was imported.');
   }
 
   return {
     format: 'sprix-block-answer-bank',
     schema_version: 1,
-    subject_id: 3,
-    language: 'en',
+    subject_id: resolvedSubjectId,
+    language,
     imported_at: new Date().toISOString(),
     source_url: sourceUrl,
     total,
@@ -187,17 +254,105 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
   };
 }
 
-function saveSprixBlockAnswerBank(bank) {
+function saveSprixBlockAnswerBank(bank, outputPath = SPRIX_ENGLISH_BLOCK_BANK_PATH) {
   fs.mkdirSync(SPRIX_DIR, { recursive: true });
-  const temporaryPath = SPRIX_ENGLISH_BLOCK_BANK_PATH + '.tmp';
+  const temporaryPath = outputPath + '.tmp';
   fs.writeFileSync(temporaryPath, JSON.stringify(bank, null, 2) + '\n', {
     encoding: 'utf8',
     mode: 0o600
   });
-  fs.renameSync(temporaryPath, SPRIX_ENGLISH_BLOCK_BANK_PATH);
+  fs.renameSync(temporaryPath, outputPath);
+}
+
+function readLocalSprixBank(filePath, label) {
+  if (!fs.existsSync(filePath)) return null;
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    throw new Error('The local ' + label + ' is invalid JSON: ' + filePath);
+  }
+  if (data?.format !== 'sprix-answer-bank' || data?.schema_version !== 1 || !Array.isArray(data.questions)) {
+    throw new Error('The local ' + label + ' has an unsupported format: ' + filePath);
+  }
+  return data;
+}
+
+function readLocalSprixBlockBank(filePath, subjectId, language, label) {
+  if (!fs.existsSync(filePath)) return null;
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    throw new Error('The local ' + label + ' is invalid JSON. Run the matching bank import command again.');
+  }
+  if (data?.format !== 'sprix-block-answer-bank' ||
+      data?.schema_version !== 1 ||
+      data?.subject_id !== subjectId ||
+      data?.language !== language ||
+      !data.answers ||
+      typeof data.answers !== 'object' ||
+      Array.isArray(data.answers) ||
+      !data.testAnswers ||
+      typeof data.testAnswers !== 'object' ||
+      Array.isArray(data.testAnswers)) {
+    throw new Error('The local ' + label + ' has an unsupported format. Run the matching bank import command again.');
+  }
+  return data;
+}
+
+function mergeSprixQuestionBanks(...banks) {
+  const questions = [];
+  const seen = new Set();
+  for (const bank of banks.filter(Boolean)) {
+    for (const question of bank.questions || []) {
+      const key = normalize(question.question) + '|' + normalize(question.answer);
+      if (!question.question || !question.answer || seen.has(key)) continue;
+      seen.add(key);
+      questions.push(question);
+    }
+  }
+  return questions;
 }
 
 export function loadSprixAnswerBank(subjectId = null) {
+  if (Number(subjectId) === 7) {
+    const localBank = readLocalSprixBank(SPRIX_BANK_PATH, 'Arabic SPRIX answer bank');
+    const mappedBank = readLocalSprixBlockBank(
+      SPRIX_ARABIC_BLOCK_BANK_PATH,
+      7,
+      'ar',
+      'Arabic SPRIX API answer map'
+    );
+    const archiveBank = readLocalSprixBank(SPRIX_ARABIC_ARCHIVE_PATH, 'Arabic SPRIX answer archive');
+
+    if (!localBank && !mappedBank && !archiveBank) {
+      throw new Error(
+        'No Arabic SPRIX answer source is installed. Run: sprix bank import-arabic'
+      );
+    }
+
+    const questions = mergeSprixQuestionBanks(localBank, archiveBank);
+    const imported = [localBank?.imported_at, archiveBank?.imported_at].filter(Boolean).sort().at(-1) || mappedBank?.imported_at || null;
+    return {
+      format: 'sprix-answer-bank',
+      schema_version: 1,
+      subjectId: 7,
+      imported_at: imported,
+      source: [localBank?.source, archiveBank?.source, mappedBank?.source_url].filter(Boolean).join('; ') || 'local Arabic SPRIX answer sources',
+      total: questions.length,
+      answered: questions.length,
+      unanswered: 0,
+      questions,
+      blockAnswers: mappedBank?.answers || null,
+      blockAnswerSource: mappedBank?.source_url || null,
+      blockAnswerTotal: mappedBank?.total || 0,
+      testAnswers: mappedBank?.testAnswers || {},
+      testAnswerTotal: mappedBank?.testTotal || 0,
+      archiveQuestionTotal: archiveBank?.total || 0
+    };
+  }
+
   if (Number(subjectId) === 3) {
     if (!fs.existsSync(SPRIX_ENGLISH_BLOCK_BANK_PATH)) {
       throw new Error(
@@ -332,9 +487,12 @@ export function buildSprixChapterPlan(data, bank) {
   const answeredBank = Array.isArray(bank.questions)
     ? bank.questions.filter(question => question.answer)
     : [];
-  const blockAnswers = Number(bank.subjectId) === 3 && bank.blockAnswers
+  const blockAnswers = (Number(bank.subjectId) === 3 || Number(bank.subjectId) === 7) && bank.blockAnswers
     ? bank.blockAnswers
     : null;
+  const blockMapLabel = Number(bank.subjectId) === 7
+    ? 'Arabic subject-7'
+    : 'English subject-3';
   const plan = [];
   const unmatched = [];
 
@@ -352,7 +510,7 @@ export function buildSprixChapterPlan(data, bank) {
         unmatched.push({
           blockId: block.id,
           prompt,
-          reason: 'no English subject-3 answer is available for this block ID'
+          reason: 'no ' + blockMapLabel + ' answer is available for this block ID'
         });
         continue;
       }
@@ -362,7 +520,7 @@ export function buildSprixChapterPlan(data, bank) {
         unmatched.push({
           blockId: block.id,
           prompt,
-          reason: 'English answer map points to option #' + mappedOptionId + ', which is absent from the live options'
+          reason: blockMapLabel + ' answer map points to option #' + mappedOptionId + ', which is absent from the live options'
         });
         continue;
       }
@@ -370,7 +528,7 @@ export function buildSprixChapterPlan(data, bank) {
       plan.push({
         blockId: block.id,
         prompt,
-        bankQuestion: 'English subject-3 block answer map',
+        bankQuestion: blockMapLabel + ' block answer map',
         bankAnswer: 'Mapped option #' + mappedOptionId,
         optionId: mappedOption.id,
         optionText: optionText(mappedOption),
@@ -1594,6 +1752,44 @@ function registerBankCommands(sprix) {
       console.log('This third-party answer data is unverified and is stored locally only.');
     });
 
+  bank.command('import-arabic')
+    .description('Download the Arabic subject-7 API answer map and question-text archive into the ignored local data directory')
+    .action(async () => {
+      const fetchSource = async (url, label) => {
+        let response;
+        try {
+          response = await fetch(url, {
+            headers: { Accept: 'application/json' },
+            signal: AbortSignal.timeout(30000)
+          });
+        } catch (error) {
+          throw new Error('Could not download ' + label + ': ' + error.message);
+        }
+        if (!response.ok) {
+          throw new Error(label + ' download failed (HTTP ' + response.status + ').');
+        }
+        return response.text();
+      };
+
+      const [mapSource, archiveSource] = await Promise.all([
+        fetchSource(SPRIX_ARABIC_BLOCK_BANK_URL, 'the Arabic SPRIX API answer map'),
+        fetchSource(SPRIX_ARABIC_ARCHIVE_URL, 'the Arabic SPRIX answer archive')
+      ]);
+      const mapped = parseSprixBlockAnswerBank(mapSource, SPRIX_ARABIC_BLOCK_BANK_URL, 7);
+      const archive = parseSprixAnswerArchive(archiveSource, SPRIX_ARABIC_ARCHIVE_URL);
+
+      saveSprixBlockAnswerBank(mapped, SPRIX_ARABIC_BLOCK_BANK_PATH);
+      saveSprixBlockAnswerBank(archive, SPRIX_ARABIC_ARCHIVE_PATH);
+      console.log('Imported ' + mapped.total + ' Arabic subject-7 chapter block-answer mappings.');
+      console.log('Imported ' + mapped.testTotal + ' Arabic subject-7 test-answer mappings.');
+      console.log('Imported ' + archive.total + ' answered questions from the Arabic text archive.');
+      console.log('API map source: ' + mapped.source_url);
+      console.log('Text archive source: ' + archive.source);
+      console.log('Saved locally under: ' + SPRIX_DIR);
+      console.log('The solver validates every mapped option ID against the live question options before using it.');
+      console.log('The upstream answer data is third-party and unverified; it remains local and is not committed.');
+    });
+
   bank.command('status')
     .description('Show counts from the local SPRIX answer bank')
     .option('--subject <id>', 'SPRIX subject ID')
@@ -1605,8 +1801,17 @@ function registerBankCommands(sprix) {
       console.log('Without answer notes: ' + (data.unanswered ?? 0));
       console.log('Imported from: ' + (data.source || 'local answer map'));
       if (data.blockAnswerSource) console.log('Block-answer source: ' + data.blockAnswerSource);
-      if (Number(options.subject) === 3) console.log('Test answer mappings: ' + (data.testAnswerTotal ?? Object.keys(data.testAnswers || {}).length));
-      console.log('Stored locally: ' + (Number(options.subject) === 3 ? SPRIX_ENGLISH_BLOCK_BANK_PATH : SPRIX_BANK_PATH));
+      if (Number(options.subject) === 3 || Number(options.subject) === 7) {
+        console.log('Chapter block mappings: ' + (data.blockAnswerTotal ?? Object.keys(data.blockAnswers || {}).length));
+        console.log('Test answer mappings: ' + (data.testAnswerTotal ?? Object.keys(data.testAnswers || {}).length));
+      }
+      if (Number(options.subject) === 7) console.log('Arabic archive questions: ' + (data.archiveQuestionTotal ?? 0));
+      const bankPath = Number(options.subject) === 3
+        ? SPRIX_ENGLISH_BLOCK_BANK_PATH
+        : Number(options.subject) === 7
+          ? SPRIX_ARABIC_BLOCK_BANK_PATH
+          : SPRIX_BANK_PATH;
+      console.log('Stored locally: ' + bankPath);
     });
 }
 
