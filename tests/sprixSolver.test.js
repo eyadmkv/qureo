@@ -448,9 +448,8 @@ test('automatically completes reviews at their position in the SPRIX course sequ
     async getCurriculum() {
       return structuredClone(units);
     },
-    async getReviewItems(reviewId) {
-      calls.push('read-review:' + reviewId);
-      return { data: { items: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] } };
+    async getReviewItems() {
+      assert.fail('The solver does not need to fetch protected review items before completing a review.');
     },
     async completeReview(reviewId) {
       calls.push('complete-review:' + reviewId);
@@ -498,7 +497,6 @@ test('automatically completes reviews at their position in the SPRIX course sequ
   assert.equal(result.reviewsCompleted, 1);
   assert.equal(result.questionsSubmitted, 1);
   assert.deepEqual(calls, [
-    'read-review:151',
     'complete-review:151',
     'read-chapter:201',
     'answer:201:202:203',
@@ -506,7 +504,7 @@ test('automatically completes reviews at their position in the SPRIX course sequ
   ]);
 });
 
-test('dry-run reads review items but never completes them', async () => {
+test('dry-run previews reviews without fetching protected review items or completing them', async () => {
   const bank = parseSprixAnswerBank(sampleSource());
   const calls = [];
   const session = {
@@ -516,9 +514,8 @@ test('dry-run reads review items but never completes them', async () => {
         items: [{ id: 151, item_type: 'review', title: 'Review One', is_completed: false, is_unlocked: true }]
       }];
     },
-    async getReviewItems(reviewId) {
-      calls.push('read:' + reviewId);
-      return { data: { items: [{ id: 1 }] } };
+    async getReviewItems() {
+      assert.fail('Dry-run must not fetch protected review items.');
     },
     async completeReview() {
       assert.fail('Dry-run must not complete reviews.');
@@ -533,7 +530,7 @@ test('dry-run reads review items but never completes them', async () => {
 
   assert.equal(result.reviewsProcessed, 1);
   assert.equal(result.reviewsCompleted, 0);
-  assert.deepEqual(calls, ['read:151']);
+  assert.deepEqual(calls, []);
 });
 
 test('probes the live chapter endpoint when the curriculum lock flag is false', async () => {
