@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecturePage } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -97,4 +97,41 @@ test('initializes the selected course page before fetching its learning API data
       path: '/courses/python_short_ar'
     }
   ]);
+});
+
+
+test('initializes a lesson page through the saved session without launching a browser', async () => {
+  const calls = [];
+  const lessonUrl = 'https://me-tp.qureo.education/chapter/511001/lecture/511001030';
+  const client = {
+    async request(url, options) {
+      calls.push({ url, method: options.method, accept: options.headers.Accept });
+      return new Response('<html>QUREO lesson</html>', {
+        status: 200,
+        headers: { 'content-type': 'text/html' }
+      });
+    }
+  };
+
+  const status = await initializeLecturePage(client, lessonUrl);
+
+  assert.equal(status, 200);
+  assert.deepEqual(calls, [{
+    url: lessonUrl,
+    method: 'GET',
+    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+  }]);
+});
+
+test('reports an unsuccessful background lesson-page initialization', async () => {
+  const client = {
+    async request() {
+      return new Response('Not found', { status: 404 });
+    }
+  };
+
+  await assert.rejects(
+    initializeLecturePage(client, 'https://me-tp.qureo.education/chapter/511001/lecture/511001030'),
+    error => error.code === 'LESSON_PAGE_INIT_FAILED' && error.status === 404
+  );
 });
