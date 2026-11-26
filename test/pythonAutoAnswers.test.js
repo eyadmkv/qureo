@@ -750,7 +750,7 @@ test('submits only the missing if line for condition-only exercises', () => {
       lesson_title: 'مراجعة المستوى',
       question_number: 4,
       question: 'اكتب شرطًا يتحقق إذا كانت a تساوي 5 أو b تساوي 10.',
-      answer: 'الإجابة\\na = 5\\nb = 10\\nif a == 5 or b == 10:\\n    print("The condition is met")'
+      answer: ['الإجابة', 'a = 5', 'b = 10', 'if a == 5 or b == 10:', '    print("The condition is met")'].join('\n')
     },
     {
       id: 'py-l09-s03-q5',
@@ -759,7 +759,7 @@ test('submits only the missing if line for condition-only exercises', () => {
       lesson_title: 'مراجعة المستوى',
       question_number: 5,
       question: 'اكتب شرطًا يتحقق إذا كانت a أكبر من أو تساوي 2 وb أكبر من أو تساوي 3.',
-      answer: 'a = 4\\nb = 3\\nif a >= 2 and b >= 3:\\n    print("The condition is met")'
+      answer: ['a = 4', 'b = 3', 'if a >= 2 and b >= 3:', '    print("The condition is met")'].join('\n')
     }
   ], '09');
 
