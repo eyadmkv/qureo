@@ -18,6 +18,7 @@ This project is independent and is not affiliated with, endorsed by, or supporte
 - View local progress with `dashboard`, `status` and `doctor`.
 - Configure terminal themes, compact dashboard output and PowerShell completion.
 - Use a standalone `sprix` CLI to import an authenticated browser session, fetch live curriculum and chapter/review/test data, and submit explicitly selected answers or completions.
+- Import your local SPRIX userscript question bank and preview a fail-closed chapter solver before submitting matched options.
 - Capture visible SPRIX lesson text, extract four-choice questions, save personal reference keys and practice offline.
 
 ## Requirements
@@ -83,6 +84,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
+| `sprix bank import` / `sprix solve` | Import a local answer bank and preview or submit safe matches |
 | `sprix login` / `logout` | Import or remove your encrypted SPRIX browser session |
 | `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
