@@ -8,36 +8,6 @@ import { QureoLectureBrowser } from './qureoBrowser.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
-function integerSetting(name, fallback, minimum, maximum) {
-  const value = Number.parseInt(process.env[name] ?? '', 10);
-  if (!Number.isFinite(value)) return fallback;
-  return Math.min(maximum, Math.max(minimum, value));
-}
-
-const LESSON_INIT_POLL_INTERVAL_MS = integerSetting('QUREO_LESSON_INIT_POLL_INTERVAL_MS', 1000, 250, 10000);
-const LESSON_RETRY_INTERVAL_MS = integerSetting('QUREO_LESSON_RETRY_INTERVAL_MS', 3000, 250, 30000);
-const LESSON_RETRY_ATTEMPTS = integerSetting('QUREO_LESSON_RETRY_ATTEMPTS', 40, 1, 100);
-const LESSON_RETRY_TIMEOUT_MS = integerSetting('QUREO_LESSON_RETRY_TIMEOUT_MS', 180000, 10000, 600000);
-const LESSON_REQUEST_TIMEOUT_MS = integerSetting('QUREO_LESSON_REQUEST_TIMEOUT_MS', 15000, 1000, 120000);
-
-const RETRYABLE_NETWORK_CODES = new Set([
-  'ECONNRESET', 'ETIMEDOUT', 'EAI_AGAIN', 'ENETUNREACH', 'ECONNREFUSED',
-  'EHOSTUNREACH', 'ECONNABORTED', 'UND_ERR_CONNECT_TIMEOUT',
-  'UND_ERR_SOCKET', 'UND_ERR_HEADERS_TIMEOUT'
-]);
-const RETRYABLE_HTTP_STATUSES = new Set([404, 408, 425, 429, 500, 502, 503, 504]);
-
-function isRetryableNetworkError(error) {
-  if (['TimeoutError', 'AbortError', 'ConnectTimeoutError'].includes(error?.name)) return true;
-  const codes = [error?.code, error?.cause?.code, error?.cause?.cause?.code];
-  if (codes.some(code => RETRYABLE_NETWORK_CODES.has(code))) return true;
-  return error instanceof TypeError && /fetch failed|network|socket|connect/i.test(error.message);
-}
-
-function isRetryableResponse(response) {
-  return RETRYABLE_HTTP_STATUSES.has(response?.status);
-}
-
 function asArray(value) {
   if (Array.isArray(value)) return value;
   if (Array.isArray(value?.data)) return value.data;
