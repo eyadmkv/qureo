@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixAnswerBank, buildSprixChapterPlan } from '../src/sprixSolver.js';
+import { parseSprixAnswerBank, buildSprixChapterPlan, buildSprixCourseAnswerBank } from '../src/sprixSolver.js';
 
 function sampleSource() {
   const data = {
@@ -127,4 +127,136 @@ test('does not use bank records without an answer note', () => {
 
   assert.equal(result.plan.length, 0);
   assert.equal(result.unmatched.length, 1);
+});
+
+
+test('builds a local answer bank from SPRIX question_text fields and option IDs', () => {
+  const source = {
+    format: 'sprix-course-source',
+    subject_id: 7,
+    units: [{
+      id: 10,
+      title: 'أساسيات المال والتمويل',
+      sections: [{
+        items: [{
+          id: 20,
+          item_type: 'chapter',
+          title: 'وظائف المال',
+          source_status: 'fetched',
+          data: {
+            blocks: [{
+              id: 30,
+              type: 'question',
+              question: { id: 40, question_text: 'ما وظيفة المال في المجتمع؟' },
+              options: [
+                { id: 50, text: 'تخزين المال فقط' },
+                { id: 51, text: 'يعمل المال كوسيط للتبادل بين الناس' }
+              ]
+            }]
+          }
+        }, {
+          id: 21,
+          item_type: 'test',
+          title: 'اختبار الوحدة'
+        }]
+      }]
+    }]
+  };
+  const answerMap = {
+    format: 'sprix-answer-map',
+    schema_version: 1,
+    subject_id: 7,
+    course_id: 'sprix_subject_7_ar',
+    answers: { '40': { choice_id: 51 } }
+  };
+  const bank = buildSprixCourseAnswerBank(source, answerMap, 'course-source.json');
+  assert.equal(bank.total, 1);
+  assert.equal(bank.answered, 1);
+  assert.equal(bank.questions[0].question, 'ما وظيفة المال في المجتمع؟');
+  assert.equal(bank.questions[0].answer, 'يعمل المال كوسيط للتبادل بين الناس');
+  assert.equal(bank.coverage.chapter_questions, 1);
+  assert.equal(bank.coverage.tests_listed, 1);
+
+  const result = buildSprixChapterPlan({
+    chapter: {},
+    blocks: [{
+      id: 30,
+      type: 'question',
+      question: { id: 40, question_text: 'ما وظيفة المال في المجتمع؟' },
+      options: [
+        { id: 50, text: 'تخزين المال فقط' },
+        { id: 51, text: 'يعمل المال كوسيط للتبادل بين الناس' }
+      ]
+    }]
+  }, bank);
+  assert.equal(result.plan.length, 1);
+  assert.equal(result.plan[0].optionId, 51);
+});
+
+test('refuses to build a course bank when answer IDs do not cover the source', () => {
+  const source = {
+    format: 'sprix-course-source',
+    subject_id: 7,
+    units: [{
+      id: 10,
+      title: 'Unit',
+      sections: [{
+        items: [{
+          id: 20,
+          item_type: 'chapter',
+          title: 'Chapter',
+          source_status: 'fetched',
+          data: {
+            blocks: [{
+              id: 30,
+              type: 'question',
+              question: { id: 40, question_text: 'Question?' },
+              options: [{ id: 50, text: 'Answer' }]
+            }]
+          }
+        }]
+      }]
+    }]
+  };
+  const answerMap = { format: 'sprix-answer-map', subject_id: 7, answers: {} };
+  assert.throws(
+    () => buildSprixCourseAnswerBank(source, answerMap),
+    /1 source question\(s\) have no mapped option/u
+  );
+});
+
+test('rejects an answer option that does not belong to its question', () => {
+  const source = {
+    format: 'sprix-course-source',
+    subject_id: 7,
+    units: [{
+      id: 10,
+      title: 'Unit',
+      sections: [{
+        items: [{
+          id: 20,
+          item_type: 'chapter',
+          title: 'Chapter',
+          source_status: 'fetched',
+          data: {
+            blocks: [{
+              id: 30,
+              type: 'question',
+              question: { id: 40, question_text: 'Question?' },
+              options: [{ id: 50, text: 'Answer' }]
+            }]
+          }
+        }]
+      }]
+    }]
+  };
+  const answerMap = {
+    format: 'sprix-answer-map',
+    subject_id: 7,
+    answers: { '40': { choice_id: 999 } }
+  };
+  assert.throws(
+    () => buildSprixCourseAnswerBank(source, answerMap),
+    /does not belong to question/u
+  );
 });
