@@ -521,7 +521,7 @@ async function refreshUntilSprixChapterCompleted(session, subjectId, chapterId, 
 }
 
 export async function solveSprixCourse(session, bank, {
-  subjectId = '7',
+  subjectId = null,
   chapterId = null,
   dryRun = false,
   single = false,
@@ -539,7 +539,8 @@ export async function solveSprixCourse(session, bank, {
     }
   }
 
-  let units = await session.getCurriculum(subjectId);
+  const resolvedSubjectId = await session.resolveSubjectId(subjectId);
+  let units = await session.getCurriculum(resolvedSubjectId);
   const allChapters = listSprixChapters(units);
   const targetedChapter = chapterId !== null && chapterId !== undefined;
   let selection;
@@ -668,7 +669,7 @@ export async function solveSprixCourse(session, bank, {
       } else {
         onProgress('Completing review ' + current.id + '...');
         const completion = await session.completeReview(current.id);
-        units = await refreshUntilSprixReviewCompleted(session, subjectId, current.id, completion);
+        units = await refreshUntilSprixReviewCompleted(session, resolvedSubjectId, current.id, completion);
         reviewsCompleted++;
         onProgress('SPRIX confirmed review ' + current.id + ' as complete.');
       }
@@ -767,7 +768,7 @@ export async function solveSprixCourse(session, bank, {
       if (completion?.data?.star_score !== undefined) {
         onProgress('Star score: ' + completion.data.star_score);
       }
-      units = await refreshUntilSprixChapterCompleted(session, subjectId, current.id, completion);
+      units = await refreshUntilSprixChapterCompleted(session, resolvedSubjectId, current.id, completion);
       chaptersCompleted++;
       onProgress('SPRIX confirmed chapter ' + current.chapterSequence + ' as complete.');
     } else {
@@ -904,11 +905,12 @@ export function buildSprixCourseAnswerBank(source, answerMap, sourceName = 'cour
 
 async function harvestCourseSource(subjectId, outputPath) {
   const session = SprixHttpClient.loadSession();
-  const units = await session.getCurriculum(subjectId);
+  const resolvedSubjectId = await session.resolveSubjectId(subjectId);
+  const units = await session.getCurriculum(resolvedSubjectId);
   const output = {
     format: 'sprix-course-source',
     schema_version: 1,
-    subject_id: Number(subjectId),
+    subject_id: resolvedSubjectId,
     exported_at: new Date().toISOString(),
     extraction_method: 'SPRIX authenticated read-only curriculum, chapter and review GET requests',
     coverage: {
@@ -1085,7 +1087,7 @@ function registerBankCommands(sprix) {
 
   bank.command('harvest')
     .description('Export all chapter and review question content through read-only SPRIX API requests')
-    .option('--subject <id>', 'SPRIX subject ID', '7')
+    .option('--subject <id>', 'SPRIX subject ID (defaults to the saved course)')
     .option('--out <path>', 'Output JSON path')
     .action(async options => {
       const outputPath = path.resolve(options.out || path.join(SPRIX_DIR, 'course-source.json'));
