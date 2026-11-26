@@ -92,6 +92,43 @@ function extractCodeAnswer(answer) {
   return inline?.[0]?.trim() || '';
 }
 
+function resolvePromptChoice(question, choices) {
+  const prompt = stripQureoMarkup(questionText(question))
+    .replace(/\s+/gu, ' ')
+    .trim();
+
+  if (/إذا كان/u.test(prompt) && /وإلا/u.test(prompt) &&
+      /فافعل\s*A/u.test(prompt) && /فافعل\s*B/u.test(prompt)) {
+    const expected = compact('if condition: A else: B');
+    const matches = choices.filter(choice => compact(choiceText(choice)) === expected);
+    if (matches.length === 1) return Number(matches[0].id);
+    if (matches.length > 1) return null;
+  }
+
+  const variable = prompt.match(/قيمة المتغير\s+([A-Za-z_][\w]*)/u)?.[1];
+  const number = prompt.match(/\b(\d+(?:\.\d+)?)\b/u)?.[1];
+  if (!variable || !number) return null;
+
+  let operator = null;
+  if (/أكبر من أو يساوي|أكبر من أو أكثر|أو أكبر/u.test(prompt)) {
+    operator = '>=';
+  } else if (/أقل من أو يساوي|أصغر من أو يساوي|أو أقل|أو أصغر/u.test(prompt)) {
+    operator = '<=';
+  } else if (/أكبر من/u.test(prompt)) {
+    operator = '>';
+  } else if (/أقل من|أصغر من/u.test(prompt)) {
+    operator = '<';
+  } else if (/يساوي|تساوي/u.test(prompt)) {
+    operator = '==';
+  }
+
+  if (!operator) return null;
+
+  const expected = compact(variable + ' ' + operator + ' ' + number);
+  const matches = choices.filter(choice => compact(choiceText(choice)) === expected);
+  return matches.length === 1 ? Number(matches[0].id) : null;
+}
+
 function resolveChoice(question, record) {
   const questionRow = question?.question || question || {};
   const choices = Array.isArray(question?.choices) ? question.choices :
@@ -117,6 +154,9 @@ function resolveChoice(question, record) {
     const multiplicationChoices = choices.filter(choice => compact(choiceText(choice)) === '*');
     if (multiplicationChoices.length === 1) return Number(multiplicationChoices[0].id);
   }
+
+  const promptChoice = resolvePromptChoice(question, choices);
+  if (Number.isSafeInteger(promptChoice)) return promptChoice;
 
   const answerTokens = tokens(answer);
   const stringAnswer = /\bstring\b|سلسلة|\bstr\b/iu.test(answer) ||
