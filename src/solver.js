@@ -3,7 +3,6 @@ import path from 'node:path';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
-import { loadSavedPythonAnswerGuide, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
@@ -484,6 +483,7 @@ export async function solveCourse(client, {
 
   let pythonGuide = null;
   if (autoAnswers) {
+    const { loadSavedPythonAnswerGuide, syncPythonAnswerGuide } = await import('./pythonAnswerGuide.js');
     pythonGuide = loadSavedPythonAnswerGuide();
     if (!pythonGuide) {
       onProgress('No cached Python guide found. Downloading all public Python answers first...');
@@ -492,10 +492,10 @@ export async function solveCourse(client, {
           if (progress.message) onProgress(progress.message);
         }
       });
-      onProgress(`Downloaded ${synced.answers_extracted} answers across ${synced.levels_fetched} levels and ${synced.lessons_fetched} lessons.`);
+      onProgress(\`Downloaded \${synced.answers_extracted} answers across \${synced.levels_fetched} levels and \${synced.lessons_fetched} lessons.\`);
       pythonGuide = loadSavedPythonAnswerGuide();
     } else {
-      onProgress(`Using cached Python guide: ${pythonGuide.answers.length} answers across ${pythonGuide.coverage?.levels_fetched ?? '?'} levels.`);
+      onProgress(\`Using cached Python guide: \${pythonGuide.answers.length} answers across \${pythonGuide.coverage?.levels_fetched ?? '?'} levels.\`);
     }
     if (!pythonGuide?.answers?.length) {
       throw new Error('The public Python guide is empty. Run qureo answers sync-python and check its output.');
