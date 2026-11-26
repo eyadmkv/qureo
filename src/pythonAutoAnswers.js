@@ -135,6 +135,25 @@ function resolvePromptChoice(question, choices) {
   return matches.length === 1 ? Number(matches[0].id) : null;
 }
 
+function resolveLogicalOperatorChoice(question, choices) {
+  const prompt = compact(questionText(question));
+  let operator = null;
+
+  if (/يتحققاوب(?:معا)?|bothab|aandbtogether/u.test(prompt)) {
+    operator = 'and';
+  } else if (/يتحققااوب|eitheraorb|aorb/u.test(prompt)) {
+    operator = 'or';
+  }
+
+  if (!operator) return null;
+
+  const expected = operator === 'and' ? 'aandb' : 'aorb';
+  const matches = choices.filter(choice =>
+    compact(choiceText(choice)).replace(/[^a-z0-9]/gu, '') === expected
+  );
+  return matches.length === 1 ? Number(matches[0].id) : null;
+}
+
 function pythonConditionalShape(value) {
   const lines = normalizePythonKeywordCase(
     stripQureoMarkup(value).replace(/\r/gu, '')
@@ -362,6 +381,9 @@ function resolveChoice(question, record) {
 
   const promptChoice = resolvePromptChoice(question, choices);
   if (Number.isSafeInteger(promptChoice)) return promptChoice;
+
+  const logicalOperatorChoice = resolveLogicalOperatorChoice(question, choices);
+  if (Number.isSafeInteger(logicalOperatorChoice)) return logicalOperatorChoice;
 
   const conditionalChoice = resolveConditionalStructureChoice(code || answer, choices);
   if (Number.isSafeInteger(conditionalChoice)) return conditionalChoice;
