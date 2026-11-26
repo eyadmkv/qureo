@@ -80,7 +80,7 @@ function extractCodeAnswer(answer) {
   const lines = source.split('\n').map(line => line.trimEnd());
   const start = lines.findIndex(line => {
     const clean = line.trim();
-    return /^(?:print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/u.test(clean) ||
+    return /^(?:print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/iu.test(clean) ||
       /^#[^!]/u.test(clean) ||
       /^[A-Za-z_][\w]*\s*(?:=|\+=|-=|\*=|\/=|==|!=|<=|>=|<|>)/u.test(clean);
   });
