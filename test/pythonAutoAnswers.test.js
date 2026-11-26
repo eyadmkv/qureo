@@ -724,3 +724,48 @@ test('maps Arabic prompts describing logical AND and OR to their matching expres
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+
+test('submits only the missing if line for condition-only exercises', () => {
+  const result = matchPythonAssessmentAnswers([
+    {
+      question: {
+        id: 511009040,
+        type: 'description',
+        content: 'اكتب شرطًا يتحقق إذا كانت a تساوي 5 أو b تساوي 10.'
+      }
+    },
+    {
+      question: {
+        id: 511009050,
+        type: 'description',
+        content: 'اكتب شرطًا يتحقق إذا كانت a أكبر من أو تساوي 2 وb أكبر من أو تساوي 3.'
+      }
+    }
+  ], [
+    {
+      id: 'py-l09-s03-q4',
+      level_id: '09',
+      lesson_id: 'py-l09-s03',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 4,
+      question: 'اكتب شرطًا يتحقق إذا كانت a تساوي 5 أو b تساوي 10.',
+      answer: 'الإجابة\\na = 5\\nb = 10\\nif a == 5 or b == 10:\\n    print("The condition is met")'
+    },
+    {
+      id: 'py-l09-s03-q5',
+      level_id: '09',
+      lesson_id: 'py-l09-s03',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 5,
+      question: 'اكتب شرطًا يتحقق إذا كانت a أكبر من أو تساوي 2 وb أكبر من أو تساوي 3.',
+      answer: 'a = 4\\nb = 3\\nif a >= 2 and b >= 3:\\n    print("The condition is met")'
+    }
+  ], '09');
+
+  assert.deepEqual(result.answers, {
+    '511009040': { type: 'description', answer_code: 'if a == 5 or b == 10:' },
+    '511009050': { type: 'description', answer_code: 'if a >= 2 and b >= 3:' }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
