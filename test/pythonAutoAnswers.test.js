@@ -667,3 +667,60 @@ test('evaluates a flattened conditional program copied from a QUREO question pro
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+
+test('maps Arabic prompts describing logical AND and OR to their matching expressions', () => {
+  const result = matchPythonAssessmentAnswers([
+    {
+      question: {
+        id: 511009010,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يعني "يتحقق A و B معا".'
+      },
+      choices: [
+        { id: 5110090101, content: 'A and B' },
+        { id: 5110090102, content: 'A < B' },
+        { id: 5110090103, content: 'A == B' },
+        { id: 5110090104, content: 'A or B' }
+      ]
+    },
+    {
+      question: {
+        id: 511009020,
+        type: 'choice',
+        content: 'اختر البرنامج الذي يعني "يتحقق A أو B ".'
+      },
+      choices: [
+        { id: 5110090201, content: 'A or B' },
+        { id: 5110090202, content: 'A < B' },
+        { id: 5110090203, content: 'A == B' },
+        { id: 5110090204, content: 'A and B' }
+      ]
+    }
+  ], [
+    {
+      id: 'py-l09-s04-q1',
+      level_id: '09',
+      lesson_id: 'py-l09-s04',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 1,
+      question: 'اختر البرنامج الذي يعني A و B.',
+      answer: 'A < B'
+    },
+    {
+      id: 'py-l09-s04-q2',
+      level_id: '09',
+      lesson_id: 'py-l09-s04',
+      lesson_title: 'مراجعة المستوى',
+      question_number: 2,
+      question: 'اختر البرنامج الذي يعني A أو B.',
+      answer: 'A == B'
+    }
+  ], '09');
+
+  assert.deepEqual(result.answers, {
+    '511009010': { type: 'choice', choice_id: 5110090101 },
+    '511009020': { type: 'choice', choice_id: 5110090201 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
