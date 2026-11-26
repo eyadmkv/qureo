@@ -221,6 +221,45 @@ function wait(ms) {
   return ms > 0 ? new Promise(resolve => setTimeout(resolve, ms)) : Promise.resolve();
 }
 
+export function buildPythonAnswerGuideResult({
+  levelUrls = [],
+  levels = [],
+  lessonsFound = 0,
+  lessonsFetched = 0,
+  emptyLessonPages = [],
+  answers = [],
+  failedPages = [],
+  countMismatches = [],
+  exportedAt = new Date().toISOString()
+} = {}) {
+  return {
+    format: 'qureo-public-answer-guide',
+    schema_version: 1,
+    course_id: 'python_short_ar',
+    source: {
+      name: 'StudentPlatformEG',
+      url: PYTHON_ANSWER_INDEX_URL,
+      note: 'Unofficial public reference. Verify answers against the current QUREO lesson before using them.'
+    },
+    exported_at: exportedAt,
+    coverage: {
+      levels_listed: levelUrls.length,
+      levels_fetched: levels.length,
+      lessons_found: lessonsFound,
+      lessons_fetched: lessonsFetched,
+      lessons_without_answer_blocks: emptyLessonPages.length,
+      answers_extracted: answers.length,
+      failed_pages: failedPages.length,
+      count_mismatches: countMismatches.length
+    },
+    levels,
+    answers,
+    count_mismatches: countMismatches,
+    empty_lesson_pages: emptyLessonPages,
+    failed_pages: failedPages
+  };
+}
+
 export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => {} } = {}) {
   if (!Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
     throw new Error('Request delay must be an integer between 0 and 5000 milliseconds.');
@@ -352,32 +391,16 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
     );
   }
 
-  const result = {
-    format: 'qureo-public-answer-guide',
-    schema_version: 1,
-    course_id: 'python_short_ar',
-    source: {
-      name: 'StudentPlatformEG',
-      url: PYTHON_ANSWER_INDEX_URL,
-      note: 'Unofficial public reference. Verify answers against the current QUREO lesson before using them.'
-    },
-    exported_at: new Date().toISOString(),
-    coverage: {
-      levels_listed: levelUrls.length,
-      levels_fetched: levels.length,
-      lessons_found: lessonsFound,
-      lessons_fetched: lessonsFetched,
-      lessons_without_answer_blocks: emptyLessonPages.length,
-      answers_extracted: answers.length,
-      failed_pages: failedPages.length,
-      count_mismatches: countMismatches.length
-    },
+  const result = buildPythonAnswerGuideResult({
+    levelUrls,
     levels,
+    lessonsFound,
+    lessonsFetched,
+    emptyLessonPages,
     answers,
-    count_mismatches,
-    empty_lesson_pages: emptyLessonPages,
-    failed_pages: failedPages
-  };
+    failedPages,
+    countMismatches
+  });
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
   const temporaryPath = OUTPUT_PATH + '.tmp';
