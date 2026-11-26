@@ -68,3 +68,30 @@ Public guide synchronization stores only material available without bypassing ac
 - `qureo.config.json`: local terminal preferences.
 
 Do not commit session files, databases, command history, checkpoints or personal exports. The repository's `.gitignore` excludes the local data directory and configuration.
+
+
+## Study the SPRIX financial-literacy course
+
+The SPRIX commands are a local companion for visible lesson material. In the signed-in browser, open a learning element, select and copy its visible text, then capture it:
+
+```powershell
+qureo sprix curriculum
+qureo sprix capture --title "كيف نشأ المال" --unit "أساسيات المال والتمويل"
+qureo sprix status
+qureo sprix lessons
+qureo sprix questions
+```
+
+You can import text from a file instead of the clipboard with `--file .\lesson.txt`. The capture parser extracts multiple-choice questions with four visible options while preserving the complete lesson text. It stores the capture under `data/sprix/`.
+
+Inspect a question and save your own reference key with an explanation:
+
+```powershell
+qureo sprix question <question-id>
+qureo sprix key <question-id> C --explanation "Why this option is correct"
+qureo sprix practice
+qureo sprix search "التضخم"
+qureo sprix export
+```
+
+Practice mode compares your choices with keys that you saved locally. A saved key is your own study note, not a verified answer from SPRIX. The SPRIX commands do not submit answers or modify your platform progress. See the [SPRIX guide](sprix.md) for details.

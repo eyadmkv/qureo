@@ -3,7 +3,7 @@
 [![CI](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml/badge.svg)](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An unofficial, Windows-focused command-line client for working with your own QUREO account. It provides course and progress sync, local SQLite caching, JSON exports, question and answer search, and an optional progress-aware chapter solver.
+An unofficial, Windows-focused command-line tool for working with your own QUREO account and studying the SPRIX financial-literacy course. It provides QUREO course and progress sync, local SQLite caching, JSON exports, question and answer search, an optional progress-aware QUREO chapter solver, and a separate local SPRIX lesson-capture and practice workflow.
 
 This project is independent and is not affiliated with, endorsed by, or supported by QUREO or its operators. It uses undocumented service endpoints that may change without notice.
 
@@ -17,6 +17,7 @@ This project is independent and is not affiliated with, endorsed by, or supporte
 - Run the chapter solver with sequential safeguards, checkpoints and configurable pauses.
 - View local progress with `dashboard`, `status` and `doctor`.
 - Configure terminal themes, compact dashboard output and PowerShell completion.
+- Capture visible SPRIX financial-literacy lesson text from the clipboard or a UTF-8 file, extract four-choice questions, save personal reference keys and practice offline.
 
 ## Requirements
 
@@ -77,10 +78,22 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo solve [range]` | Run the sequential chapter solver |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
+| `qureo sprix curriculum` | List the six financial-literacy units |
+| `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
+| `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
+| `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
 | `qureo history` | View recent command names and timestamps |
 
 Run `qureo --help` for the complete command list. See the [usage guide](docs/usage.md), [solver guide](docs/solver.md) and [terminal experience guide](docs/terminal-experience.md) for detailed command examples and behavior.
+
+## SPRIX financial-literacy study companion
+
+The `qureo sprix` command group supports the Egyptian second-year Baccalaureate financial-literacy course shown in the SPRIX Learning Square portal. Its curriculum index contains six units and 134 learning elements.
+
+SPRIX lesson pages are interactive and use a different platform from QUREO. This companion captures text that is already visible to you in the signed-in browser. It does not collect SPRIX credentials, read browser cookies, call guessed private endpoints, submit answers, or change course progress.
+
+See the [SPRIX guide](docs/sprix.md) for capture, question review, local answer keys and practice commands. Captured content and personal notes stay under `data/sprix/`, which is excluded from Git.
 
 ## Solver safety
 
@@ -91,6 +104,8 @@ The solver makes state-changing requests to QUREO when you explicitly run it. Re
 ## Local data and privacy
 
 The `data/` directory contains the SQLite database, encrypted session, command history and checkpoints. It is ignored by Git. Do not upload or commit it.
+
+SPRIX lesson captures, extracted questions and personal reference keys are stored under `data/sprix/`. They are local-only and are not sent to SPRIX. Review any exported content before sharing it.
 
 - Session cookies are encrypted with Windows DPAPI and tied to the Windows user account.
 - Passwords are not stored in the database, configuration or command history.

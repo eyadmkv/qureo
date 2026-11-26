@@ -14,12 +14,13 @@ import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
+import { registerSprixCommands } from './sprix.js';
 
 const program = new Command();
 program
   .name('qureo')
   .description('Private QUREO HTTP client, course index and local answer search')
-  .version('0.3.0');
+  .version('0.4.0');
 
 function outputJson(value) { console.log(JSON.stringify(value, null, 2)); }
 
@@ -763,6 +764,8 @@ program.command('stats')
 program.command('database')
   .description('Show the SQLite database path')
   .action(() => console.log(DB_PATH));
+
+registerSprixCommands(program);
 
 program.showHelpAfterError();
 program.parseAsync(process.argv).catch(error => {
