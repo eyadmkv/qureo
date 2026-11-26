@@ -12,6 +12,7 @@ import {
 import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
+import { syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
 import { registerSprixCommands } from './sprix.js';
@@ -620,6 +621,31 @@ answers.command('sync')
       if (p.total) process.stdout.write(`\r${p.message}   `);
     } });
     console.log(`\nSaved ${result.saved} page(s). Discovered ${result.discovered} chapter pages; ${result.failed} failed.`);
+  });
+
+
+answers.command('sync-python')
+  .description('Download the public Python course answer guide into a local searchable reference bank')
+  .option('--delay <milliseconds>', 'Pause between public page requests', '300')
+  .action(async options => {
+    const delayMs = Number(options.delay);
+    if (!Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
+      throw new Error('--delay must be an integer between 0 and 5000 milliseconds.');
+    }
+
+    console.log('Source: https://answers.studentplatformeg.online/qureo-python/');
+    console.log('Downloading public Python answer pages. No QUREO account or progress changes are involved.');
+    const result = await syncPythonAnswerGuide({
+      delayMs,
+      onProgress: progress => {
+        if (progress.message) process.stdout.write(`\r${progress.message}   `);
+      }
+    });
+    console.log(`\nSaved ${result.answers_extracted} question/answer pair(s).`);
+    console.log(`Levels: ${result.levels_fetched}/${result.levels_listed} | Lessons: ${result.lessons_fetched}/${result.lessons_found}`);
+    console.log(`Failed pages: ${result.failed_pages} | Count mismatches: ${result.count_mismatches}`);
+    console.log(`Local answer guide: ${result.outputPath}`);
+    console.log('Search it offline with: qureo search "<question words>"');
   });
 
 
