@@ -61,3 +61,26 @@ test('extracts lesson links from the selected level only', () => {
     ]
   );
 });
+
+test('searches the downloaded Python guide by question and answer text', async () => {
+  const { searchPythonAnswers } = await import('../src/pythonAnswerGuide.js');
+  const rows = [
+    {
+      question: 'ما ناتج البرنامج؟',
+      answer: 'Hello',
+      lesson_title: 'وحدة التحكم',
+      source_url: 'https://answers.studentplatformeg.online/qureo-python/l01/py-l01-s01/'
+    },
+    {
+      question: 'ما وظيفة المتغير؟',
+      answer: 'تخزين قيمة',
+      lesson_title: 'المتغيرات',
+      source_url: 'https://answers.studentplatformeg.online/qureo-python/l03/py-l03-s01/'
+    }
+  ];
+
+  const results = searchPythonAnswers(rows, 'وحدة التحكم', 3);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].question, 'ما ناتج البرنامج؟');
+  assert.equal(results[0].answer, 'Hello');
+});
