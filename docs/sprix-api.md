@@ -43,9 +43,27 @@ The curriculum lists unit learning items and their item types, IDs, unlock state
 
 Add `--json` to `sprix curriculum`, `sprix chapter`, or `sprix review items` for the complete response data.
 
+## Export all chapter and review source material without a userscript
+
+You can export the course's live chapter blocks and review items directly from your authenticated CLI session. This uses read-only GET requests and does not submit answers, start tests, or change your progress.
+
+```powershell
+sprix bank harvest
+```
+
+The default output is `data/sprix/course-source.json`. To choose another path:
+
+```powershell
+sprix bank harvest --out .\sprix-course-source.json
+```
+
+The export includes all units and learning-item metadata, chapter blocks, question prompts, option IDs and text, review items, and a summary of any failed requests. Test items are listed by ID, but the export does not start test attempts or attempt to extract test answer keys.
+
+This export is source material for building a separate answer bank. It does not fabricate correct answers. Correct answers should be added only when supported by the lesson explanation or an independently verified source.
+
 ## Import your userscript answer bank and preview a solve
 
-Your userscript stores its question bank in a JavaScript `DATA` object. You can import that object directly from your local script file. The CLI copies only question text and your saved answer notes into the ignored local data directory.
+The userscript import is optional. The course-source export above works independently and does not require a userscript. The `DATA` import remains available only for users who already have a separate local question bank.
 
 ```powershell
 sprix bank import --file .\script.js
