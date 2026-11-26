@@ -103,3 +103,57 @@ test('does not retry a failed state-changing request', async () => {
   await assert.rejects(() => http.completeChapter(120), /network request failed/u);
   assert.equal(calls, 1);
 });
+
+
+test('logs in with a Login ID and password, stores returned cookies in memory, and validates the curriculum', async () => {
+  const loginHeaders = new Headers({ 'content-type': 'application/json' });
+  loginHeaders.append('set-cookie', 'learning_token=learning123; Path=/; HttpOnly; Secure');
+  loginHeaders.append('set-cookie', 'game_token=game123; Path=/; HttpOnly; Secure');
+  const requests = [];
+
+  const fetchImpl = async (url, options) => {
+    requests.push({ url, options });
+    if (url.endsWith('/api/v1/auth/login')) {
+      return new Response(JSON.stringify({ success: true, data: {} }), {
+        status: 200,
+        headers: loginHeaders
+      });
+    }
+    return new Response(JSON.stringify({ success: true, data: [{ id: 1, title: 'Unit' }] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' }
+    });
+  };
+
+  const result = await SprixHttpClient.login({
+    loginId: 'student-code',
+    password: 'test-password',
+    fetchImpl
+  });
+
+  assert.equal(requests.length, 2);
+  assert.equal(requests[0].url, 'https://egy.app.spx-learning-square.com/api/v1/auth/login');
+  assert.equal(requests[0].options.method, 'POST');
+  assert.deepEqual(JSON.parse(requests[0].options.body), {
+    login_id: 'student-code',
+    password: 'test-password'
+  });
+  assert.equal(new Headers(requests[1].options.headers).get('cookie'),
+    'learning_token=learning123; game_token=game123');
+  assert.equal(result.curriculum.length, 1);
+  assert.equal(result.session.cookie.includes('learning_token=learning123'), true);
+  assert.equal(result.session.cookie.includes('game_token=game123'), true);
+  assert.equal(result.session.cookie.includes('test-password'), false);
+});
+
+test('does not accept a successful login response that returns no session cookies', async () => {
+  const fetchImpl = async () => new Response(JSON.stringify({ success: true, data: {} }), {
+    status: 200,
+    headers: { 'content-type': 'application/json' }
+  });
+
+  await assert.rejects(
+    () => SprixHttpClient.login({ loginId: 'student-code', password: 'test-password', fetchImpl }),
+    /did not return session cookies/u
+  );
+});

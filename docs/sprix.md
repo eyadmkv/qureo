@@ -85,6 +85,6 @@ The QUREO login session and QUREO API client remain separate from the SPRIX sess
 
 The standalone `sprix` command now supports live curriculum, chapter, review and test API operations. The same commands are available as `qureo sprix`.
 
-Start with the [SPRIX API CLI guide](sprix-api.md) to import your browser session, inspect live course data, and use explicit confirmed actions. Session cookies are encrypted locally with Windows DPAPI. Commands that submit answers, complete lessons/reviews, or open/submit tests require `--yes`.
+Start with the [SPRIX API CLI guide](sprix-api.md) to sign in using your Login ID and password, inspect live course data, harvest chapter and review source material without a userscript, and use explicit confirmed actions. Passwords are prompted securely and not stored. Session cookies are encrypted locally with Windows DPAPI. Commands that submit answers, complete lessons/reviews, or open/submit tests require `--yes`.
 
 The previous local-only commands remain available for lesson text captures, offline question review, personal reference keys, and practice.
