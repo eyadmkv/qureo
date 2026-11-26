@@ -117,6 +117,11 @@ export function getQuestionAnswer(item, answers) {
   return null;
 }
 
+export function getChapterAssessmentResultPath(chapterId, testType = 'review') {
+  const resultType = testType === 'test' ? 'test' : 'review';
+  return `/students/chapters/${encodeURIComponent(chapterId)}/${resultType}/result`;
+}
+
 export function getChapterAnswerCoverage(chapterMeta, chapterId, answers) {
   const rawExpected = chapterMeta?.chapter?.question_count ??
     chapterMeta?.question_count ??
@@ -352,7 +357,7 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
 
   let resultPayload = null;
   try {
-    resultPayload = await client.json(`/students/chapters/${encodeURIComponent(chapterId)}/test/result`);
+    resultPayload = await client.json(getChapterAssessmentResultPath(chapterId, testType));
   } catch {
     // The per-question submission responses remain the available verification source.
   }

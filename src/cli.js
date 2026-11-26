@@ -16,7 +16,7 @@ import { COMMUNITY_ANSWER_ARCHIVE_PATH, syncCommunityAnswers } from './community
 import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
-import { solveCourse } from './solver.js';
+import { getChapterAssessmentResultPath, solveCourse } from './solver.js';
 import { resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
@@ -659,11 +659,51 @@ program.command('questions <chapterId>')
   }));
 
 program.command('result <chapterId>')
-  .description('Read the result data from an existing chapter attempt, if QUREO exposes it')
+  .description('Read an existing review or test result and save any model answers QUREO exposes')
   .action(async chapterId => withClient(async client => {
-    const result = await client.json(`/students/chapters/${encodeURIComponent(chapterId)}/test/result`);
+    const chapterMeta = await client.json(`/chapters/${encodeURIComponent(chapterId)}`).catch(() => null);
+    const testType = chapterMeta?.chapter?.test_type ||
+      chapterMeta?.test_type ||
+      chapterMeta?.data?.chapter?.test_type ||
+      'review';
+    const resultTypes = testType === 'test' ? ['test', 'review'] : ['review', 'test'];
+    const failures = [];
+    let result = null;
+    let resultPath = null;
+
+    for (const resultType of resultTypes) {
+      const pathname = getChapterAssessmentResultPath(chapterId, resultType);
+      try {
+        const candidate = await client.json(pathname);
+        const candidatePayload = candidate?.result || candidate;
+        if (!result) {
+          result = candidate;
+          resultPath = pathname;
+        }
+        const hasResultData = Array.isArray(candidatePayload?.choice_results) ||
+          Array.isArray(candidatePayload?.description_results);
+        const hasAnswerData = (candidatePayload?.choice_results || []).length > 0 ||
+          (candidatePayload?.description_results || []).length > 0;
+        if (hasResultData) {
+          result = candidate;
+          resultPath = pathname;
+          if (hasAnswerData) break;
+        }
+      } catch (error) {
+        failures.push(`${resultType}: ${error.message}`);
+        if (error?.code === 'AUTH_EXPIRED') throw error;
+      }
+    }
+
+    if (!result) {
+      throw new Error(
+        `QUREO did not expose an existing review or test result for chapter ${chapterId}. ` +
+        `Checked both result endpoints. ${failures.join(' | ')}`
+      );
+    }
+
     const payload = result?.result || result;
-    const sourceUrl = `${API_BASE}/students/chapters/${encodeURIComponent(chapterId)}/test/result`;
+    const sourceUrl = `${API_BASE}${resultPath}`;
     let harvested = 0;
     for (const item of (Array.isArray(payload?.choice_results) ? payload.choice_results : [])) {
       const correct = (item.choices || []).find(choice => choice.correct === true);
@@ -680,7 +720,8 @@ program.command('result <chapterId>')
         answerType: 'code', answerText: String(answerText), explanation: 'Model answer read from an existing QUREO result response.', sourceUrl });
       if (saved) harvested++;
     }
-    console.log(`Read existing result for chapter ${chapterId}. Stored ${harvested} new answer(s) from result data.`);
+    console.log(`Read existing ${resultPath.includes('/test/') ? 'test' : 'review'} result for chapter ${chapterId}. Stored ${harvested} new answer(s) from result data.`);
+    if (failures.length) console.log(`Other endpoint response: ${failures.join(' | ')}`);
     outputJson(result);
   }));
 
