@@ -89,6 +89,22 @@ The export includes all units and learning-item metadata, chapter blocks, questi
 
 This export is source material for building a separate answer bank. It does not contain SPRIX correctness flags. A separate answer map can be matched to the exported question and option IDs, then converted into the solver's local text bank.
 
+## English Financial Literacy answer map
+
+For the English Financial Literacy course (SPRIX subject ID `3`), Qureo can import a community-maintained block-ID answer map:
+
+```powershell
+sprix bank import-english
+sprix bank status --subject 3
+sprix solve --subject 3 --dry-run
+```
+
+The importer downloads only the subject-3 `block` answer map from a pinned revision of [kky84rgkjy-maker/mohammad](https://github.com/kky84rgkjy-maker/mohammad). It does not import or use the source's test answers. The map is saved under the ignored local `data/sprix/` directory and is not committed or uploaded.
+
+The map currently contains 274 chapter-block mappings. Before planning an answer, Qureo checks that the mapped option ID exists among the options returned for that live block. Missing mappings and option IDs that no longer exist are reported as unmatched, and the solver stops before submitting any answer for that chapter. The source is third-party, has no declared repository license, and its accuracy and continued availability are not guaranteed. Review the dry-run options before running the solver.
+
+The English subject-3 map is kept separate from the Arabic text answer bank. Selecting subject `3` uses only the English block-ID map and will not fall back to Arabic question matches.
+
 ## Build a local bank from the course export
 
 The course export contains the prompts and option text, but SPRIX does not return correct-option flags for chapter questions. A separate answer map is therefore required. Keep both JSON files under the ignored local `data/sprix/` directory.
