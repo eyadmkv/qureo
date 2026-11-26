@@ -63,6 +63,13 @@ function loadAnswers(courseId) {
   return parsed.answers;
 }
 
+export async function fetchCourseData(client, courseId) {
+  await client.request(`${COURSE_ORIGIN}/?content_id=${encodeURIComponent(courseId)}`, {
+    method: 'GET'
+  });
+  return client.json(`/courses/${encodeURIComponent(courseId)}`);
+}
+
 function errorFromResponse(pathname, response, payload) {
   const code = payload?.not_fulfill_preconditions
     ? 'PRECONDITION_NOT_FULFILLED'
@@ -445,7 +452,7 @@ export async function solveCourse(client, {
   }
 
   const answers = loadAnswers(courseId);
-  const courseRaw = await client.json(`/courses/${encodeURIComponent(courseId)}`);
+  const courseRaw = await fetchCourseData(client, courseId);
   const sectionId = courseRaw?.basic_section?.id || courseRaw?.course?.basic_section?.id;
   if (!sectionId) throw new Error(`Course ${courseId} did not return basic_section.id.`);
 
