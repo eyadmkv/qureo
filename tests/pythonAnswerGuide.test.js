@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   decodeHtmlEntities,
+  htmlToText,
   extractPythonAnswerPairs,
   extractPythonLevelUrls,
   extractPythonLessonUrls
@@ -83,4 +84,35 @@ test('searches the downloaded Python guide by question and answer text', async (
   assert.equal(results.length, 1);
   assert.equal(results[0].question, 'ما ناتج البرنامج؟');
   assert.equal(results[0].answer, 'Hello');
+});
+
+
+test('extracts answers from the public guide HTML layout', () => {
+  const html = `
+    <main>
+      <p>01</p>
+      <p>السؤال 1</p>
+      <h2>كم عدد لغات البرمجة في العالم؟</h2>
+      <p>أكثر من 100 نوع.</p>
+      <button>نسخ الإجابة ⧉</button>
+    </main>
+  `;
+  const body = htmlToText(html);
+
+  assert.deepEqual(extractPythonAnswerPairs(body), [
+    { question_number: 1, question: 'كم عدد لغات البرمجة في العالم؟', answer: 'أكثر من 100 نوع.' }
+  ]);
+});
+
+test('recognizes Arabic-Indic question numbers and invisible direction marks', () => {
+  const body = [
+    '\u200fالسؤال ٢',
+    'ما وظيفة الدالة؟',
+    'print()',
+    'نسخ الإجابة ⧉'
+  ].join('\\n');
+
+  assert.deepEqual(extractPythonAnswerPairs(body), [
+    { question_number: 2, question: 'ما وظيفة الدالة؟', answer: 'print()' }
+  ]);
 });
