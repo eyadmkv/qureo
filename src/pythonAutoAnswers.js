@@ -113,7 +113,7 @@ function resolveChoice(question, record) {
   }
 
   const prompt = questionText(question);
-  if (/(?:رمز|علامة)\\s+الضرب|multiplication\\s+(?:operator|symbol)/iu.test(prompt)) {
+  if (/(?:رمز|علامة)\s+الضرب|multiplication\\s+(?:operator|symbol)/iu.test(prompt)) {
     const multiplicationChoices = choices.filter(choice => compact(choiceText(choice)) === '*');
     if (multiplicationChoices.length === 1) return Number(multiplicationChoices[0].id);
   }
