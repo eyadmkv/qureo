@@ -637,3 +637,33 @@ test('evaluates an elif chain in order and returns only the first matching branc
   });
   assert.deepEqual(result.unmatched, []);
 });
+
+
+test('evaluates a flattened conditional program copied from a QUREO question prompt', () => {
+  const result = matchPythonAssessmentAnswers([{
+    question: {
+      id: 511008062,
+      type: 'choice',
+      content: 'اختر نتيجة الطباعة عند تشغيل البرنامج أدناه. score = 92 if score == 100: print("Perfect score") elif score >= 80: print("Pass") elif score >= 60: print("So close")'
+    },
+    choices: [
+      { id: 5110080624, content: 'Nothing is printed' },
+      { id: 5110080621, content: 'Pass' },
+      { id: 5110080622, content: 'Perfect score' },
+      { id: 5110080623, content: 'So close' }
+    ]
+  }], [{
+    id: 'py-l08-s02-q6',
+    level_id: '08',
+    lesson_id: 'py-l08-s02',
+    lesson_title: 'اختبار منتصف المستوى',
+    question_number: 6,
+    question: 'ما ناتج برنامج score=92؟',
+    answer: 'Pass.'
+  }], '08');
+
+  assert.deepEqual(result.answers, {
+    '511008062': { type: 'choice', choice_id: 5110080621 }
+  });
+  assert.deepEqual(result.unmatched, []);
+});
