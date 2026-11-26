@@ -14,7 +14,7 @@ The curriculum index currently lists six units:
 | الذكاء الاصطناعي والتمويل ومستقبل الأعمال | 14 |
 | **Total** | **134** |
 
-The course page is [SPRIX Learning Square](https://egy.app.spx-learning-square.com/subjects/7/curriculum).
+The course page is [SPRIX Learning Square](https://egy.app.spx-learning-square.com/dashboard).
 
 ## Capture a lesson
 
