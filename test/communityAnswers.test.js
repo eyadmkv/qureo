@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCommunityAnswerArchive } from '../src/communityAnswers.js';
+import { mergeCommunityAnswers, parseCommunityAnswerArchive } from '../src/communityAnswers.js';
+import { getQuestionAnswer } from '../src/solver.js';
 
 test('parses community choice and description answers into solver records', () => {
   const result = parseCommunityAnswerArchive({
@@ -42,4 +43,36 @@ test('rejects conflicting duplicate question IDs', () => {
     '90001': { '90001010': ['choice', 900010101] },
     '90002': { '90001010': ['choice', 900010102] }
   }), /Conflicting duplicate answer/);
+});
+
+test('course-specific answers take precedence over community fallback answers', () => {
+  const merged = mergeCommunityAnswers(
+    { '90001010': { type: 'choice', choice_id: 900010102 } },
+    {
+      '90001010': { type: 'choice', choice_id: 900010101 },
+      '90001020': { type: 'description', answer_code: 'console.log("fallback");' }
+    }
+  );
+
+  assert.deepEqual(merged['90001010'], { type: 'choice', choice_id: 900010102 });
+  assert.deepEqual(merged['90001020'], {
+    type: 'description',
+    answer_code: 'console.log("fallback");'
+  });
+});
+
+test('community choice IDs are accepted only when present in live question choices', () => {
+  const answers = {
+    '90001010': { type: 'choice', choice_id: 900010101 }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: { id: 90001010, type: 'choice' },
+    choices: [{ id: 900010101 }, { id: 900010102 }]
+  }, answers), { type: 'choice', choice_id: 900010101 });
+
+  assert.equal(getQuestionAnswer({
+    question: { id: 90001010, type: 'choice' },
+    choices: [{ id: 900010102 }]
+  }, answers), null);
 });
