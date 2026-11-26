@@ -433,13 +433,13 @@ function isConditionOnlyExercise(question, record) {
     questionText(question),
     String(record?.question ?? '')
   ].join(' ');
-  return /اكتب\\s+شرط|اكتب\\s+الشرط|conditional\\s+expression|only\\s+the\\s+condition/iu.test(prompt);
+  return /اكتب\s+شرط|اكتب\s+الشرط|conditional\s+expression|only\s+the\s+condition/iu.test(prompt);
 }
 
 function extractPythonIfHeader(answerCode) {
-  const lines = String(answerCode ?? '').replace(/\\r/gu, '').split('\\n');
+  const lines = String(answerCode ?? '').replace(/\r/gu, '').split('\n');
   const matches = lines.map(line => line.trim()).filter(line =>
-    /^if\\s+.+:\\s*$/iu.test(line)
+    /^if\s+.+:\s*$/iu.test(line)
   );
   return matches.length === 1 ? matches[0] : '';
 }
