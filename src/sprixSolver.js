@@ -1138,7 +1138,7 @@ function parseSolvePause(value, label) {
 function registerSolveCommand(sprix) {
   sprix.command('solve [chapterId]')
     .description('Solve all remaining SPRIX chapters in curriculum order, or one selected chapter')
-    .option('--subject <id>', 'SPRIX subject ID', '7')
+    .option('--subject <id>', 'SPRIX subject ID (defaults to the saved course)')
     .option('--dry-run', 'Preview selected chapters without submitting answers')
     .option('--yes', 'Confirm the run without an interactive prompt')
     .option('--single', 'Solve the first unfinished chapter and its preceding reviews')
