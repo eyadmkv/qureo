@@ -284,7 +284,7 @@ export async function syncPythonAnswerGuide({ delayMs = 300, onProgress = () => 
           emptyLessonPages.push({
             url: lessonPage.url,
             title: lessonPage.title,
-            hasQuestionMarker: /السؤال\\s*[0-9٠-٩]+/u.test(lessonPage.body),
+            hasQuestionMarker: /السؤال\s*[0-9٠-٩]+/u.test(lessonPage.body),
             preview: lessonPage.body.slice(0, 500)
           });
         }
