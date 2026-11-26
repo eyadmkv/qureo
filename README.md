@@ -80,7 +80,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo solve [range]` | Run the sequential chapter solver |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
-| `sprix curriculum` / `qureo sprix curriculum` | Fetch live SPRIX curriculum and progress |
+| `sprix sync` / `progress` | Sync the live curriculum and summarize saved progress |\n| `sprix curriculum` / `qureo sprix curriculum` | Fetch live SPRIX curriculum and progress |
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
 | `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
