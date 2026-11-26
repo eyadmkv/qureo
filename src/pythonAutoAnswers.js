@@ -21,6 +21,7 @@ const STOP_WORDS = new Set([
 
 function tokens(value) {
   return stripQureoMarkup(value)
+    .replace(/^\s{0,3}#{1,6}\s*/gmu, '')
     .toLocaleLowerCase('ar')
     .replace(/[\u064b-\u065f\u0670\u0640]/gu, '')
     .replace(/[أإآ]/gu, 'ا')
