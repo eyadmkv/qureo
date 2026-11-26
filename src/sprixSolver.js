@@ -141,10 +141,10 @@ function numericSignature(value) {
   const ascii = String(value || '')
     .replace(/[٠-٩]/gu, digit => String(digit.charCodeAt(0) - 0x0660))
     .replace(/[۰-۹]/gu, digit => String(digit.charCodeAt(0) - 0x06f0));
-  const values = ascii.match(/\\d+/gu) || [];
+  const values = ascii.match(/\d+/gu) || [];
   if (values.length < 2) return null;
   return values
-    .map(value => value.replace(/^0+(?=\\d)/u, ''))
+    .map(value => value.replace(/^0+(?=\d)/u, ''))
     .sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
 }
 
