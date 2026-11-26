@@ -11,7 +11,7 @@ test('parses community choice and description answers into solver records', () =
     '511001': {
       '511001010': ['choice', 5110010101]
     }
-  });
+  }, { minimumAnswers: 1 });
 
   assert.equal(result.chapterCount, 2);
   assert.equal(result.answerCount, 3);
