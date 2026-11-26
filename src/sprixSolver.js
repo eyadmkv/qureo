@@ -661,12 +661,8 @@ export async function solveSprixCourse(session, bank, {
         (current.unitTitle ? ' | ' + current.unitTitle : '')
       );
 
-      const reviewPayload = await session.getReviewItems(current.id);
-      const reviewItemCount = countReviewQuestions(reviewPayload);
-      onProgress('Loaded ' + reviewItemCount + ' review item(s).');
-
       if (dryRun) {
-        onProgress('[review] Would complete review ' + current.id + '.');
+        onProgress('[review] Would complete review ' + current.id + ' through POST /api/v1/reviews/' + current.id + '/complete.');
       } else if (!complete) {
         onProgress('[review] Left review ' + current.id + ' uncompleted by --answers-only.');
       } else {
