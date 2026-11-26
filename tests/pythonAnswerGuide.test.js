@@ -1,0 +1,63 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  decodeHtmlEntities,
+  extractPythonAnswerPairs,
+  extractPythonLevelUrls,
+  extractPythonLessonUrls
+} from '../src/pythonAnswerGuide.js';
+
+test('decodes named, decimal and hexadecimal HTML entities', () => {
+  assert.equal(decodeHtmlEntities('&quot;Python&#34; &amp; &#x3C;code&#x3E;'), '"Python" & <code>');
+  assert.equal(decodeHtmlEntities('&#x110000;'), '&#x110000;');
+});
+
+test('extracts multiple question and answer pairs from one lesson page', () => {
+  const body = [
+    'مقدمة',
+    'السؤال 1',
+    'ما ناتج الكود التالي؟',
+    'Hello',
+    'نسخ الإجابة ⧉',
+    'السؤال 2',
+    'ما اسم الدالة المستخدمة للطباعة؟',
+    'print()',
+    'نسخ الإجابة ⧉'
+  ].join('\n');
+
+  assert.deepEqual(extractPythonAnswerPairs(body), [
+    { question_number: 1, question: 'ما ناتج الكود التالي؟', answer: 'Hello' },
+    { question_number: 2, question: 'ما اسم الدالة المستخدمة للطباعة؟', answer: 'print()' }
+  ]);
+});
+
+test('extracts only Python level links from the index', () => {
+  const html = [
+    '<a href="/qureo-python/l02/">Level 2</a>',
+    '<a href="/qureo-python/l01/">Level 1</a>',
+    '<a href="/qureo-js/l01/">JavaScript</a>',
+    '<a href="https://example.com/qureo-python/l03/">External</a>'
+  ].join('');
+
+  assert.deepEqual(extractPythonLevelUrls(html), [
+    'https://answers.studentplatformeg.online/qureo-python/l01/',
+    'https://answers.studentplatformeg.online/qureo-python/l02/'
+  ]);
+});
+
+test('extracts lesson links from the selected level only', () => {
+  const html = [
+    '<a href="py-l01-s02/">Lesson 2</a>',
+    '<a href="py-l01-s01/">Lesson 1</a>',
+    '<a href="/qureo-python/l02/py-l02-s01/">Other level</a>',
+    '<a href="https://example.com/qureo-python/l01/fake/">External</a>'
+  ].join('');
+
+  assert.deepEqual(
+    extractPythonLessonUrls(html, 'https://answers.studentplatformeg.online/qureo-python/l01/'),
+    [
+      'https://answers.studentplatformeg.online/qureo-python/l01/py-l01-s01/',
+      'https://answers.studentplatformeg.online/qureo-python/l01/py-l01-s02/'
+    ]
+  );
+});
