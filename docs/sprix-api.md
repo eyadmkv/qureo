@@ -32,12 +32,14 @@ Do not commit that file, upload it, paste it into a chat, or share it. Delete th
 
 ```powershell
 sprix session status
+sprix sync 7
+sprix progress
 sprix curriculum 7
 sprix chapter <chapter-id>
 sprix review items <review-id>
 ```
 
-The curriculum lists unit learning items and their item types, IDs, unlock state, and completion state. Use those IDs with the matching chapter, review, or test command.
+The curriculum lists unit learning items and their item types, IDs, unlock state, and completion state. Use those IDs with the matching chapter, review, or test command. The `sync` command saves a local snapshot under `data/sprix/`; `progress` summarizes the latest snapshot.
 
 Add `--json` to `sprix curriculum`, `sprix chapter`, or `sprix review items` for the complete response data.
 
