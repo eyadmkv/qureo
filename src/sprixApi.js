@@ -8,7 +8,8 @@ import {
   SPRIX_ORIGIN,
   SprixHttpClient,
   parseSprixCookieHeader,
-  readSprixClipboard
+  readSprixClipboard,
+  parseSprixCurlRequest
 } from './sprixHttp.js';
 
 const SPRIX_DIR = path.join(DATA_DIR, 'sprix');
@@ -111,6 +112,17 @@ function printLoginSuccess(subjectId, unitCount) {
   console.log('SPRIX login successful.');
   console.log('Session validated against subject ' + subjectId + ': ' + unitCount + ' unit(s) available.');
   console.log('Session cookies saved encrypted with Windows DPAPI. Your password was not stored.');
+}
+
+
+function registerDiagnosticCommands(sprix) {
+  sprix.command('inspect-action')
+    .description('Safely inspect a copied SPRIX cURL request, with credentials and tokens redacted')
+    .action(() => {
+      const parsed = parseSprixCurlRequest(readSprixClipboard());
+      printJson(parsed);
+      console.log('\nOnly the sanitized output above is safe to share. Never paste the raw cURL command.');
+    });
 }
 
 function registerSessionCommands(sprix) {
@@ -338,6 +350,7 @@ function registerMutationCommands(sprix) {
 }
 
 export function registerSprixApiCommands(sprix) {
+  registerDiagnosticCommands(sprix);
   registerSessionCommands(sprix);
   registerSyncCommands(sprix);
   registerReadCommands(sprix);
