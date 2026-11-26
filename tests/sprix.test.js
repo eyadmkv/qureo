@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSprixQuestions, normalizeSprixText } from '../src/sprix.js';
+import { parseSprixQuestions, normalizeSprixText, captureSprixLesson } from '../src/sprix.js';
 
 test('parses four-option Arabic multiple-choice questions', () => {
   const source = [
@@ -90,4 +90,12 @@ test('parses options when labels and option text share a line', () => {
   assert.equal(questions.length, 1);
   assert.deepEqual(questions[0].choices.map(choice => choice.label), ['A', 'B', 'C', 'D']);
   assert.match(questions[0].choices[2].text, /ثقة المجتمع/u);
+});
+
+
+test('rejects a partial clipboard selection by default', () => {
+  assert.throws(
+    () => captureSprixLesson({ title: 'كيف نشأ المال', unit: 'أساسيات المال والتمويل', rawText: 'نص قصير منسوخ من جزء صغير في الصفحة'.repeat(3) }),
+    /Only \d+ characters were read from the clipboard/u
+  );
 });
