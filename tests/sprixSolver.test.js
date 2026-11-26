@@ -853,7 +853,7 @@ test('solves tests in curriculum order, remaps previously selected answers and u
     },
     async submitTest(testId) {
       calls.push('submit-test:' + testId);
-      units[0].items.find(item => item.id === testId).is_completed = true;
+      units[0].items.find(item => String(item.id) === String(testId)).is_completed = true;
       units[0].items.find(item => item.id === 201).is_unlocked = true;
       return { data: { response: { status: 'completed', passed: true, total_score: 100 } } };
     },
@@ -878,7 +878,7 @@ test('solves tests in curriculum order, remaps previously selected answers and u
     },
     async completeChapter(chapterId) {
       calls.push('complete-chapter:' + chapterId);
-      units[0].items.find(item => item.id === chapterId).is_completed = true;
+      units[0].items.find(item => String(item.id) === String(chapterId)).is_completed = true;
       return { data: { is_completed: true } };
     }
   };
