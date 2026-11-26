@@ -223,6 +223,31 @@ async function waitForDevTools(profileDir, child, getStartupError) {
   throw new Error(getStartupError('Chrome did not expose its local automation interface within 20 seconds.'));
 }
 
+export async function waitForApiIdle({
+  inFlightApi,
+  getLastApiActivity,
+  quietWindowMs = 650,
+  timeoutMs = 15000,
+  pollIntervalMs = 100,
+  now = Date.now,
+  sleepImpl = sleep
+}) {
+  const startedAt = now();
+  while (now() - startedAt < timeoutMs) {
+    const currentTime = now();
+    const inFlightCount = inFlightApi.size;
+    const quietForMs = currentTime - getLastApiActivity();
+    if (inFlightCount === 0 && quietForMs >= quietWindowMs) return true;
+
+    const remainingTimeoutMs = timeoutMs - (currentTime - startedAt);
+    const remainingQuietMs = inFlightCount === 0
+      ? Math.max(1, quietWindowMs - quietForMs)
+      : pollIntervalMs;
+    await sleepImpl(Math.min(pollIntervalMs, remainingQuietMs, remainingTimeoutMs));
+  }
+  return false;
+}
+
 export class QureoLectureBrowser {
   constructor(client, { onProgress = () => {} } = {}) {
     this.client = client;
@@ -308,17 +333,21 @@ export class QureoLectureBrowser {
       });
       this.sessionId = attached.sessionId;
 
-      await this.cdp.send('Page.enable', {}, this.sessionId);
-      await this.cdp.send('Runtime.enable', {}, this.sessionId);
-      await this.cdp.send('Network.enable', {}, this.sessionId);
-      await this.cdp.send('Network.setUserAgentOverride', {
-        userAgent: USER_AGENT,
-        acceptLanguage: 'ar,en-US;q=0.9,en;q=0.8',
-        platform: 'Windows'
-      }, this.sessionId);
-      await this.cdp.send('Network.setCookies', {
-        cookies: cookies.map(toCdpCookie)
-      }, this.sessionId);
+      await Promise.all([
+        this.cdp.send('Page.enable', {}, this.sessionId),
+        this.cdp.send('Runtime.enable', {}, this.sessionId),
+        this.cdp.send('Network.enable', {}, this.sessionId)
+      ]);
+      await Promise.all([
+        this.cdp.send('Network.setUserAgentOverride', {
+          userAgent: USER_AGENT,
+          acceptLanguage: 'ar,en-US;q=0.9,en;q=0.8',
+          platform: 'Windows'
+        }, this.sessionId),
+        this.cdp.send('Network.setCookies', {
+          cookies: cookies.map(toCdpCookie)
+        }, this.sessionId)
+      ]);
 
       this.trackApiActivity();
       this.started = true;
@@ -349,16 +378,13 @@ export class QureoLectureBrowser {
     );
   }
 
-  async waitForApiIdle(minWaitMs = 1500, timeoutMs = 15000) {
-    const startedAt = Date.now();
-    while (Date.now() - startedAt < timeoutMs) {
-      const elapsed = Date.now() - startedAt;
-      if (elapsed >= minWaitMs && this.inFlightApi.size === 0 && Date.now() - this.lastApiActivity >= 650) {
-        return true;
-      }
-      await sleep(100);
-    }
-    return false;
+  async waitForApiIdle(quietWindowMs = 650, timeoutMs = 15000) {
+    return waitForApiIdle({
+      inFlightApi: this.inFlightApi,
+      getLastApiActivity: () => this.lastApiActivity,
+      quietWindowMs,
+      timeoutMs
+    });
   }
 
   async evaluate(expression) {
@@ -390,6 +416,7 @@ export class QureoLectureBrowser {
     const navigation = await this.cdp.send('Page.navigate', { url: parsed.href }, this.sessionId);
     if (navigation.errorText) throw new Error(`QUREO lesson navigation failed: ${navigation.errorText}`);
     await loaded;
+    this.lastApiActivity = Date.now();
     const pageIdle = await this.waitForApiIdle();
     if (!pageIdle) {
       this.onProgress(`  lesson ${lessonId}: page API activity did not fully settle; continuing with bounded completion checks`);
