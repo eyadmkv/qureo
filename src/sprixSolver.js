@@ -506,36 +506,29 @@ export function buildSprixChapterPlan(data, bank) {
 
     if (blockAnswers) {
       const mappedOptionId = blockAnswers[String(block.id)];
-      if (mappedOptionId === undefined) {
-        unmatched.push({
+      if (mappedOptionId !== undefined) {
+        const mappedOption = options.find(option => String(option.id) === String(mappedOptionId));
+        if (!mappedOption) {
+          unmatched.push({
+            blockId: block.id,
+            prompt,
+            reason: blockMapLabel + ' answer map points to option #' + mappedOptionId + ', which is absent from the live options'
+          });
+          continue;
+        }
+
+        plan.push({
           blockId: block.id,
           prompt,
-          reason: 'no ' + blockMapLabel + ' answer is available for this block ID'
+          bankQuestion: blockMapLabel + ' block answer map',
+          bankAnswer: 'Mapped option #' + mappedOptionId,
+          optionId: mappedOption.id,
+          optionText: optionText(mappedOption),
+          questionScore: 1,
+          optionScore: 1
         });
         continue;
       }
-
-      const mappedOption = options.find(option => String(option.id) === String(mappedOptionId));
-      if (!mappedOption) {
-        unmatched.push({
-          blockId: block.id,
-          prompt,
-          reason: blockMapLabel + ' answer map points to option #' + mappedOptionId + ', which is absent from the live options'
-        });
-        continue;
-      }
-
-      plan.push({
-        blockId: block.id,
-        prompt,
-        bankQuestion: blockMapLabel + ' block answer map',
-        bankAnswer: 'Mapped option #' + mappedOptionId,
-        optionId: mappedOption.id,
-        optionText: optionText(mappedOption),
-        questionScore: 1,
-        optionScore: 1
-      });
-      continue;
     }
 
     const questionResult = bestMatch(prompt, answeredBank, row => row.question, {
