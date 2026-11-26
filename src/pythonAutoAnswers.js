@@ -428,6 +428,22 @@ function isReviewRecord(record) {
   );
 }
 
+function isConditionOnlyExercise(question, record) {
+  const prompt = [
+    questionText(question),
+    String(record?.question ?? '')
+  ].join(' ');
+  return /اكتب\\s+شرط|اكتب\\s+الشرط|conditional\\s+expression|only\\s+the\\s+condition/iu.test(prompt);
+}
+
+function extractPythonIfHeader(answerCode) {
+  const lines = String(answerCode ?? '').replace(/\\r/gu, '').split('\\n');
+  const matches = lines.map(line => line.trim()).filter(line =>
+    /^if\\s+.+:\\s*$/iu.test(line)
+  );
+  return matches.length === 1 ? matches[0] : '';
+}
+
 function makeAnswer(question, record) {
   const questionRow = question?.question || question || {};
   const type = String(questionRow.type || '');
@@ -441,7 +457,16 @@ function makeAnswer(question, record) {
   }
   if (type === 'description') {
     const answerCode = extractCodeAnswer(record.answer);
-    return answerCode ? { type: 'description', answer_code: answerCode } : null;
+    if (!answerCode) return null;
+
+    if (isConditionOnlyExercise(question, record)) {
+      const conditionLine = extractPythonIfHeader(answerCode);
+      if (conditionLine) {
+        return { type: 'description', answer_code: conditionLine };
+      }
+    }
+
+    return { type: 'description', answer_code: answerCode };
   }
   return null;
 }
