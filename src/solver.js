@@ -5,7 +5,7 @@ import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
 import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
 import { QureoLectureBrowser } from './qureoBrowser.js';
-import { loadCommunityAnswers } from './communityAnswers.js';
+import { loadCommunityAnswers, mergeCommunityAnswers } from './communityAnswers.js';
 
 const ANSWER_ROOT = path.join(ROOT, 'answers');
 
@@ -32,7 +32,7 @@ function loadAnswers(courseId) {
   if (parsed.course_id !== courseId || !parsed.answers || typeof parsed.answers !== 'object') {
     throw new Error(`Invalid answer bank format: ${file}`);
   }
-  return { ...loadCommunityAnswers(), ...parsed.answers };
+  return mergeCommunityAnswers(parsed.answers, loadCommunityAnswers());
 }
 
 function saveAnswers(courseId, answers, sources = {}) {
