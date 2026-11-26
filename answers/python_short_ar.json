@@ -25,6 +25,42 @@
     "511001060": {
       "type": "description",
       "answer_code": "print(\"Hello\")\nprint(\"My name is\")\n#print(\"Riki\")\nprint(\"Cody\")"
+    },
+    "511002010": {
+      "type": "choice",
+      "choice_id": 5110020101
+    },
+    "511002020": {
+      "type": "choice",
+      "choice_id": 5110020201
+    },
+    "511002030": {
+      "type": "description",
+      "answer_code": "print(19 + 40)"
+    },
+    "511002040": {
+      "type": "description",
+      "answer_code": "print(7 - 2)"
+    },
+    "511002050": {
+      "type": "description",
+      "answer_code": "print(15 / 5)"
+    },
+    "511002060": {
+      "type": "choice",
+      "choice_id": 5110020601
+    },
+    "511002070": {
+      "type": "description",
+      "answer_code": "print(\"The answer is \" + str(2 * 5))"
+    },
+    "511002080": {
+      "type": "choice",
+      "choice_id": 5110020801
+    },
+    "511002090": {
+      "type": "choice",
+      "choice_id": 5110020901
     }
   }
 }
