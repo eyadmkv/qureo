@@ -202,7 +202,7 @@ export function parseSprixCurlRequest(source) {
       body = next ?? '';
       bodyLength = Buffer.byteLength(body, 'utf8');
       index++;
-    } else if (/^https:\/\//iu.test(argument) && !requestUrl) {
+    } else if (/^https?:\/\//iu.test(argument) && !requestUrl) {
       requestUrl = argument;
     }
   }
