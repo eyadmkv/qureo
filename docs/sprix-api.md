@@ -2,31 +2,38 @@
 
 The repository now exposes a standalone `sprix` command and the same API commands under `qureo sprix`. The API client talks to the SPRIX Learning Square host over HTTPS. It is separate from the QUREO login session.
 
-## Import a browser session
+## Sign in with Login ID and password
 
-The portal login process is handled by SPRIX in your browser. This CLI does not guess a login endpoint or ask for your SPRIX password.
+The CLI supports the same Login ID + Password flow shown on the SPRIX sign-in page. It sends a JSON request to `POST /api/v1/auth/login` with `login_id` and `password`, then validates the returned session with a read-only curriculum request.
+
+Run:
+
+```powershell
+sprix login
+```
+
+Enter your Login ID when prompted, then type your password at the hidden password prompt. The password is sent directly to SPRIX for authentication and is not saved to disk or included in command history. The resulting session cookies are encrypted with Windows DPAPI in `data/sprix/session.dpapi`.
+
+You can pass the Login ID as an option while keeping the password prompt hidden:
+
+```powershell
+sprix login --login-id <login-id>
+```
+
+The login route and payload names were cross-checked against the public [SPX Learning Square API client implementation](https://github.com/kky84rgkjy-maker/mohammad/blob/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/gfq_solver.py). The CLI validates the resulting cookie session immediately. If SPRIX changes its login contract or does not return session cookies, the command stops with an error.
+
+### Optional browser-session import fallback
+
+The previous cookie import remains available if password login is unavailable:
 
 1. Sign in to SPRIX normally in your browser.
 2. Open Developer Tools with **F12**, then select **Network**.
-3. Open or refresh the SPRIX curriculum page.
-4. Select the authenticated request to `/api/v1/subjects/7/curriculum`.
-5. Right-click it and choose **Copy → Copy as cURL**.
-6. Keep that copied command private. It contains your session cookie.
-7. In PowerShell, type the command below manually so the clipboard still contains the cURL request:
+3. Select an authenticated request to `/api/v1/subjects/7/curriculum`.
+4. Right-click it and choose **Copy → Copy as cURL**.
+5. Keep that copied command private. It contains your session cookie.
+6. In PowerShell, run `sprix login --clipboard` without copying anything else first.
 
-```powershell
-sprix login --clipboard
-```
-
-The CLI extracts only the `Cookie` header, validates it with a read-only curriculum request, and saves the session encrypted with Windows DPAPI in `data/sprix/session.dpapi`. The cookie is never printed.
-
-You can also save the copied cURL request in a local UTF-8 file and use:
-
-```powershell
-sprix login --cookie-file .\sprix-session-curl.txt
-```
-
-Do not commit that file, upload it, paste it into a chat, or share it. Delete the temporary cURL file after importing the session.
+You can also save the copied cURL request in a local UTF-8 file and use `sprix login --cookie-file .\\sprix-session-curl.txt`. Do not commit or share that file, and delete it after importing the session.
 
 ## Read course data
 
