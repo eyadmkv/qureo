@@ -141,6 +141,73 @@ export class SprixHttpClient {
     this.metadata = metadata && typeof metadata === 'object' ? metadata : {};
   }
 
+  static async login({ loginId, password, origin = SPRIX_ORIGIN, fetchImpl = globalThis.fetch, timeoutMs = 30000, subjectId = 7 } = {}) {
+    const username = String(loginId || '').trim();
+    if (!username) throw new Error('SPRIX Login ID is required.');
+    if (typeof password !== 'string' || !password) throw new Error('SPRIX password is required.');
+    if (typeof fetchImpl !== 'function') throw new Error('Fetch is unavailable in this Node.js runtime.');
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    const url = normalizedOrigin + '/api/v1/auth/login';
+    const timeout = Math.min(120000, Math.max(1000, Number(timeoutMs) || 30000));
+    let response;
+
+    try {
+      response = await fetchImpl(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Origin: normalizedOrigin,
+          Referer: normalizedOrigin + '/login',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36'
+        },
+        body: JSON.stringify({ login_id: username, password }),
+        redirect: 'manual',
+        signal: AbortSignal.timeout(timeout)
+      });
+    } catch (error) {
+      const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+      throw new SprixHttpError(
+        timedOut ? 'SPRIX login request timed out.' : 'SPRIX login request failed: ' + error.message,
+        { code: timedOut ? 'TIMEOUT' : 'NETWORK_ERROR' }
+      );
+    }
+
+    const responseText = await response.text();
+    let payload = null;
+    if (responseText) {
+      try { payload = JSON.parse(responseText); } catch {}
+    }
+
+    if (!response.ok || payload?.success === false || payload === null) {
+      const detail = payload?.message || payload?.error?.message || payload?.error || 'Login was rejected (HTTP ' + response.status + ').';
+      throw new SprixHttpError('SPRIX login failed: ' + detail, {
+        code: response.status === 401 || response.status === 403 ? 'AUTH_REJECTED' : 'LOGIN_FAILED',
+        status: response.status,
+        payload
+      });
+    }
+
+    const cookie = mergeSetCookies('', response);
+    if (!cookie) {
+      throw new SprixHttpError('SPRIX accepted the login response but did not return session cookies. Use the browser-session import fallback and report this response status.', {
+        code: 'NO_SESSION_COOKIE',
+        status: response.status,
+        payload
+      });
+    }
+
+    const session = new SprixHttpClient({
+      cookie,
+      origin: normalizedOrigin,
+      fetchImpl,
+      timeoutMs
+    });
+    const curriculum = await session.getCurriculum(subjectId);
+    return { session, curriculum };
+  }
+
   static hasSession() {
     return fs.existsSync(SESSION_PATH);
   }
