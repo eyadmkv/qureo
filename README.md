@@ -3,7 +3,7 @@
 [![CI](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml/badge.svg)](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An unofficial, Windows-focused command-line tool for working with your own QUREO account and studying the SPRIX financial-literacy course. It provides QUREO course and progress sync, local SQLite caching, JSON exports, question and answer search, an optional progress-aware QUREO chapter solver, and a separate local SPRIX lesson-capture and practice workflow.
+An unofficial, Windows-focused command-line toolkit for your own QUREO account and the SPRIX financial-literacy course. It includes QUREO sync and a progress-aware solver, plus a standalone SPRIX CLI for live curriculum and lesson workflows, encrypted browser-session import, and local study data.
 
 This project is independent and is not affiliated with, endorsed by, or supported by QUREO or its operators. It uses undocumented service endpoints that may change without notice.
 
@@ -17,7 +17,8 @@ This project is independent and is not affiliated with, endorsed by, or supporte
 - Run the chapter solver with sequential safeguards, checkpoints and configurable pauses.
 - View local progress with `dashboard`, `status` and `doctor`.
 - Configure terminal themes, compact dashboard output and PowerShell completion.
-- Capture visible SPRIX financial-literacy lesson text from the clipboard or a UTF-8 file, extract four-choice questions, save personal reference keys and practice offline.
+- Use a standalone `sprix` CLI to import an authenticated browser session, fetch live curriculum and chapter/review/test data, and submit explicitly selected answers or completions.
+- Capture visible SPRIX lesson text, extract four-choice questions, save personal reference keys and practice offline.
 
 ## Requirements
 
@@ -81,7 +82,9 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `sprix curriculum` / `qureo sprix curriculum` | Fetch live SPRIX curriculum and progress |
 | `qureo sprix capture` | Capture a visible SPRIX lesson from clipboard or text file |
 | `qureo sprix questions` / `practice` | Review captured questions and practice against your own saved keys |
-| `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |\n| `sprix login` / `logout` | Import or remove your encrypted SPRIX browser session |\n| `qureo sprix search` / `export` | Search and export your local SPRIX study data |
+| `sprix chapter`, `answer`, `complete`, `review`, `test` | Read and explicitly submit SPRIX actions |
+| `sprix login` / `logout` | Import or remove your encrypted SPRIX browser session |
+| `qureo sprix search` / `export` | Search and export your local SPRIX study data |
 | `qureo config show` | View terminal configuration |
 | `qureo history` | View recent command names and timestamps |
 
@@ -107,14 +110,14 @@ The solver makes state-changing requests to QUREO when you explicitly run it. Re
 
 The `data/` directory contains the SQLite database, encrypted session, command history and checkpoints. It is ignored by Git. Do not upload or commit it.
 
-SPRIX lesson captures, extracted questions and personal reference keys are stored under `data/sprix/`. They are local-only and are not sent to SPRIX. Review any exported content before sharing it.
+SPRIX session cookies, lesson captures, extracted questions and personal reference keys are stored under `data/sprix/`. Session cookies are encrypted with Windows DPAPI. Local captures and notes stay on your computer; API requests are sent directly to SPRIX only when you run the corresponding command. Review any exported content before sharing it.
 
 - Session cookies are encrypted with Windows DPAPI and tied to the Windows user account.
 - Passwords are not stored in the database, configuration or command history.
 - Command history records command names and timestamps only. It omits arguments and search terms.
 - Course exports may contain account-related learning data. Review them before sharing.
 
-This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO hosts and, when syncing public answer guides, to the documented public guide source.
+This project does not send your database or exports to a third-party server. Requests are made directly to the QUREO and SPRIX hosts and, when syncing public answer guides, to the documented public guide source.
 
 ## Third-party content and redistribution
 
