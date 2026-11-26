@@ -390,6 +390,90 @@ test('supports single-chapter and maximum-chapter SPRIX solve limits', () => {
   assert.deepEqual(targeted.chapters.map(chapter => chapter.id), ['301']);
 });
 
+test('probes the live chapter endpoint when the curriculum lock flag is false', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  const units = [{
+    title: 'أساسيات المال والتمويل',
+    is_accessible: true,
+    items: [
+      { id: 101, item_type: 'chapter', title: 'Previous chapter', is_completed: true, is_unlocked: true },
+      { id: 201, item_type: 'chapter', title: 'Next chapter', is_completed: false, is_unlocked: false, is_accessible: false }
+    ]
+  }];
+  const calls = [];
+  const session = {
+    async getCurriculum() {
+      return structuredClone(units);
+    },
+    async getChapterBlocks(chapterId) {
+      calls.push('read:' + chapterId);
+      return {
+        chapter: { title: 'Next chapter', cleared_block_ids: [] },
+        blocks: [{
+          id: 202,
+          type: 'question',
+          question: { text: 'ما وظيفة المال في المجتمع؟' },
+          options: [
+            { id: 203, text: 'يعمل المال كوسيط للتبادل بين الناس' },
+            { id: 204, text: 'تقتصر وظيفة المال على شراء الذهب' }
+          ]
+        }]
+      };
+    },
+    async answerChapterQuestion(chapterId, blockId, optionId) {
+      calls.push('answer:' + chapterId + ':' + blockId + ':' + optionId);
+      return { data: { is_correct: true } };
+    },
+    async completeChapter(chapterId) {
+      calls.push('complete:' + chapterId);
+      units[0].items.find(item => String(item.id) === String(chapterId)).is_completed = true;
+      return { data: { is_completed: true, star_score: 5 } };
+    }
+  };
+
+  const result = await solveSprixCourse(session, bank, {
+    onConfirm: async () => true,
+    onProgress: () => {}
+  });
+
+  assert.equal(result.chaptersCompleted, 1);
+  assert.equal(result.questionsSubmitted, 1);
+  assert.deepEqual(calls, ['read:201', 'answer:201:202:203', 'complete:201']);
+});
+
+test('stops safely when SPRIX denies a read-only chapter probe for a curriculum-locked chapter', async () => {
+  const bank = parseSprixAnswerBank(sampleSource());
+  let answersSubmitted = 0;
+  const session = {
+    async getCurriculum() {
+      return [{
+        title: 'Unit',
+        is_accessible: true,
+        items: [{ id: 201, item_type: 'chapter', title: 'Locked chapter', is_completed: false, is_unlocked: false, is_accessible: false }]
+      }];
+    },
+    async getChapterBlocks() {
+      throw new Error('SPRIX GET /api/v1/chapters/201/blocks failed: HTTP 403');
+    },
+    async answerChapterQuestion() {
+      answersSubmitted++;
+      return { data: { is_correct: true } };
+    },
+    async completeChapter() {
+      assert.fail('A denied chapter must not be completed.');
+    }
+  };
+
+  await assert.rejects(
+    solveSprixCourse(session, bank, {
+      onConfirm: async () => true,
+      onProgress: () => {}
+    }),
+    /curriculum, and SPRIX denied the read-only chapter request/u
+  );
+  assert.equal(answersSubmitted, 0);
+});
+
 test('solves SPRIX chapters in order and refreshes progress to unlock the next chapter', async () => {
   const bank = parseSprixAnswerBank(sampleSource());
   const units = [{
