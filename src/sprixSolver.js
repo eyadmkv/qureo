@@ -137,7 +137,7 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
 
   const answers = {};
   for (const [rawBlockId, rawOptionId] of Object.entries(data.block)) {
-    if (!/^[1-9]\\d*$/u.test(rawBlockId)) {
+    if (!/^[1-9]\d*$/u.test(rawBlockId)) {
       throw new Error('The public SPRIX answer map contains an invalid block ID.');
     }
     const optionId = Number(rawOptionId);
@@ -167,7 +167,7 @@ export function parseSprixBlockAnswerBank(source, sourceUrl = SPRIX_ENGLISH_BLOC
 function saveSprixBlockAnswerBank(bank) {
   fs.mkdirSync(SPRIX_DIR, { recursive: true });
   const temporaryPath = SPRIX_ENGLISH_BLOCK_BANK_PATH + '.tmp';
-  fs.writeFileSync(temporaryPath, JSON.stringify(bank, null, 2) + '\\n', {
+  fs.writeFileSync(temporaryPath, JSON.stringify(bank, null, 2) + '\n', {
     encoding: 'utf8',
     mode: 0o600
   });
