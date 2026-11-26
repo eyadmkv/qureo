@@ -249,6 +249,155 @@ function saveBank(bank) {
   fs.renameSync(temporaryPath, SPRIX_BANK_PATH);
 }
 
+function unitSections(unit) {
+  if (Array.isArray(unit.sections) && unit.sections.length > 0) return unit.sections;
+  if (Array.isArray(unit.items)) return [{ id: null, items: unit.items }];
+  return [];
+}
+
+function countChapterQuestions(data) {
+  return (Array.isArray(data?.blocks) ? data.blocks : []).filter(block =>
+    block.type === 'question' || (block.question && Array.isArray(block.options) && block.options.length > 0)
+  ).length;
+}
+
+function countReviewQuestions(payload) {
+  const data = payload?.data ?? payload;
+  if (Array.isArray(data)) return data.length;
+  if (Array.isArray(data?.items)) return data.items.length;
+  if (Array.isArray(data?.questions)) return data.questions.length;
+  return 0;
+}
+
+async function harvestCourseSource(subjectId, outputPath) {
+  const session = SprixHttpClient.loadSession();
+  const units = await session.getCurriculum(subjectId);
+  const output = {
+    format: 'sprix-course-source',
+    schema_version: 1,
+    subject_id: Number(subjectId),
+    exported_at: new Date().toISOString(),
+    extraction_method: 'SPRIX authenticated read-only curriculum, chapter and review GET requests',
+    coverage: {
+      units: units.length,
+      chapters: 0,
+      reviews: 0,
+      tests: 0,
+      chapter_questions: 0,
+      review_items: 0,
+      errors: 0
+    },
+    units: [],
+    errors: []
+  };
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  let processed = 0;
+
+  for (const unit of units) {
+    const exportedUnit = {
+      id: unit.id ?? null,
+      title: unit.title || unit.name || '',
+      is_accessible: unit.is_accessible ?? null,
+      sections: []
+    };
+
+    for (const section of unitSections(unit)) {
+      const exportedSection = {
+        id: section.id ?? null,
+        title: section.title || section.name || '',
+        items: []
+      };
+
+      for (const item of section.items || []) {
+        const exportedItem = {
+          id: item.id,
+          item_type: item.item_type || 'unknown',
+          title: item.title || item.name || '',
+          is_completed: Boolean(item.is_completed),
+          is_unlocked: Boolean(item.is_unlocked),
+          source_status: 'metadata-only'
+        };
+
+        if (item.item_type === 'chapter') {
+          try {
+            const data = await session.getChapterBlocks(item.id);
+            exportedItem.source_status = 'fetched';
+            exportedItem.data = data;
+            exportedItem.question_count = countChapterQuestions(data);
+            output.coverage.chapters++;
+            output.coverage.chapter_questions += exportedItem.question_count;
+          } catch (error) {
+            exportedItem.source_status = 'error';
+            exportedItem.error = error.message;
+            output.errors.push({
+              type: 'chapter',
+              id: item.id,
+              title: exportedItem.title,
+              message: error.message
+            });
+          }
+        } else if (item.item_type === 'review') {
+          try {
+            const payload = await session.getReviewItems(item.id);
+            exportedItem.source_status = 'fetched';
+            exportedItem.data = payload?.data ?? payload;
+            exportedItem.question_count = countReviewQuestions(payload);
+            output.coverage.reviews++;
+            output.coverage.review_items += exportedItem.question_count;
+          } catch (error) {
+            exportedItem.source_status = 'error';
+            exportedItem.error = error.message;
+            output.errors.push({
+              type: 'review',
+              id: item.id,
+              title: exportedItem.title,
+              message: error.message
+            });
+          }
+        } else if (item.item_type === 'test') {
+          output.coverage.tests++;
+          exportedItem.note = 'Test questions were not started or submitted by this read-only export.';
+        }
+
+        exportedSection.items.push(exportedItem);
+        processed++;
+        if (item.item_type === 'chapter' || item.item_type === 'review') {
+          if (processed % 4 === 0) {
+            console.log('Fetched ' + output.coverage.chapters + ' chapter(s) and ' +
+              output.coverage.reviews + ' review(s); ' + output.errors.length + ' error(s).');
+          }
+          await sleep(120);
+        }
+      }
+
+      exportedUnit.sections.push(exportedSection);
+    }
+
+    output.units.push(exportedUnit);
+  }
+
+  output.coverage.errors = output.errors.length;
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  const temporaryPath = outputPath + '.tmp';
+  fs.writeFileSync(temporaryPath, JSON.stringify(output, null, 2) + '\n', {
+    encoding: 'utf8',
+    mode: 0o600
+  });
+  fs.renameSync(temporaryPath, outputPath);
+
+  console.log('\nSPRIX course export finished.');
+  console.log('Units: ' + output.coverage.units);
+  console.log('Chapters fetched: ' + output.coverage.chapters);
+  console.log('Chapter question blocks: ' + output.coverage.chapter_questions);
+  console.log('Reviews fetched: ' + output.coverage.reviews);
+  console.log('Review items: ' + output.coverage.review_items);
+  console.log('Tests listed, without opening attempts: ' + output.coverage.tests);
+  console.log('Errors: ' + output.coverage.errors);
+  console.log('Saved locally: ' + outputPath);
+  console.log('This export is local and contains course content. Review it before sharing.');
+}
+
 function registerBankCommands(sprix) {
   const bank = sprix.command('bank').description('Import and inspect your local SPRIX answer bank');
   bank.command('import')
@@ -267,6 +416,15 @@ function registerBankCommands(sprix) {
       console.log('Answer notes: ' + bankData.answered + ' | Missing answers: ' + bankData.unanswered);
       console.log('Saved locally: ' + SPRIX_BANK_PATH);
       console.log('This bank is not committed or uploaded.');
+    });
+
+  bank.command('harvest')
+    .description('Export all chapter and review question content through read-only SPRIX API requests')
+    .option('--subject <id>', 'SPRIX subject ID', '7')
+    .option('--out <path>', 'Output JSON path')
+    .action(async options => {
+      const outputPath = path.resolve(options.out || path.join(SPRIX_DIR, 'course-source.json'));
+      await harvestCourseSource(options.subject, outputPath);
     });
 
   bank.command('status')
