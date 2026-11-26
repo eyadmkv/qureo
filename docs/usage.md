@@ -13,6 +13,19 @@ qureo logout
 
 The password prompt is hidden. The CLI sends credentials to the QUREO login service, verifies the authenticated session and stores the returned cookies encrypted with Windows DPAPI. The password is not saved.
 
+
+## Choose a course and solve chapters
+
+Run \`qureo solve\` to choose JavaScript or Python from an interactive list. You can bypass the menu with \`--course\`:
+
+\`\`\`powershell
+qureo solve
+qureo solve --course python_short_ar --dry-run
+qureo solve --course javascript_ar
+\`\`\`
+
+The solver reads the matching local file under \`answers/\`. Python choice and code-description questions are supported. See the [solver guide](solver.md) for Python assessment prerequisites and answer-bank coverage.
+
 ## Sync and inspect progress
 
 ```powershell
