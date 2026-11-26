@@ -122,7 +122,7 @@ test('keeps numeric option matching fail-closed when more than one option has th
       id: 1,
       levels: [{
         questions: [{
-          q: 'ما الاختياران الصحيحان؟',
+          q: 'ما الاختياران الصحيحان من السيناريوهات التالية؟',
           a: '(١) و(٣)'
         }]
       }]
@@ -134,7 +134,7 @@ test('keeps numeric option matching fail-closed when more than one option has th
     blocks: [{
       id: 1,
       type: 'question',
-      question: { text: 'ما الاختياران الصحيحان؟' },
+      question: { text: 'ما الاختياران الصحيحان من السيناريوهات التالية؟' },
       options: [
         { id: 10, text: '(١) و(٣)' },
         { id: 11, text: '(3) and (1)' }
