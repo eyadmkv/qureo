@@ -1,0 +1,3146 @@
+{
+  "format": "qureo-course-export",
+  "schema_version": 1,
+  "exported_at": "2026-11-26T12:23:22.535Z",
+  "extraction_method": "QUREO authenticated GET API requests",
+  "account_courses": [
+    {
+      "id": "javascript_ar",
+      "name": ""
+    },
+    {
+      "id": "javascript_trial_ar",
+      "name": ""
+    },
+    {
+      "id": "python_short_ar",
+      "name": ""
+    }
+  ],
+  "coverage_notes": [
+    "Includes course metadata, chapters, lesson IDs/titles, chapter test/review question payloads and visible choices/code descriptions returned by the Learning API.",
+    "QUREO lesson pages are client-rendered. This API export does not claim to include every interactive step inside a lesson unless QUREO returns that content in chapter metadata or test question responses.",
+    "No answers are submitted, no attempt is reset, and no answer-reveal endpoint is probed."
+  ],
+  "courses": [
+    {
+      "id": "python_short_ar",
+      "title": "Python コース",
+      "section_id": 106,
+      "raw": {
+        "basic_section": {
+          "course_id": "python_short_ar",
+          "id": 106
+        },
+        "course": {
+          "description": "Pythonを学ぶ",
+          "id": "python_short_ar",
+          "is_trial": false,
+          "lang_set": "python+",
+          "name": "Python コース"
+        }
+      },
+      "section_raw": {
+        "chapters": [
+          {
+            "description": "مرحبًا بك في عالم البرمجة! في هذا الفصل، سنتعلم البرمجة معًا بطريقة ممتعة. سنبدأ بسؤال: “ماذا يمكن أن تفعل البرمجة؟” ثم نتدرج إلى كتابة برنامجك الخاص لعرض النصوص على الشاشة.",
+            "id": 511001,
+            "name": "مقدمة",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 1,
+            "test_range": "print",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية إخراج النصوص والأرقام والمعادلات إلى وحدة التحكم (console).",
+            "id": 511002,
+            "name": "الحسابات والنصوص",
+            "question_count": 9,
+            "section_id": 106,
+            "seq": 2,
+            "test_range": "Calculation, String",
+            "test_type": "review"
+          },
+          {
+            "description": "سنتعلم عن “التعريف”، و”الإسناد”، و”إعادة الإسناد” للمتغيرات.",
+            "id": 511003,
+            "name": "المتغيرات",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 3,
+            "test_range": "Variables",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 1 إلى 3 للتأكد من أنك تفهمه!",
+            "id": 511004,
+            "name": "مراجعة الفهم",
+            "question_count": 8,
+            "section_id": 106,
+            "seq": 4,
+            "test_range": "console,Variables",
+            "test_type": "test"
+          },
+          {
+            "description": "ستتعلم برنامج التفرع الشرطي الذي يقول: “إذا تحقق الشرط A، نفذ العملية A”.",
+            "id": 511005,
+            "name": "جملة if",
+            "question_count": 4,
+            "section_id": 106,
+            "seq": 5,
+            "test_range": "if",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة برنامج تفرع شرطي يقول: “إذا تحقق الشرط A، نفذ العملية A. وإلا، نفذ العملية B”.",
+            "id": 511006,
+            "name": "جمل if - else",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 6,
+            "test_range": "if - else",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة برنامج تفرع شرطي يقول: “إذا تحقق الشرط A، نفذ العملية A؛ وإلا إذا تحقق الشرط B، نفذ العملية B”.",
+            "id": 511007,
+            "name": "جمل elif",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 7,
+            "test_range": "elif",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 5 إلى 7 للتأكد من أنك تفهمه!",
+            "id": 511008,
+            "name": "مراجعة الفهم",
+            "question_count": 7,
+            "section_id": 106,
+            "seq": 8,
+            "test_range": "if,if - else,else if",
+            "test_type": "test"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة واستخدام العوامل المنطقية “و” (and) و”أو” (or).",
+            "id": 511009,
+            "name": "العامل المنطقي",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 9,
+            "test_range": "logical operator",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة جملة “for” التي تكرر عملية معينة عددًا محددًا من المرات.",
+            "id": 511010,
+            "name": "العملية التكرارية",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 10,
+            "test_range": "iterative operation",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 9 إلى 10 للتأكد من أنك تفهمه!",
+            "id": 511011,
+            "name": "مراجعة الفهم",
+            "question_count": 8,
+            "section_id": 106,
+            "seq": 11,
+            "test_range": "Operators,Repetition",
+            "test_type": "test"
+          },
+          {
+            "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+            "id": 511012,
+            "name": "الدالة (1)",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 12,
+            "test_range": "Function",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+            "id": 511013,
+            "name": "الدالة (2)",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 13,
+            "test_range": "Function",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 12 إلى 13 للتأكد من أنك تفهمه!",
+            "id": 511014,
+            "name": "مراجعة الفهم",
+            "question_count": 8,
+            "section_id": 106,
+            "seq": 14,
+            "test_range": "Function",
+            "test_type": "test"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع التكرار.",
+            "id": 511015,
+            "name": "المصفوفة (1)",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 15,
+            "test_range": "Array",
+            "test_type": "review"
+          },
+          {
+            "description": "ستتعلم كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع التكرار.",
+            "id": 511016,
+            "name": "المصفوفة (2)",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 16,
+            "test_range": "Array",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 15 إلى 16 للتأكد من أنك تفهمه!",
+            "id": 511017,
+            "name": "مراجعة الفهم",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 17,
+            "test_range": "Array",
+            "test_type": "test"
+          },
+          {
+            "description": "سنراجع أنواع البيانات ونتعلم نوع bool.",
+            "id": 511018,
+            "name": "bool",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 18,
+            "test_range": "Bool",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عملية معينة، وتعيد النتيجة!\n",
+            "id": 511019,
+            "name": "الدوال (3)",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 19,
+            "test_range": "Functions",
+            "test_type": "review"
+          },
+          {
+            "description": "دعنا نراجع محتوى الفصول من 18 إلى 19 للتأكد من أنك تفهمه!",
+            "id": 511020,
+            "name": "مراجعة الفهم",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 20,
+            "test_range": "Bool,Functions",
+            "test_type": "test"
+          },
+          {
+            "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت بيانات if والحلقات والدوال!",
+            "id": 511021,
+            "name": "مراجعة الفهم",
+            "question_count": 10,
+            "section_id": 106,
+            "seq": 21,
+            "test_range": "If,Loops,Functions",
+            "test_type": "test"
+          },
+          {
+            "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت بيانات for والقوائم (المصفوفات)!",
+            "id": 511022,
+            "name": "مراجعة الفهم",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 22,
+            "test_range": "loops,arrays",
+            "test_type": "test"
+          },
+          {
+            "description": "دعنا نتعلم كيفية دمج حلقات for مع المصفوفات لإخراج جميع القيم الموجودة في المصفوفة!\n",
+            "id": 511023,
+            "name": "جملة for والمصفوفة",
+            "question_count": 5,
+            "section_id": 106,
+            "seq": 23,
+            "test_range": "loops and arrays",
+            "test_type": "review"
+          },
+          {
+            "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت التفرعات الشرطية المتداخلة التي تجمع بيانات if!",
+            "id": 511024,
+            "name": "مراجعة الفهم",
+            "question_count": 6,
+            "section_id": 106,
+            "seq": 24,
+            "test_range": "loops,arrays",
+            "test_type": "test"
+          },
+          {
+            "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت الدوال والمخططات الانسيابية!",
+            "id": 511025,
+            "name": "مراجعة الفهم",
+            "question_count": 7,
+            "section_id": 106,
+            "seq": 25,
+            "test_range": "Functions,Flowchart",
+            "test_type": "test"
+          }
+        ],
+        "section": {
+          "course_id": "python_short_ar",
+          "id": 106
+        }
+      },
+      "chapters": [
+        {
+          "id": "511001",
+          "sequence": 1,
+          "title": "مقدمة",
+          "test_type": "review",
+          "progress": {
+            "best_correct_count": 0,
+            "chapter_id": 511001,
+            "diamond": 0,
+            "started_at": "2026-11-24T02:57:04.246+09:00"
+          },
+          "raw": {
+            "chapter": {
+              "description": "مرحبًا بك في عالم البرمجة! في هذا الفصل، سنتعلم البرمجة معًا بطريقة ممتعة. سنبدأ بسؤال: “ماذا يمكن أن تفعل البرمجة؟” ثم نتدرج إلى كتابة برنامجك الخاص لعرض النصوص على الشاشة.",
+              "id": 511001,
+              "name": "مقدمة",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 1,
+              "test_range": "print",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511001,
+                "id": 511001010,
+                "seq": 1,
+                "title": "ما هي البرمجة؟ (1)"
+              },
+              {
+                "chapter_id": 511001,
+                "id": 511001020,
+                "seq": 2,
+                "title": "ما هي البرمجة؟ (2)"
+              },
+              {
+                "chapter_id": 511001,
+                "id": 511001030,
+                "seq": 3,
+                "title": "كيفية استخدام المحرر"
+              },
+              {
+                "chapter_id": 511001,
+                "id": 511001040,
+                "seq": 4,
+                "title": "وحدة التحكم"
+              },
+              {
+                "chapter_id": 511001,
+                "id": 511001050,
+                "seq": 5,
+                "title": "تعليق"
+              },
+              {
+                "chapter_id": 511001,
+                "id": 511001060,
+                "seq": 6,
+                "title": "التعليق لتعطيل التنفيذ"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511001010",
+              "title": "ما هي البرمجة؟ (1)",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001010",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001010,
+                "seq": 1,
+                "title": "ما هي البرمجة؟ (1)"
+              }
+            },
+            {
+              "id": "511001020",
+              "title": "ما هي البرمجة؟ (2)",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001020",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001020,
+                "seq": 2,
+                "title": "ما هي البرمجة؟ (2)"
+              }
+            },
+            {
+              "id": "511001030",
+              "title": "كيفية استخدام المحرر",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001030",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001030,
+                "seq": 3,
+                "title": "كيفية استخدام المحرر"
+              }
+            },
+            {
+              "id": "511001040",
+              "title": "وحدة التحكم",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001040",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001040,
+                "seq": 4,
+                "title": "وحدة التحكم"
+              }
+            },
+            {
+              "id": "511001050",
+              "title": "تعليق",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001050",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001050,
+                "seq": 5,
+                "title": "تعليق"
+              }
+            },
+            {
+              "id": "511001060",
+              "title": "التعليق لتعطيل التنفيذ",
+              "sequence": 6,
+              "url": "https://me-tp.qureo.education/chapter/511001/lecture/511001060",
+              "raw": {
+                "chapter_id": 511001,
+                "id": 511001060,
+                "seq": 6,
+                "title": "التعليق لتعطيل التنفيذ"
+              }
+            }
+          ],
+          "questions": [
+            {
+              "choices": [
+                {
+                  "content": "[[bdi]]print(\"Hello\")[[/bdi]]",
+                  "id": 5110010101,
+                  "question_id": 511001010
+                },
+                {
+                  "content": "[[bdi]]print(Hello)[[/bdi]]",
+                  "id": 5110010103,
+                  "question_id": 511001010
+                },
+                {
+                  "content": "[[bdi]]print(\"Hello\"[[/bdi]]",
+                  "id": 5110010102,
+                  "question_id": 511001010
+                }
+              ],
+              "descriptions": null,
+              "question": {
+                "chapter_id": 511001,
+                "content": "اختر البرنامج الصحيح لطباعة [[bdi]]\"Hello\"[[/bdi]] في وحدة التحكم.",
+                "hints": [
+                  "أحِط الأحرف بعلامتي تنصيص مزدوجتين."
+                ],
+                "id": 511001010,
+                "seq": 1,
+                "type": "choice"
+              }
+            },
+            {
+              "choices": null,
+              "descriptions": [
+                {
+                  "code": "print",
+                  "editable": true,
+                  "lang": "python",
+                  "placeholders": [],
+                  "question_id": 511001020
+                }
+              ],
+              "question": {
+                "chapter_id": 511001,
+                "content": "يرجى إنشاء البرنامج كما هو موضح أدناه.\n\n(1) تتم طباعة [[bdi]]\"Good morning\"[[/bdi]] في وحدة التحكم\n\nنسخ النص: [[copy]]Good morning[[/copy]]",
+                "hints": [
+                  "أحِط الأحرف بعلامتي تنصيص مزدوجتين."
+                ],
+                "id": 511001020,
+                "seq": 2,
+                "type": "description"
+              }
+            },
+            {
+              "choices": null,
+              "descriptions": [
+                {
+                  "code": "",
+                  "editable": true,
+                  "lang": "python",
+                  "placeholders": [],
+                  "question_id": 511001030
+                }
+              ],
+              "question": {
+                "chapter_id": 511001,
+                "content": "يرجى إنشاء البرنامج كما هو موضح أدناه.\n\n(1) اطبع [[bdi]]\"programming\"[[/bdi]] في وحدة التحكم\n\nنسخ النص: [[copy]]programming[[/copy]]",
+                "hints": [
+                  "استخدم [[bdi]]print[[/bdi]] عندما تريد طباعة الأحرف في وحدة التحكم.",
+                  "أحِط الأحرف بعلامتي تنصيص مزدوجتين."
+                ],
+                "id": 511001030,
+                "seq": 3,
+                "type": "description"
+              }
+            },
+            {
+              "choices": null,
+              "descriptions": [
+                {
+                  "code": "",
+                  "editable": true,
+                  "lang": "python",
+                  "placeholders": [],
+                  "question_id": 511001040
+                }
+              ],
+              "question": {
+                "chapter_id": 511001,
+                "content": "يرجى إنشاء البرنامج كما هو موضح أدناه.\n\n(1) اطبع [[bdi]]\"hello\"[[/bdi]] في وحدة التحكم\n\nنسخ النص: [[copy]]hello[[/copy]]",
+                "hints": [
+                  "استخدم [[bdi]]print[[/bdi]] عندما تريد طباعة الأحرف في وحدة التحكم.",
+                  "أحِط الأحرف بعلامتي تنصيص مزدوجتين."
+                ],
+                "id": 511001040,
+                "seq": 4,
+                "type": "description"
+              }
+            },
+            {
+              "choices": [
+                {
+                  "content": "/Write a comment here",
+                  "id": 5110010502,
+                  "question_id": 511001050
+                },
+                {
+                  "content": "Write a comment here/",
+                  "id": 5110010504,
+                  "question_id": 511001050
+                },
+                {
+                  "content": "Write a comment here#",
+                  "id": 5110010503,
+                  "question_id": 511001050
+                },
+                {
+                  "content": "#Write a comment here",
+                  "id": 5110010501,
+                  "question_id": 511001050
+                }
+              ],
+              "descriptions": null,
+              "question": {
+                "chapter_id": 511001,
+                "content": "يرجى اختيار الطريقة الصحيحة لكتابة تعليق.",
+                "hints": [
+                  "أدخل # لجعله تعليقًا."
+                ],
+                "id": 511001050,
+                "seq": 5,
+                "type": "choice"
+              }
+            },
+            {
+              "choices": null,
+              "descriptions": [
+                {
+                  "code": "print(\"Hello\")\nprint(\"My name is\")\nprint(\"Riki\")\nprint(\"Cody\")",
+                  "editable": true,
+                  "lang": "python",
+                  "placeholders": [],
+                  "question_id": 511001060
+                }
+              ],
+              "question": {
+                "chapter_id": 511001,
+                "content": "علّق البرنامج بحيث تكون الطباعة كما هو موضح أدناه.\n[[code]]Hello\nMy name is\nCody[[/code]]",
+                "hints": [
+                  "تحقق من عدد الجمل غير الضرورية.",
+                  "للتعليق لتعطيل التنفيذ، اكتب # في بداية السطر."
+                ],
+                "id": 511001060,
+                "seq": 6,
+                "type": "description"
+              }
+            }
+          ],
+          "expected_question_count": 6,
+          "questions_status": "available",
+          "questions_error": null
+        },
+        {
+          "id": "511002",
+          "sequence": 2,
+          "title": "الحسابات والنصوص",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية إخراج النصوص والأرقام والمعادلات إلى وحدة التحكم (console).",
+              "id": 511002,
+              "name": "الحسابات والنصوص",
+              "question_count": 9,
+              "section_id": 106,
+              "seq": 2,
+              "test_range": "Calculation, String",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511002,
+                "id": 511002010,
+                "seq": 1,
+                "title": "طريقة الطباعة في وحدة التحكم"
+              },
+              {
+                "chapter_id": 511002,
+                "id": 511002020,
+                "seq": 2,
+                "title": "طريقة الحساب"
+              },
+              {
+                "chapter_id": 511002,
+                "id": 511002030,
+                "seq": 3,
+                "title": "ربط النصوص والصيغ الحسابية (1)"
+              },
+              {
+                "chapter_id": 511002,
+                "id": 511002040,
+                "seq": 4,
+                "title": "ربط النصوص والصيغ الحسابية (2)"
+              },
+              {
+                "chapter_id": 511002,
+                "id": 511002050,
+                "seq": 5,
+                "title": "اختلاف أنواع البيانات"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511002010",
+              "title": "طريقة الطباعة في وحدة التحكم",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511002/lecture/511002010",
+              "raw": {
+                "chapter_id": 511002,
+                "id": 511002010,
+                "seq": 1,
+                "title": "طريقة الطباعة في وحدة التحكم"
+              }
+            },
+            {
+              "id": "511002020",
+              "title": "طريقة الحساب",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511002/lecture/511002020",
+              "raw": {
+                "chapter_id": 511002,
+                "id": 511002020,
+                "seq": 2,
+                "title": "طريقة الحساب"
+              }
+            },
+            {
+              "id": "511002030",
+              "title": "ربط النصوص والصيغ الحسابية (1)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511002/lecture/511002030",
+              "raw": {
+                "chapter_id": 511002,
+                "id": 511002030,
+                "seq": 3,
+                "title": "ربط النصوص والصيغ الحسابية (1)"
+              }
+            },
+            {
+              "id": "511002040",
+              "title": "ربط النصوص والصيغ الحسابية (2)",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511002/lecture/511002040",
+              "raw": {
+                "chapter_id": 511002,
+                "id": 511002040,
+                "seq": 4,
+                "title": "ربط النصوص والصيغ الحسابية (2)"
+              }
+            },
+            {
+              "id": "511002050",
+              "title": "اختلاف أنواع البيانات",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511002/lecture/511002050",
+              "raw": {
+                "chapter_id": 511002,
+                "id": 511002050,
+                "seq": 5,
+                "title": "اختلاف أنواع البيانات"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 9,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511002/test (HTTP 403)."
+        },
+        {
+          "id": "511003",
+          "sequence": 3,
+          "title": "المتغيرات",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "سنتعلم عن “التعريف”، و”الإسناد”، و”إعادة الإسناد” للمتغيرات.",
+              "id": 511003,
+              "name": "المتغيرات",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 3,
+              "test_range": "Variables",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511003,
+                "id": 511003010,
+                "seq": 1,
+                "title": "إسناد القيم إلى المتغيرات"
+              },
+              {
+                "chapter_id": 511003,
+                "id": 511003020,
+                "seq": 2,
+                "title": "التدرب على المتغيرات"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511003010",
+              "title": "إسناد القيم إلى المتغيرات",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511003/lecture/511003010",
+              "raw": {
+                "chapter_id": 511003,
+                "id": 511003010,
+                "seq": 1,
+                "title": "إسناد القيم إلى المتغيرات"
+              }
+            },
+            {
+              "id": "511003020",
+              "title": "التدرب على المتغيرات",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511003/lecture/511003020",
+              "raw": {
+                "chapter_id": 511003,
+                "id": 511003020,
+                "seq": 2,
+                "title": "التدرب على المتغيرات"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511003/test (HTTP 403)."
+        },
+        {
+          "id": "511004",
+          "sequence": 4,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 1 إلى 3 للتأكد من أنك تفهمه!",
+              "id": 511004,
+              "name": "مراجعة الفهم",
+              "question_count": 8,
+              "section_id": 106,
+              "seq": 4,
+              "test_range": "console,Variables",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511004,
+                "id": 511004010,
+                "seq": 1,
+                "title": "مراجعة الدروس 1 إلى 3"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511004010",
+              "title": "مراجعة الدروس 1 إلى 3",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511004/lecture/511004010",
+              "raw": {
+                "chapter_id": 511004,
+                "id": 511004010,
+                "seq": 1,
+                "title": "مراجعة الدروس 1 إلى 3"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 8,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511004/test (HTTP 403)."
+        },
+        {
+          "id": "511005",
+          "sequence": 5,
+          "title": "جملة if",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم برنامج التفرع الشرطي الذي يقول: “إذا تحقق الشرط A، نفذ العملية A”.",
+              "id": 511005,
+              "name": "جملة if",
+              "question_count": 4,
+              "section_id": 106,
+              "seq": 5,
+              "test_range": "if",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511005,
+                "id": 511005010,
+                "seq": 1,
+                "title": "عبارة if"
+              },
+              {
+                "chapter_id": 511005,
+                "id": 511005020,
+                "seq": 2,
+                "title": "التدرب على عبارة if"
+              },
+              {
+                "chapter_id": 511005,
+                "id": 511005030,
+                "seq": 3,
+                "title": "آلية عمل عبارة if"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511005010",
+              "title": "عبارة if",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511005/lecture/511005010",
+              "raw": {
+                "chapter_id": 511005,
+                "id": 511005010,
+                "seq": 1,
+                "title": "عبارة if"
+              }
+            },
+            {
+              "id": "511005020",
+              "title": "التدرب على عبارة if",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511005/lecture/511005020",
+              "raw": {
+                "chapter_id": 511005,
+                "id": 511005020,
+                "seq": 2,
+                "title": "التدرب على عبارة if"
+              }
+            },
+            {
+              "id": "511005030",
+              "title": "آلية عمل عبارة if",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511005/lecture/511005030",
+              "raw": {
+                "chapter_id": 511005,
+                "id": 511005030,
+                "seq": 3,
+                "title": "آلية عمل عبارة if"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 4,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511005/test (HTTP 403)."
+        },
+        {
+          "id": "511006",
+          "sequence": 6,
+          "title": "جمل if - else",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة برنامج تفرع شرطي يقول: “إذا تحقق الشرط A، نفذ العملية A. وإلا، نفذ العملية B”.",
+              "id": 511006,
+              "name": "جمل if - else",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 6,
+              "test_range": "if - else",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511006,
+                "id": 511006010,
+                "seq": 1,
+                "title": "التفرع الشرطي (عبارة if-else)"
+              },
+              {
+                "chapter_id": 511006,
+                "id": 511006020,
+                "seq": 2,
+                "title": "التدرب على عبارة if-else"
+              },
+              {
+                "chapter_id": 511006,
+                "id": 511006030,
+                "seq": 3,
+                "title": "معاملات المقارنة (1)"
+              },
+              {
+                "chapter_id": 511006,
+                "id": 511006040,
+                "seq": 4,
+                "title": "معاملات المقارنة (2)"
+              },
+              {
+                "chapter_id": 511006,
+                "id": 511006050,
+                "seq": 5,
+                "title": "عدم التساوي"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511006010",
+              "title": "التفرع الشرطي (عبارة if-else)",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511006/lecture/511006010",
+              "raw": {
+                "chapter_id": 511006,
+                "id": 511006010,
+                "seq": 1,
+                "title": "التفرع الشرطي (عبارة if-else)"
+              }
+            },
+            {
+              "id": "511006020",
+              "title": "التدرب على عبارة if-else",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511006/lecture/511006020",
+              "raw": {
+                "chapter_id": 511006,
+                "id": 511006020,
+                "seq": 2,
+                "title": "التدرب على عبارة if-else"
+              }
+            },
+            {
+              "id": "511006030",
+              "title": "معاملات المقارنة (1)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511006/lecture/511006030",
+              "raw": {
+                "chapter_id": 511006,
+                "id": 511006030,
+                "seq": 3,
+                "title": "معاملات المقارنة (1)"
+              }
+            },
+            {
+              "id": "511006040",
+              "title": "معاملات المقارنة (2)",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511006/lecture/511006040",
+              "raw": {
+                "chapter_id": 511006,
+                "id": 511006040,
+                "seq": 4,
+                "title": "معاملات المقارنة (2)"
+              }
+            },
+            {
+              "id": "511006050",
+              "title": "عدم التساوي",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511006/lecture/511006050",
+              "raw": {
+                "chapter_id": 511006,
+                "id": 511006050,
+                "seq": 5,
+                "title": "عدم التساوي"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511006/test (HTTP 403)."
+        },
+        {
+          "id": "511007",
+          "sequence": 7,
+          "title": "جمل elif",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة برنامج تفرع شرطي يقول: “إذا تحقق الشرط A، نفذ العملية A؛ وإلا إذا تحقق الشرط B، نفذ العملية B”.",
+              "id": 511007,
+              "name": "جمل elif",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 7,
+              "test_range": "elif",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511007,
+                "id": 511007010,
+                "seq": 1,
+                "title": "elif"
+              },
+              {
+                "chapter_id": 511007,
+                "id": 511007020,
+                "seq": 2,
+                "title": "التدرب على elif (1)"
+              },
+              {
+                "chapter_id": 511007,
+                "id": 511007030,
+                "seq": 3,
+                "title": "التدرب على elif (2)"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511007010",
+              "title": "elif",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511007/lecture/511007010",
+              "raw": {
+                "chapter_id": 511007,
+                "id": 511007010,
+                "seq": 1,
+                "title": "elif"
+              }
+            },
+            {
+              "id": "511007020",
+              "title": "التدرب على elif (1)",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511007/lecture/511007020",
+              "raw": {
+                "chapter_id": 511007,
+                "id": 511007020,
+                "seq": 2,
+                "title": "التدرب على elif (1)"
+              }
+            },
+            {
+              "id": "511007030",
+              "title": "التدرب على elif (2)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511007/lecture/511007030",
+              "raw": {
+                "chapter_id": 511007,
+                "id": 511007030,
+                "seq": 3,
+                "title": "التدرب على elif (2)"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511007/test (HTTP 403)."
+        },
+        {
+          "id": "511008",
+          "sequence": 8,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 5 إلى 7 للتأكد من أنك تفهمه!",
+              "id": 511008,
+              "name": "مراجعة الفهم",
+              "question_count": 7,
+              "section_id": 106,
+              "seq": 8,
+              "test_range": "if,if - else,else if",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511008,
+                "id": 511008010,
+                "seq": 1,
+                "title": "مراجعة الفصول من 5 إلى 7"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511008010",
+              "title": "مراجعة الفصول من 5 إلى 7",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511008/lecture/511008010",
+              "raw": {
+                "chapter_id": 511008,
+                "id": 511008010,
+                "seq": 1,
+                "title": "مراجعة الفصول من 5 إلى 7"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 7,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511008/test (HTTP 403)."
+        },
+        {
+          "id": "511009",
+          "sequence": 9,
+          "title": "العامل المنطقي",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة واستخدام العوامل المنطقية “و” (and) و”أو” (or).",
+              "id": 511009,
+              "name": "العامل المنطقي",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 9,
+              "test_range": "logical operator",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511009,
+                "id": 511009010,
+                "seq": 1,
+                "title": "المعامل المنطقي"
+              },
+              {
+                "chapter_id": 511009,
+                "id": 511009020,
+                "seq": 2,
+                "title": "استخدام المعاملات المنطقية"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511009010",
+              "title": "المعامل المنطقي",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511009/lecture/511009010",
+              "raw": {
+                "chapter_id": 511009,
+                "id": 511009010,
+                "seq": 1,
+                "title": "المعامل المنطقي"
+              }
+            },
+            {
+              "id": "511009020",
+              "title": "استخدام المعاملات المنطقية",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511009/lecture/511009020",
+              "raw": {
+                "chapter_id": 511009,
+                "id": 511009020,
+                "seq": 2,
+                "title": "استخدام المعاملات المنطقية"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511009/test (HTTP 403)."
+        },
+        {
+          "id": "511010",
+          "sequence": 10,
+          "title": "العملية التكرارية",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة جملة “for” التي تكرر عملية معينة عددًا محددًا من المرات.",
+              "id": 511010,
+              "name": "العملية التكرارية",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 10,
+              "test_range": "iterative operation",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511010,
+                "id": 511010010,
+                "seq": 1,
+                "title": "فواصل الأسطر في البرنامج"
+              },
+              {
+                "chapter_id": 511010,
+                "id": 511010020,
+                "seq": 2,
+                "title": "التكرار (الحلقات)"
+              },
+              {
+                "chapter_id": 511010,
+                "id": 511010030,
+                "seq": 3,
+                "title": "التدرب على عبارة for (1)"
+              },
+              {
+                "chapter_id": 511010,
+                "id": 511010040,
+                "seq": 4,
+                "title": "التدرب على عبارة for (2)"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511010010",
+              "title": "فواصل الأسطر في البرنامج",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511010/lecture/511010010",
+              "raw": {
+                "chapter_id": 511010,
+                "id": 511010010,
+                "seq": 1,
+                "title": "فواصل الأسطر في البرنامج"
+              }
+            },
+            {
+              "id": "511010020",
+              "title": "التكرار (الحلقات)",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511010/lecture/511010020",
+              "raw": {
+                "chapter_id": 511010,
+                "id": 511010020,
+                "seq": 2,
+                "title": "التكرار (الحلقات)"
+              }
+            },
+            {
+              "id": "511010030",
+              "title": "التدرب على عبارة for (1)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511010/lecture/511010030",
+              "raw": {
+                "chapter_id": 511010,
+                "id": 511010030,
+                "seq": 3,
+                "title": "التدرب على عبارة for (1)"
+              }
+            },
+            {
+              "id": "511010040",
+              "title": "التدرب على عبارة for (2)",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511010/lecture/511010040",
+              "raw": {
+                "chapter_id": 511010,
+                "id": 511010040,
+                "seq": 4,
+                "title": "التدرب على عبارة for (2)"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511010/test (HTTP 403)."
+        },
+        {
+          "id": "511011",
+          "sequence": 11,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 9 إلى 10 للتأكد من أنك تفهمه!",
+              "id": 511011,
+              "name": "مراجعة الفهم",
+              "question_count": 8,
+              "section_id": 106,
+              "seq": 11,
+              "test_range": "Operators,Repetition",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511011,
+                "id": 511011010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 9 و10"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511011010",
+              "title": "مراجعة الفصلين 9 و10",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511011/lecture/511011010",
+              "raw": {
+                "chapter_id": 511011,
+                "id": 511011010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 9 و10"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 8,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511011/test (HTTP 403)."
+        },
+        {
+          "id": "511012",
+          "sequence": 12,
+          "title": "الدالة (1)",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+              "id": 511012,
+              "name": "الدالة (1)",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 12,
+              "test_range": "Function",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511012,
+                "id": 511012010,
+                "seq": 1,
+                "title": "ما هي الدالة؟"
+              },
+              {
+                "chapter_id": 511012,
+                "id": 511012020,
+                "seq": 2,
+                "title": "التدرب على استخدام الدوال"
+              },
+              {
+                "chapter_id": 511012,
+                "id": 511012030,
+                "seq": 3,
+                "title": "كيفية استخدام الدوال"
+              },
+              {
+                "chapter_id": 511012,
+                "id": 511012040,
+                "seq": 4,
+                "title": "التدرب على استخدام الدوال (2)"
+              },
+              {
+                "chapter_id": 511012,
+                "id": 511012050,
+                "seq": 5,
+                "title": "التدرب على استخدام الدوال (3)"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511012010",
+              "title": "ما هي الدالة؟",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511012/lecture/511012010",
+              "raw": {
+                "chapter_id": 511012,
+                "id": 511012010,
+                "seq": 1,
+                "title": "ما هي الدالة؟"
+              }
+            },
+            {
+              "id": "511012020",
+              "title": "التدرب على استخدام الدوال",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511012/lecture/511012020",
+              "raw": {
+                "chapter_id": 511012,
+                "id": 511012020,
+                "seq": 2,
+                "title": "التدرب على استخدام الدوال"
+              }
+            },
+            {
+              "id": "511012030",
+              "title": "كيفية استخدام الدوال",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511012/lecture/511012030",
+              "raw": {
+                "chapter_id": 511012,
+                "id": 511012030,
+                "seq": 3,
+                "title": "كيفية استخدام الدوال"
+              }
+            },
+            {
+              "id": "511012040",
+              "title": "التدرب على استخدام الدوال (2)",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511012/lecture/511012040",
+              "raw": {
+                "chapter_id": 511012,
+                "id": 511012040,
+                "seq": 4,
+                "title": "التدرب على استخدام الدوال (2)"
+              }
+            },
+            {
+              "id": "511012050",
+              "title": "التدرب على استخدام الدوال (3)",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511012/lecture/511012050",
+              "raw": {
+                "chapter_id": 511012,
+                "id": 511012050,
+                "seq": 5,
+                "title": "التدرب على استخدام الدوال (3)"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511012/test (HTTP 403)."
+        },
+        {
+          "id": "511013",
+          "sequence": 13,
+          "title": "الدالة (2)",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عمليات محددة، وتعيد النتيجة.",
+              "id": 511013,
+              "name": "الدالة (2)",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 13,
+              "test_range": "Function",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511013,
+                "id": 511013010,
+                "seq": 1,
+                "title": "تدريب على إنشاء الدوال (1)"
+              },
+              {
+                "chapter_id": 511013,
+                "id": 511013020,
+                "seq": 2,
+                "title": "كيفية إنشاء دالة"
+              },
+              {
+                "chapter_id": 511013,
+                "id": 511013030,
+                "seq": 3,
+                "title": "تدريب على إنشاء الدوال (2)"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511013010",
+              "title": "تدريب على إنشاء الدوال (1)",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511013/lecture/511013010",
+              "raw": {
+                "chapter_id": 511013,
+                "id": 511013010,
+                "seq": 1,
+                "title": "تدريب على إنشاء الدوال (1)"
+              }
+            },
+            {
+              "id": "511013020",
+              "title": "كيفية إنشاء دالة",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511013/lecture/511013020",
+              "raw": {
+                "chapter_id": 511013,
+                "id": 511013020,
+                "seq": 2,
+                "title": "كيفية إنشاء دالة"
+              }
+            },
+            {
+              "id": "511013030",
+              "title": "تدريب على إنشاء الدوال (2)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511013/lecture/511013030",
+              "raw": {
+                "chapter_id": 511013,
+                "id": 511013030,
+                "seq": 3,
+                "title": "تدريب على إنشاء الدوال (2)"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511013/test (HTTP 403)."
+        },
+        {
+          "id": "511014",
+          "sequence": 14,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 12 إلى 13 للتأكد من أنك تفهمه!",
+              "id": 511014,
+              "name": "مراجعة الفهم",
+              "question_count": 8,
+              "section_id": 106,
+              "seq": 14,
+              "test_range": "Function",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511014,
+                "id": 511014010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 12 و13"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511014010",
+              "title": "مراجعة الفصلين 12 و13",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511014/lecture/511014010",
+              "raw": {
+                "chapter_id": 511014,
+                "id": 511014010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 12 و13"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 8,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511014/test (HTTP 403)."
+        },
+        {
+          "id": "511015",
+          "sequence": 15,
+          "title": "المصفوفة (1)",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع التكرار.",
+              "id": 511015,
+              "name": "المصفوفة (1)",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 15,
+              "test_range": "Array",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511015,
+                "id": 511015010,
+                "seq": 1,
+                "title": "ما هي القائمة؟"
+              },
+              {
+                "chapter_id": 511015,
+                "id": 511015020,
+                "seq": 2,
+                "title": "تمرين القائمة (1)"
+              },
+              {
+                "chapter_id": 511015,
+                "id": 511015030,
+                "seq": 3,
+                "title": "القوائم وعبارة for"
+              },
+              {
+                "chapter_id": 511015,
+                "id": 511015040,
+                "seq": 4,
+                "title": "تمرين القائمة (2)"
+              },
+              {
+                "chapter_id": 511015,
+                "id": 511015050,
+                "seq": 5,
+                "title": "طول القائمة"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511015010",
+              "title": "ما هي القائمة؟",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511015/lecture/511015010",
+              "raw": {
+                "chapter_id": 511015,
+                "id": 511015010,
+                "seq": 1,
+                "title": "ما هي القائمة؟"
+              }
+            },
+            {
+              "id": "511015020",
+              "title": "تمرين القائمة (1)",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511015/lecture/511015020",
+              "raw": {
+                "chapter_id": 511015,
+                "id": 511015020,
+                "seq": 2,
+                "title": "تمرين القائمة (1)"
+              }
+            },
+            {
+              "id": "511015030",
+              "title": "القوائم وعبارة for",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511015/lecture/511015030",
+              "raw": {
+                "chapter_id": 511015,
+                "id": 511015030,
+                "seq": 3,
+                "title": "القوائم وعبارة for"
+              }
+            },
+            {
+              "id": "511015040",
+              "title": "تمرين القائمة (2)",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511015/lecture/511015040",
+              "raw": {
+                "chapter_id": 511015,
+                "id": 511015040,
+                "seq": 4,
+                "title": "تمرين القائمة (2)"
+              }
+            },
+            {
+              "id": "511015050",
+              "title": "طول القائمة",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511015/lecture/511015050",
+              "raw": {
+                "chapter_id": 511015,
+                "id": 511015050,
+                "seq": 5,
+                "title": "طول القائمة"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511015/test (HTTP 403)."
+        },
+        {
+          "id": "511016",
+          "sequence": 16,
+          "title": "المصفوفة (2)",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "ستتعلم كيفية كتابة المصفوفات، واستخراج القيم منها، واستخدامها مع التكرار.",
+              "id": 511016,
+              "name": "المصفوفة (2)",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 16,
+              "test_range": "Array",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511016,
+                "id": 511016010,
+                "seq": 1,
+                "title": "ما هي المصفوفة؟"
+              },
+              {
+                "chapter_id": 511016,
+                "id": 511016020,
+                "seq": 2,
+                "title": "تدريب على المصفوفات"
+              },
+              {
+                "chapter_id": 511016,
+                "id": 511016030,
+                "seq": 3,
+                "title": "حول المصفوفات الأخرى"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511016010",
+              "title": "ما هي المصفوفة؟",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511016/lecture/511016010",
+              "raw": {
+                "chapter_id": 511016,
+                "id": 511016010,
+                "seq": 1,
+                "title": "ما هي المصفوفة؟"
+              }
+            },
+            {
+              "id": "511016020",
+              "title": "تدريب على المصفوفات",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511016/lecture/511016020",
+              "raw": {
+                "chapter_id": 511016,
+                "id": 511016020,
+                "seq": 2,
+                "title": "تدريب على المصفوفات"
+              }
+            },
+            {
+              "id": "511016030",
+              "title": "حول المصفوفات الأخرى",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511016/lecture/511016030",
+              "raw": {
+                "chapter_id": 511016,
+                "id": 511016030,
+                "seq": 3,
+                "title": "حول المصفوفات الأخرى"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511016/test (HTTP 403)."
+        },
+        {
+          "id": "511017",
+          "sequence": 17,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 15 إلى 16 للتأكد من أنك تفهمه!",
+              "id": 511017,
+              "name": "مراجعة الفهم",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 17,
+              "test_range": "Array",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511017,
+                "id": 511017010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 15 و16"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511017010",
+              "title": "مراجعة الفصلين 15 و16",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511017/lecture/511017010",
+              "raw": {
+                "chapter_id": 511017,
+                "id": 511017010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 15 و16"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511017/test (HTTP 403)."
+        },
+        {
+          "id": "511018",
+          "sequence": 18,
+          "title": "bool",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "سنراجع أنواع البيانات ونتعلم نوع bool.",
+              "id": 511018,
+              "name": "bool",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 18,
+              "test_range": "Bool",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511018,
+                "id": 511018010,
+                "seq": 1,
+                "title": "المتغيرات وقيم bool"
+              },
+              {
+                "chapter_id": 511018,
+                "id": 511018020,
+                "seq": 2,
+                "title": "bool"
+              },
+              {
+                "chapter_id": 511018,
+                "id": 511018030,
+                "seq": 3,
+                "title": "إسناد قيم bool"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511018010",
+              "title": "المتغيرات وقيم bool",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511018/lecture/511018010",
+              "raw": {
+                "chapter_id": 511018,
+                "id": 511018010,
+                "seq": 1,
+                "title": "المتغيرات وقيم bool"
+              }
+            },
+            {
+              "id": "511018020",
+              "title": "bool",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511018/lecture/511018020",
+              "raw": {
+                "chapter_id": 511018,
+                "id": 511018020,
+                "seq": 2,
+                "title": "bool"
+              }
+            },
+            {
+              "id": "511018030",
+              "title": "إسناد قيم bool",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511018/lecture/511018030",
+              "raw": {
+                "chapter_id": 511018,
+                "id": 511018030,
+                "seq": 3,
+                "title": "إسناد قيم bool"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511018/test (HTTP 403)."
+        },
+        {
+          "id": "511019",
+          "sequence": 19,
+          "title": "الدوال (3)",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع كيفية استخدام وكتابة الدوال التي تستقبل بيانات، وتنفذ عملية معينة، وتعيد النتيجة!\n",
+              "id": 511019,
+              "name": "الدوال (3)",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 19,
+              "test_range": "Functions",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511019,
+                "id": 511019010,
+                "seq": 1,
+                "title": "دوال جاهزة"
+              },
+              {
+                "chapter_id": 511019,
+                "id": 511019020,
+                "seq": 2,
+                "title": "مراجعة import"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511019010",
+              "title": "دوال جاهزة",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511019/lecture/511019010",
+              "raw": {
+                "chapter_id": 511019,
+                "id": 511019010,
+                "seq": 1,
+                "title": "دوال جاهزة"
+              }
+            },
+            {
+              "id": "511019020",
+              "title": "مراجعة import",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511019/lecture/511019020",
+              "raw": {
+                "chapter_id": 511019,
+                "id": 511019020,
+                "seq": 2,
+                "title": "مراجعة import"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511019/test (HTTP 403)."
+        },
+        {
+          "id": "511020",
+          "sequence": 20,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نراجع محتوى الفصول من 18 إلى 19 للتأكد من أنك تفهمه!",
+              "id": 511020,
+              "name": "مراجعة الفهم",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 20,
+              "test_range": "Bool,Functions",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511020,
+                "id": 511020010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 18-19"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511020010",
+              "title": "مراجعة الفصلين 18-19",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511020/lecture/511020010",
+              "raw": {
+                "chapter_id": 511020,
+                "id": 511020010,
+                "seq": 1,
+                "title": "مراجعة الفصلين 18-19"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511020/test (HTTP 403)."
+        },
+        {
+          "id": "511021",
+          "sequence": 21,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت بيانات if والحلقات والدوال!",
+              "id": 511021,
+              "name": "مراجعة الفهم",
+              "question_count": 10,
+              "section_id": 106,
+              "seq": 21,
+              "test_range": "If,Loops,Functions",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511021,
+                "id": 511021010,
+                "seq": 1,
+                "title": "مراجعة الشروط"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021020,
+                "seq": 2,
+                "title": "التدرب على المعاملات"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021030,
+                "seq": 3,
+                "title": "استخدام المتغيرات في عبارات if"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021040,
+                "seq": 4,
+                "title": "الشروط المتداخلة"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021050,
+                "seq": 5,
+                "title": "تدرب على عبارات if المتداخلة"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021060,
+                "seq": 6,
+                "title": "مراجعة معالجة التكرار"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021070,
+                "seq": 7,
+                "title": "نطاق المتغيرات في عبارة for"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021080,
+                "seq": 8,
+                "title": "تداخل عبارة for وعبارة if"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021090,
+                "seq": 9,
+                "title": "التدرب على التداخل"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021100,
+                "seq": 10,
+                "title": "كيفية كتابة المعامل"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021110,
+                "seq": 11,
+                "title": "مراجعة: كيفية إنشاء الدوال"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021120,
+                "seq": 12,
+                "title": "نطاق المتغير في الدالة"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021130,
+                "seq": 13,
+                "title": "دالة بدون وسائط"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021140,
+                "seq": 14,
+                "title": "دالة بوسائط متعددة"
+              },
+              {
+                "chapter_id": 511021,
+                "id": 511021150,
+                "seq": 15,
+                "title": "لنراجع"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511021010",
+              "title": "مراجعة الشروط",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021010",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021010,
+                "seq": 1,
+                "title": "مراجعة الشروط"
+              }
+            },
+            {
+              "id": "511021020",
+              "title": "التدرب على المعاملات",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021020",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021020,
+                "seq": 2,
+                "title": "التدرب على المعاملات"
+              }
+            },
+            {
+              "id": "511021030",
+              "title": "استخدام المتغيرات في عبارات if",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021030",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021030,
+                "seq": 3,
+                "title": "استخدام المتغيرات في عبارات if"
+              }
+            },
+            {
+              "id": "511021040",
+              "title": "الشروط المتداخلة",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021040",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021040,
+                "seq": 4,
+                "title": "الشروط المتداخلة"
+              }
+            },
+            {
+              "id": "511021050",
+              "title": "تدرب على عبارات if المتداخلة",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021050",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021050,
+                "seq": 5,
+                "title": "تدرب على عبارات if المتداخلة"
+              }
+            },
+            {
+              "id": "511021060",
+              "title": "مراجعة معالجة التكرار",
+              "sequence": 6,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021060",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021060,
+                "seq": 6,
+                "title": "مراجعة معالجة التكرار"
+              }
+            },
+            {
+              "id": "511021070",
+              "title": "نطاق المتغيرات في عبارة for",
+              "sequence": 7,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021070",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021070,
+                "seq": 7,
+                "title": "نطاق المتغيرات في عبارة for"
+              }
+            },
+            {
+              "id": "511021080",
+              "title": "تداخل عبارة for وعبارة if",
+              "sequence": 8,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021080",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021080,
+                "seq": 8,
+                "title": "تداخل عبارة for وعبارة if"
+              }
+            },
+            {
+              "id": "511021090",
+              "title": "التدرب على التداخل",
+              "sequence": 9,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021090",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021090,
+                "seq": 9,
+                "title": "التدرب على التداخل"
+              }
+            },
+            {
+              "id": "511021100",
+              "title": "كيفية كتابة المعامل",
+              "sequence": 10,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021100",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021100,
+                "seq": 10,
+                "title": "كيفية كتابة المعامل"
+              }
+            },
+            {
+              "id": "511021110",
+              "title": "مراجعة: كيفية إنشاء الدوال",
+              "sequence": 11,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021110",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021110,
+                "seq": 11,
+                "title": "مراجعة: كيفية إنشاء الدوال"
+              }
+            },
+            {
+              "id": "511021120",
+              "title": "نطاق المتغير في الدالة",
+              "sequence": 12,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021120",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021120,
+                "seq": 12,
+                "title": "نطاق المتغير في الدالة"
+              }
+            },
+            {
+              "id": "511021130",
+              "title": "دالة بدون وسائط",
+              "sequence": 13,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021130",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021130,
+                "seq": 13,
+                "title": "دالة بدون وسائط"
+              }
+            },
+            {
+              "id": "511021140",
+              "title": "دالة بوسائط متعددة",
+              "sequence": 14,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021140",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021140,
+                "seq": 14,
+                "title": "دالة بوسائط متعددة"
+              }
+            },
+            {
+              "id": "511021150",
+              "title": "لنراجع",
+              "sequence": 15,
+              "url": "https://me-tp.qureo.education/chapter/511021/lecture/511021150",
+              "raw": {
+                "chapter_id": 511021,
+                "id": 511021150,
+                "seq": 15,
+                "title": "لنراجع"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 10,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511021/test (HTTP 403)."
+        },
+        {
+          "id": "511022",
+          "sequence": 22,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت بيانات for والقوائم (المصفوفات)!",
+              "id": 511022,
+              "name": "مراجعة الفهم",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 22,
+              "test_range": "loops,arrays",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511022,
+                "id": 511022010,
+                "seq": 1,
+                "title": "كيفية تكرار العمليات الحسابية"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022020,
+                "seq": 2,
+                "title": "تدرب على تكرار الحساب"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022030,
+                "seq": 3,
+                "title": "استخدام i في عبارة for"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022040,
+                "seq": 4,
+                "title": "مراجعة القوائم"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022050,
+                "seq": 5,
+                "title": "الجمع بين التكرار والقوائم"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022060,
+                "seq": 6,
+                "title": "استخدام عدد القيم في قائمة"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022070,
+                "seq": 7,
+                "title": "القوائم والتكرار والشروط"
+              },
+              {
+                "chapter_id": 511022,
+                "id": 511022080,
+                "seq": 8,
+                "title": "لنراجع"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511022010",
+              "title": "كيفية تكرار العمليات الحسابية",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022010",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022010,
+                "seq": 1,
+                "title": "كيفية تكرار العمليات الحسابية"
+              }
+            },
+            {
+              "id": "511022020",
+              "title": "تدرب على تكرار الحساب",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022020",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022020,
+                "seq": 2,
+                "title": "تدرب على تكرار الحساب"
+              }
+            },
+            {
+              "id": "511022030",
+              "title": "استخدام i في عبارة for",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022030",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022030,
+                "seq": 3,
+                "title": "استخدام i في عبارة for"
+              }
+            },
+            {
+              "id": "511022040",
+              "title": "مراجعة القوائم",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022040",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022040,
+                "seq": 4,
+                "title": "مراجعة القوائم"
+              }
+            },
+            {
+              "id": "511022050",
+              "title": "الجمع بين التكرار والقوائم",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022050",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022050,
+                "seq": 5,
+                "title": "الجمع بين التكرار والقوائم"
+              }
+            },
+            {
+              "id": "511022060",
+              "title": "استخدام عدد القيم في قائمة",
+              "sequence": 6,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022060",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022060,
+                "seq": 6,
+                "title": "استخدام عدد القيم في قائمة"
+              }
+            },
+            {
+              "id": "511022070",
+              "title": "القوائم والتكرار والشروط",
+              "sequence": 7,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022070",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022070,
+                "seq": 7,
+                "title": "القوائم والتكرار والشروط"
+              }
+            },
+            {
+              "id": "511022080",
+              "title": "لنراجع",
+              "sequence": 8,
+              "url": "https://me-tp.qureo.education/chapter/511022/lecture/511022080",
+              "raw": {
+                "chapter_id": 511022,
+                "id": 511022080,
+                "seq": 8,
+                "title": "لنراجع"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511022/test (HTTP 403)."
+        },
+        {
+          "id": "511023",
+          "sequence": 23,
+          "title": "جملة for والمصفوفة",
+          "test_type": "review",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "دعنا نتعلم كيفية دمج حلقات for مع المصفوفات لإخراج جميع القيم الموجودة في المصفوفة!\n",
+              "id": 511023,
+              "name": "جملة for والمصفوفة",
+              "question_count": 5,
+              "section_id": 106,
+              "seq": 23,
+              "test_range": "loops and arrays",
+              "test_type": "review"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511023,
+                "id": 511023010,
+                "seq": 1,
+                "title": "مراجعة معالجة التكرار"
+              },
+              {
+                "chapter_id": 511023,
+                "id": 511023020,
+                "seq": 2,
+                "title": "التكرار باستخدام القوائم"
+              },
+              {
+                "chapter_id": 511023,
+                "id": 511023030,
+                "seq": 3,
+                "title": "تدرب على استخدام for والقوائم"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511023010",
+              "title": "مراجعة معالجة التكرار",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511023/lecture/511023010",
+              "raw": {
+                "chapter_id": 511023,
+                "id": 511023010,
+                "seq": 1,
+                "title": "مراجعة معالجة التكرار"
+              }
+            },
+            {
+              "id": "511023020",
+              "title": "التكرار باستخدام القوائم",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511023/lecture/511023020",
+              "raw": {
+                "chapter_id": 511023,
+                "id": 511023020,
+                "seq": 2,
+                "title": "التكرار باستخدام القوائم"
+              }
+            },
+            {
+              "id": "511023030",
+              "title": "تدرب على استخدام for والقوائم",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511023/lecture/511023030",
+              "raw": {
+                "chapter_id": 511023,
+                "id": 511023030,
+                "seq": 3,
+                "title": "تدرب على استخدام for والقوائم"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 5,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511023/test (HTTP 403)."
+        },
+        {
+          "id": "511024",
+          "sequence": 24,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت التفرعات الشرطية المتداخلة التي تجمع بيانات if!",
+              "id": 511024,
+              "name": "مراجعة الفهم",
+              "question_count": 6,
+              "section_id": 106,
+              "seq": 24,
+              "test_range": "loops,arrays",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511024,
+                "id": 511024010,
+                "seq": 1,
+                "title": "مراجعة الشروط"
+              },
+              {
+                "chapter_id": 511024,
+                "id": 511024020,
+                "seq": 2,
+                "title": "الحسابات في العبارات الشرطية"
+              },
+              {
+                "chapter_id": 511024,
+                "id": 511024030,
+                "seq": 3,
+                "title": "الشروط المتداخلة المتقدمة"
+              },
+              {
+                "chapter_id": 511024,
+                "id": 511024040,
+                "seq": 4,
+                "title": "ممارسة الشروط المتداخلة"
+              },
+              {
+                "chapter_id": 511024,
+                "id": 511024050,
+                "seq": 5,
+                "title": "لنراجع"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511024010",
+              "title": "مراجعة الشروط",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511024/lecture/511024010",
+              "raw": {
+                "chapter_id": 511024,
+                "id": 511024010,
+                "seq": 1,
+                "title": "مراجعة الشروط"
+              }
+            },
+            {
+              "id": "511024020",
+              "title": "الحسابات في العبارات الشرطية",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511024/lecture/511024020",
+              "raw": {
+                "chapter_id": 511024,
+                "id": 511024020,
+                "seq": 2,
+                "title": "الحسابات في العبارات الشرطية"
+              }
+            },
+            {
+              "id": "511024030",
+              "title": "الشروط المتداخلة المتقدمة",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511024/lecture/511024030",
+              "raw": {
+                "chapter_id": 511024,
+                "id": 511024030,
+                "seq": 3,
+                "title": "الشروط المتداخلة المتقدمة"
+              }
+            },
+            {
+              "id": "511024040",
+              "title": "ممارسة الشروط المتداخلة",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511024/lecture/511024040",
+              "raw": {
+                "chapter_id": 511024,
+                "id": 511024040,
+                "seq": 4,
+                "title": "ممارسة الشروط المتداخلة"
+              }
+            },
+            {
+              "id": "511024050",
+              "title": "لنراجع",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511024/lecture/511024050",
+              "raw": {
+                "chapter_id": 511024,
+                "id": 511024050,
+                "seq": 5,
+                "title": "لنراجع"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 6,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511024/test (HTTP 403)."
+        },
+        {
+          "id": "511025",
+          "sequence": 25,
+          "title": "مراجعة الفهم",
+          "test_type": "test",
+          "progress": null,
+          "raw": {
+            "chapter": {
+              "description": "لنقم بالمراجعة للتحقق مما إذا كنت قد فهمت الدوال والمخططات الانسيابية!",
+              "id": 511025,
+              "name": "مراجعة الفهم",
+              "question_count": 7,
+              "section_id": 106,
+              "seq": 25,
+              "test_range": "Functions,Flowchart",
+              "test_type": "test"
+            },
+            "lectures": [
+              {
+                "chapter_id": 511025,
+                "id": 511025010,
+                "seq": 1,
+                "title": "دالة بقيمتين"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025020,
+                "seq": 2,
+                "title": "دالة بثلاث قيم(1)"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025030,
+                "seq": 3,
+                "title": "دالة بثلاث قيم(2)"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025040,
+                "seq": 4,
+                "title": "الشروط والحسابات"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025050,
+                "seq": 5,
+                "title": "مخطط انسيابي (1)"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025060,
+                "seq": 6,
+                "title": "مخطط انسيابي (2)"
+              },
+              {
+                "chapter_id": 511025,
+                "id": 511025070,
+                "seq": 7,
+                "title": "لنراجع"
+              }
+            ],
+            "section": {
+              "course_id": "python_short_ar",
+              "id": 106
+            }
+          },
+          "lessons": [
+            {
+              "id": "511025010",
+              "title": "دالة بقيمتين",
+              "sequence": 1,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025010",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025010,
+                "seq": 1,
+                "title": "دالة بقيمتين"
+              }
+            },
+            {
+              "id": "511025020",
+              "title": "دالة بثلاث قيم(1)",
+              "sequence": 2,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025020",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025020,
+                "seq": 2,
+                "title": "دالة بثلاث قيم(1)"
+              }
+            },
+            {
+              "id": "511025030",
+              "title": "دالة بثلاث قيم(2)",
+              "sequence": 3,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025030",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025030,
+                "seq": 3,
+                "title": "دالة بثلاث قيم(2)"
+              }
+            },
+            {
+              "id": "511025040",
+              "title": "الشروط والحسابات",
+              "sequence": 4,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025040",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025040,
+                "seq": 4,
+                "title": "الشروط والحسابات"
+              }
+            },
+            {
+              "id": "511025050",
+              "title": "مخطط انسيابي (1)",
+              "sequence": 5,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025050",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025050,
+                "seq": 5,
+                "title": "مخطط انسيابي (1)"
+              }
+            },
+            {
+              "id": "511025060",
+              "title": "مخطط انسيابي (2)",
+              "sequence": 6,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025060",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025060,
+                "seq": 6,
+                "title": "مخطط انسيابي (2)"
+              }
+            },
+            {
+              "id": "511025070",
+              "title": "لنراجع",
+              "sequence": 7,
+              "url": "https://me-tp.qureo.education/chapter/511025/lecture/511025070",
+              "raw": {
+                "chapter_id": 511025,
+                "id": 511025070,
+                "seq": 7,
+                "title": "لنراجع"
+              }
+            }
+          ],
+          "questions": [],
+          "expected_question_count": 7,
+          "questions_status": "precondition_blocked",
+          "questions_error": "QUREO preconditions are not fulfilled for GET /chapters/511025/test (HTTP 403)."
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511002",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511002/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511003",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511003/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511004",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511004/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511005",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511005/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511006",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511006/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511007",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511007/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511008",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511008/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511009",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511009/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511010",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511010/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511011",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511011/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511012",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511012/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511013",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511013/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511014",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511014/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511015",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511015/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511016",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511016/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511017",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511017/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511018",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511018/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511019",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511019/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511020",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511020/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511021",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511021/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511022",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511022/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511023",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511023/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511024",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511024/test (HTTP 403)."
+    },
+    {
+      "course_id": "python_short_ar",
+      "chapter_id": "511025",
+      "stage": "chapter_questions",
+      "code": "PRECONDITION_NOT_FULFILLED",
+      "status": 403,
+      "message": "QUREO preconditions are not fulfilled for GET /chapters/511025/test (HTTP 403)."
+    }
+  ]
+}
