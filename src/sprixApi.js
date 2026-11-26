@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
 import { DATA_DIR } from './paths.js';
+import { askHidden } from './hiddenInput.js';
 import {
   SPRIX_ORIGIN,
   SprixHttpClient,
@@ -94,28 +97,73 @@ function renderTest(data) {
   console.log('Submit only after reviewing your answers: sprix test submit <testId> --yes');
 }
 
+async function promptLoginId() {
+  if (!stdin.isTTY) throw new Error('Interactive SPRIX login requires a PowerShell terminal.');
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  try {
+    return (await rl.question('SPRIX Login ID: ')).trim();
+  } finally {
+    rl.close();
+  }
+}
+
+function printLoginSuccess(subjectId, unitCount) {
+  console.log('SPRIX login successful.');
+  console.log('Session validated against subject ' + subjectId + ': ' + unitCount + ' unit(s) available.');
+  console.log('Session cookies saved encrypted with Windows DPAPI. Your password was not stored.');
+}
+
 function registerSessionCommands(sprix) {
   sprix.command('login')
-    .description('Import your signed-in SPRIX browser session from a copied cURL request')
-    .option('--clipboard', 'Read the copied cURL request from the Windows clipboard')
-    .option('--cookie-file <path>', 'Read a Cookie header or cURL command from a UTF-8 file')
+    .description('Sign in with your SPRIX Login ID and password, or import an existing browser session')
+    .option('--login-id <id>', 'SPRIX Login ID; the password is always prompted securely')
+    .option('--clipboard', 'Import a copied authenticated request as a fallback')
+    .option('--cookie-file <path>', 'Import a Cookie header or cURL command from a UTF-8 file')
     .option('--origin <url>', 'SPRIX origin', SPRIX_ORIGIN)
     .option('--subject <id>', 'Subject ID to validate', '7')
     .action(async options => {
-      if (Boolean(options.clipboard) === Boolean(options.cookieFile)) {
-        throw new Error('Choose exactly one source: --clipboard or --cookie-file <path>.');
+      const cookieMode = Boolean(options.clipboard || options.cookieFile);
+      if (cookieMode && (Boolean(options.clipboard) === Boolean(options.cookieFile) || options.loginId)) {
+        throw new Error('Choose either password login, --clipboard, or --cookie-file <path>.');
       }
+
+      if (!cookieMode) {
+        const loginId = options.loginId || await promptLoginId();
+        if (!loginId) throw new Error('SPRIX Login ID is required.');
+        let password = await askHidden('SPRIX password: ');
+        if (!password) throw new Error('SPRIX password is required.');
+
+        try {
+          const result = await SprixHttpClient.login({
+            loginId,
+            password,
+            origin: options.origin,
+            subjectId: options.subject
+          });
+          result.session.saveSession({
+            subjectId: Number(options.subject),
+            validated: true,
+            authMethod: 'password'
+          });
+          printLoginSuccess(options.subject, result.curriculum.length);
+        } finally {
+          password = '';
+        }
+        return;
+      }
+
       const raw = options.clipboard
         ? readSprixClipboard()
         : fs.readFileSync(options.cookieFile, 'utf8');
       const cookie = parseSprixCookieHeader(raw);
       const session = new SprixHttpClient({ cookie, origin: options.origin });
       const curriculum = await session.getCurriculum(options.subject);
-      session.saveSession({ subjectId: Number(options.subject), validated: true });
-      console.log('SPRIX session validated.');
-      console.log('Imported session saved encrypted with Windows DPAPI.');
-      console.log('Subject ' + options.subject + ': ' + curriculum.length + ' unit(s) available.');
-      console.log('The copied cURL command and Cookie header were not printed or sent to ChatGPT.');
+      session.saveSession({
+        subjectId: Number(options.subject),
+        validated: true,
+        authMethod: 'browser-cookie-import'
+      });
+      printLoginSuccess(options.subject, curriculum.length);
     });
 
   sprix.command('logout')
@@ -130,7 +178,7 @@ function registerSessionCommands(sprix) {
     .description('Validate the local session with a read-only curriculum request')
     .option('--subject <id>', 'Subject ID to check', '7')
     .action(async options => {
-      if (!SprixHttpClient.hasSession()) return console.log('No saved SPRIX session. Run sprix login --clipboard.');
+      if (!SprixHttpClient.hasSession()) return console.log('No saved SPRIX session. Run sprix login.');
       const curriculum = await client().getCurriculum(options.subject);
       console.log('SPRIX session: valid');
       console.log('Subject ' + options.subject + ': ' + curriculum.length + ' unit(s).');
