@@ -62,7 +62,7 @@ The solver stops when a required lesson, answer submission, or completion check 
 
 ## Lesson initialization
 
-Some QUREO lesson completion endpoints return HTTP 404 until the lesson page has initialized in QUREO's browser application. In that case, the CLI opens the exact lesson URL in the default browser and retries while the endpoint becomes available. The browser must be signed in to the same QUREO account.
+Some QUREO lesson completion endpoints return HTTP 404 until the lesson page has initialized. In that case, the CLI requests the exact lesson URL through the saved authenticated QUREO session and retries the completion endpoint in the background. It does not open a browser tab. This request does not execute QUREO's frontend JavaScript, so the API may still reject initialization if the lesson requires client-side setup.
 
 ## Recovery limitations
 
