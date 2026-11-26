@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getChapterAnswerCoverage, getQuestionAnswer } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -66,4 +66,35 @@ test('checks answer-bank coverage before unlocking a Python chapter assessment',
     answerQuestions: 0,
     complete: false
   });
+});
+
+
+test('initializes the selected course page before fetching its learning API data', async () => {
+  const calls = [];
+  const courseData = { basic_section: { id: 106 } };
+  const client = {
+    async request(url, options) {
+      calls.push({ type: 'page', url, method: options.method });
+      return new Response('', { status: 200 });
+    },
+    async json(path) {
+      calls.push({ type: 'api', path });
+      return courseData;
+    }
+  };
+
+  const result = await fetchCourseData(client, 'python_short_ar');
+
+  assert.equal(result, courseData);
+  assert.deepEqual(calls, [
+    {
+      type: 'page',
+      url: 'https://me-tp.qureo.education/?content_id=python_short_ar',
+      method: 'GET'
+    },
+    {
+      type: 'api',
+      path: '/courses/python_short_ar'
+    }
+  ]);
 });
