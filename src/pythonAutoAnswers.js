@@ -87,7 +87,7 @@ function extractCodeAnswer(answer) {
   if (start >= 0) {
     const code = [];
     for (const line of lines.slice(start)) {
-      if (/^(?:نسخ|السؤال\s*\d+|Made with intention|إعلان)/u.test(line.trim())) break;
+      if (/^(?:نسخ|السؤال\s*\d+|الناتج|النتيجة|output)\s*[:：]?/iu.test(line.trim()) || /^(?:Made with intention|إعلان)/u.test(line.trim())) break;
       code.push(line);
     }
     while (code.length && !code.at(-1).trim()) code.pop();
@@ -135,6 +135,11 @@ function resolvePromptChoice(question, choices) {
   return matches.length === 1 ? Number(matches[0].id) : null;
 }
 
+function extractOutputAnswer(answer) {
+  const match = String(answer ?? '').match(/^(?:الناتج|النتيجة|output)\s*[:：]\s*(.+?)\s*$/imu);
+  return match?.[1]?.trim() || '';
+}
+
 function resolveChoice(question, record) {
   const questionRow = question?.question || question || {};
   const choices = Array.isArray(question?.choices) ? question.choices :
@@ -144,7 +149,8 @@ function resolveChoice(question, record) {
   const answer = String(record.answer ?? '').trim();
   const answerLines = answer.split('\n').map(line => line.trim()).filter(Boolean);
   const code = extractCodeAnswer(answer);
-  const variants = [...new Set([...answerLines, code].filter(Boolean))];
+  const output = extractOutputAnswer(answer);
+  const variants = [...new Set([...answerLines, code, output].filter(Boolean))];
 
   for (const choice of choices) {
     const text = choiceText(choice);
