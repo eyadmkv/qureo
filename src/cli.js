@@ -12,7 +12,8 @@ import {
 import { QureoHttpClient, API_BASE, COURSE_ORIGIN } from './http.js';
 import { askHidden } from './hiddenInput.js';
 import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers.js';
-import { syncCommunityAnswers } from './communityAnswers.js';
+import { COMMUNITY_ANSWER_ARCHIVE_PATH, syncCommunityAnswers } from './communityAnswers.js';
+import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { solveCourse } from './solver.js';
@@ -533,22 +534,33 @@ program.command('export')
     console.log('Upload this JSON file here so the question sets can be solved in bulk.');
   }));
 
-program.command('solve [chapterRange]')
-  .description('Interactively choose a QUREO course, then solve its remaining chapters')
-  .option('--course <id>', 'Course ID to solve; prompts for a choice when omitted')
-  .option('--dry-run', 'Preview selected chapters without submitting answers')
-  .option('--single', 'Solve only the current or explicitly selected chapter')
-  .option('--max-chapters <count>', 'Stop after this many chapters')
-  .option('--pause-between-chapters <seconds>', 'Wait between completed chapters')
-  .option('--pause-between-questions <seconds>', 'Wait between submitted questions')
-  .option('--interactive', 'Ask before starting each chapter')
-  .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
-  .option('--no-resume', 'Ignore the previous local checkpoint')
-  .option('--auto-answers', 'Download/cache the public Python guide and infer missing assessment mappings')
-  .action(async (chapterRange, options) => withClient(async (client, user) => {
-    const courseId = options.course || await chooseSolveCourse(user);
+function configureSolveCommand(command, { includeCourse = true } = {}) {
+  if (includeCourse) {
+    command.option('--course <id>', 'Course ID to solve; prompts for a choice when omitted');
+  }
+  return command
+    .option('--dry-run', 'Preview selected chapters without submitting answers')
+    .option('--single', 'Solve only the current or explicitly selected chapter')
+    .option('--max-chapters <count>', 'Stop after this many chapters')
+    .option('--pause-between-chapters <seconds>', 'Wait between completed chapters')
+    .option('--pause-between-questions <seconds>', 'Wait between submitted questions')
+    .option('--interactive', 'Ask before starting each chapter')
+    .option('--no-skip-completed', 'Revisit completed chapters inside an explicit chapter range')
+    .option('--no-resume', 'Ignore the previous local checkpoint')
+    .option('--auto-answers', 'Download/cache the public Python guide and infer missing assessment mappings');
+}
+
+async function runSolve(courseId, chapterRange, options) {
+  await withClient(async (client, user) => {
+    const selectedCourseId = courseId || options.course || await chooseSolveCourse(user);
+    if (selectedCourseId === PYTHON_COURSE_ID && !fs.existsSync(COMMUNITY_ANSWER_ARCHIVE_PATH)) {
+      console.log('The community answer archive is missing. Downloading it before the Python solve...');
+      const downloaded = await syncCommunityAnswers();
+      console.log(`Installed ${downloaded.answerCount} fallback answer(s) across ${downloaded.chapterCount} chapter groups.`);
+    }
+
     const result = await solveCourse(client, {
-      courseId,
+      courseId: selectedCourseId,
       targetChapter: chapterRange || null,
       dryRun: Boolean(options.dryRun),
       single: Boolean(options.single),
@@ -565,7 +577,24 @@ program.command('solve [chapterRange]')
       onProgress: message => console.log(message)
     });
     console.log(result.summary);
-  }));
+  });
+}
+
+configureSolveCommand(
+  program.command('solve [courseOrRange] [chapterRange]')
+    .description('Solve a selected QUREO course or use the Python shortcut')
+).action(async (courseOrRange, chapterRange, options) => {
+  const target = resolveSolveTarget(courseOrRange, chapterRange, options.course);
+  await runSolve(target.courseId, target.targetChapter, options);
+});
+
+const python = program.command('python').description('Shortcuts for the QUREO Python course');
+configureSolveCommand(python.command('solve [chapterRange]')
+  .description('Solve remaining Python chapters using the local and community answer banks'), {
+  includeCourse: false
+}).action(async (chapterRange, options) => {
+  await runSolve(PYTHON_COURSE_ID, chapterRange, options);
+});
 
 program.command('lessons <chapterId>')
   .description('List every lesson ID and title in a chapter')
