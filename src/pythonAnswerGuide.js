@@ -176,10 +176,9 @@ export function searchPythonAnswers(records, query, limit = 8) {
     .slice(0, Math.max(1, Math.min(100, Number(limit) || 8)));
 }
 
-export function searchSavedPythonAnswers(query, limit = 8) {
-  if (!fs.existsSync(OUTPUT_PATH)) {
-    throw new Error('No local Python answer guide. Run: qureo answers sync-python');
-  }
+export function loadSavedPythonAnswerGuide() {
+  if (!fs.existsSync(OUTPUT_PATH)) return null;
+
   let guide;
   try {
     guide = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
@@ -190,6 +189,12 @@ export function searchSavedPythonAnswers(query, limit = 8) {
       !Array.isArray(guide.answers)) {
     throw new Error('The local Python answer guide format is unsupported. Run qureo answers sync-python again.');
   }
+  return guide;
+}
+
+export function searchSavedPythonAnswers(query, limit = 8) {
+  const guide = loadSavedPythonAnswerGuide();
+  if (!guide) throw new Error('No local Python answer guide. Run: qureo answers sync-python');
   return searchPythonAnswers(guide.answers, query, limit);
 }
 
