@@ -76,7 +76,7 @@ function extractCodeAnswer(answer) {
     const clean = line.trim();
     return /^(?:print|if|elif|else|for|while|def|return|import|from|class|pass|break|continue|raise|try|except|finally)\b/u.test(clean) ||
       /^#[^!]/u.test(clean) ||
-      /^[A-Za-z_][\w]*\s*(?:=|\+=|-=|\*=|\/=)/u.test(clean);
+      /^[A-Za-z_][\w]*\s*(?:=|\+=|-=|\*=|\/=|==|!=|<=|>=|<|>)/u.test(clean);
   });
   if (start >= 0) {
     const code = [];
