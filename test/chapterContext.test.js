@@ -105,6 +105,48 @@ test('resolves chapter commands from the signed-in account and cached CLI course
   ]);
 });
 
+test('infers the supported Python course from a chapter ID when no course metadata is cached', async () => {
+  const selected = [];
+  const client = {
+    async request(url, options) {
+      selected.push(new URL(url).searchParams.get('content_id'));
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511021 }];
+      throw new Error('Unexpected path: ' + path);
+    }
+  };
+
+  assert.deepEqual(
+    await resolveAccountChapterContext(client, {}, [], '511021'),
+    { courseId: 'python_short_ar', sectionId: 106 }
+  );
+  assert.deepEqual(selected, ['python_short_ar']);
+});
+
+test('infers the supported JavaScript course from a chapter ID when no course metadata is cached', async () => {
+  const selected = [];
+  const client = {
+    async request(url) {
+      selected.push(new URL(url).searchParams.get('content_id'));
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      if (path === '/courses/javascript_ar') return { basic_section: { id: 105 } };
+      if (path === '/sections/105') return [{ id: 900021 }];
+      throw new Error('Unexpected path: ' + path);
+    }
+  };
+
+  assert.deepEqual(
+    await resolveAccountChapterContext(client, {}, [], '900021'),
+    { courseId: 'javascript_ar', sectionId: 105 }
+  );
+  assert.deepEqual(selected, ['javascript_ar']);
+});
+
 test('uses cached courses when the account profile omits its course list', async () => {
   const client = {
     async request() {
