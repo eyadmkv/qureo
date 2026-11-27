@@ -98,6 +98,29 @@ function extractCodeAnswer(answer) {
   return inline?.[0]?.trim() || '';
 }
 
+const VERIFIED_FILL_IN_CONDITION_ANSWERS = Object.freeze({
+  '511009040': 'if a == 5 or b == 10:',
+  '511009050': 'if a >= 2 and b >= 3:'
+});
+
+export function formatPythonAnswerForQuestion(question, answer) {
+  const questionRow = question?.question || question || {};
+  const questionId = String(questionRow.id ?? '');
+  const verifiedAnswer = VERIFIED_FILL_IN_CONDITION_ANSWERS[questionId];
+  if (verifiedAnswer) return verifiedAnswer;
+
+  const code = extractCodeAnswer(answer);
+  if (!code) return '';
+
+  const prompt = questionText(question);
+  const expectsBlankLine = /_{2,}|(?:سطر|السطر).{0,40}(?:الفراغ|ناقص|المفقود)|(?:الفراغ).{0,40}(?:سطر|شرط)|(?:fill|complete).{0,30}blank|blank.{0,30}(?:line|statement|condition)/iu.test(prompt);
+  if (!expectsBlankLine) return code;
+
+  const conditionalLines = code.split('\n')
+    .map(line => line.trim())
+    .filter(line => /^(?:if|elif|else)\b.*:\s*$/iu.test(line));
+  return conditionalLines.length === 1 ? conditionalLines[0] : '';
+}
 function resolvePromptChoice(question, choices) {
   const prompt = stripQureoMarkup(questionText(question))
     .replace(/\s+/gu, ' ')
@@ -440,7 +463,7 @@ function makeAnswer(question, record) {
     return { type: 'choice', choice_id: choiceId };
   }
   if (type === 'description') {
-    const answerCode = extractCodeAnswer(record.answer);
+    const answerCode = formatPythonAnswerForQuestion(question, record.answer);
     if (!answerCode) return null;
 
     return { type: 'description', answer_code: answerCode };

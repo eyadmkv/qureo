@@ -3,7 +3,7 @@ import path from 'node:path';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
-import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
+import { formatPythonAnswerForQuestion, matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
 import { QureoLectureBrowser } from './qureoBrowser.js';
 import { loadCommunityAnswers, mergeCommunityAnswers } from './communityAnswers.js';
 
@@ -110,8 +110,8 @@ export function getQuestionAnswer(item, answers) {
     return { type: 'choice', choice_id: choiceId };
   }
   if (question.type === 'description') {
-    const answerCode = String(saved.answer_code ?? '');
-    if (!answerCode.trim()) return null;
+    const answerCode = formatPythonAnswerForQuestion(item, saved.answer_code);
+    if (!answerCode) return null;
     return { type: 'description', answer_code: answerCode };
   }
   return null;

@@ -76,3 +76,39 @@ test('community choice IDs are accepted only when present in live question choic
     choices: [{ id: 900010102 }]
   }, answers), null);
 });
+
+
+test('formats archived Chapter 9 full-program examples as line-only answers before submission', () => {
+  const answers = {
+    '511009040': {
+      type: 'description',
+      answer_code: 'a = 5\nb = 10\nif a == 5 or b == 10:\n    print("The condition is met")'
+    },
+    '511009050': {
+      type: 'description',
+      answer_code: 'a = 4\nb = 3\nif a >= 2 and b >= 3:\n    print("The condition is met")'
+    }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: {
+      id: 511009040,
+      type: 'description',
+      content: 'أنهي سطر يتحط مكان الفراغ؟\na = 5\nb = 10\n____'
+    }
+  }, answers), {
+    type: 'description',
+    answer_code: 'if a == 5 or b == 10:'
+  });
+
+  assert.deepEqual(getQuestionAnswer({
+    question: {
+      id: 511009050,
+      type: 'description',
+      content: 'كمّل السطر الناقص.\na = 4\nb = 3\n____'
+    }
+  }, answers), {
+    type: 'description',
+    answer_code: 'if a >= 2 and b >= 3:'
+  });
+});
