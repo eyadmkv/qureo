@@ -147,6 +147,24 @@ test('infers the supported JavaScript course from a chapter ID when no course me
   assert.deepEqual(selected, ['javascript_ar']);
 });
 
+test('accepts course IDs returned as strings in the account profile', async () => {
+  const client = {
+    async request() {
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511021 }];
+      throw new Error('Unexpected path: ' + path);
+    }
+  };
+
+  assert.deepEqual(
+    await resolveAccountChapterContext(client, { available_courses: ['python_short_ar'] }, [], '511021'),
+    { courseId: 'python_short_ar', sectionId: 106 }
+  );
+});
+
 test('uses cached courses when the account profile omits its course list', async () => {
   const client = {
     async request() {
