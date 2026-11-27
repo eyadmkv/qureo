@@ -53,3 +53,19 @@ export async function resolveChapterContext(client, courses, chapterId) {
   if (lastError && !(lastError?.status === 403 || lastError?.status === 404)) throw lastError;
   return null;
 }
+
+export async function resolveAccountChapterContext(client, user, cachedCourses, chapterId) {
+  const courses = new Map();
+  for (const course of user?.available_courses || []) {
+    const id = String(course?.content_id ?? course?.id ?? '').trim();
+    if (id) courses.set(id, { id });
+  }
+  for (const course of cachedCourses || []) {
+    const id = String(course?.course_id ?? course?.content_id ?? course?.id ?? '').trim();
+    if (id && !courses.has(id)) courses.set(id, { id });
+  }
+  if (!courses.size) {
+    throw new Error('QUREO did not return any available or cached courses. Run qureo sync, then retry.');
+  }
+  return resolveChapterContext(client, [...courses.values()], chapterId);
+}
