@@ -897,8 +897,22 @@ class QureoSolver(
             val lessonId = lesson.firstString("id", "lecture_id")
             if (lessonId.isBlank()) continue
             val referer = "$QUREO_COURSE/chapter/$chapterId/lecture/$lessonId"
-            val directAttempt = runCatching {
+            val startAttempt = runCatching {
+                api.rawPut("/students/lectures/$lessonId", referer)
+            }
+            val start = startAttempt.getOrNull()
+            val startFailure = startAttempt.exceptionOrNull()
+            val startAccepted = start?.successful == true || start?.status in listOf(400, 409)
+            if (!startAccepted) {
+                val startDetail = startFailure?.message
+                    ?: "lesson initialization returned HTTP ${start?.status ?: 0}"
+                onProgress("Lesson $lessonId initialization failed ($startDetail); trying the QUREO lesson page.")
+            }
+
+            val directAttempt = if (startAccepted) runCatching {
                 api.rawPut("/students/lectures/$lessonId/complete", referer)
+            } else {
+                Result.failure(startFailure ?: IllegalStateException("Lesson initialization failed."))
             }
             val direct = directAttempt.getOrNull()
             val directFailure = directAttempt.exceptionOrNull()
