@@ -161,22 +161,41 @@ object LessonPageBridge {
                                             (async () => {
                                               let result;
                                               try {
-                                                const response = await fetch('/api/study/students/lectures/$lessonId/complete', {
+                                                const headers = {
+                                                  Accept: 'application/json, text/plain, */*',
+                                                  'Content-Type': 'application/json'
+                                                };
+                                                const started = await fetch('/api/study/students/lectures/$lessonId', {
                                                   method: 'PUT',
                                                   credentials: 'include',
                                                   cache: 'no-store',
-                                                  headers: {
-                                                    Accept: 'application/json, text/plain, */*',
-                                                    'Content-Type': 'application/json'
-                                                  },
+                                                  headers,
                                                   body: '{}'
                                                 });
-                                                const body = await response.text();
-                                                result = {
-                                                  status: response.status,
-                                                  ok: response.ok,
-                                                  body: body.slice(0, 1000)
-                                                };
+                                                const startBody = await started.text();
+                                                if (!started.ok && started.status !== 400 && started.status !== 409) {
+                                                  result = {
+                                                    status: started.status,
+                                                    ok: false,
+                                                    stage: 'start',
+                                                    body: startBody.slice(0, 1000)
+                                                  };
+                                                } else {
+                                                  const response = await fetch('/api/study/students/lectures/$lessonId/complete', {
+                                                    method: 'PUT',
+                                                    credentials: 'include',
+                                                    cache: 'no-store',
+                                                    headers,
+                                                    body: '{}'
+                                                  });
+                                                  const body = await response.text();
+                                                  result = {
+                                                    status: response.status,
+                                                    ok: response.ok,
+                                                    stage: 'complete',
+                                                    body: body.slice(0, 1000)
+                                                  };
+                                                }
                                               } catch (error) {
                                                 const detail = error instanceof Error
                                                   ? error.name + ': ' + error.message
