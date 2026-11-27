@@ -16,7 +16,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import org.json.JSONTokener
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -91,6 +90,19 @@ object LessonPageBridge {
                             if (settled.get() || !navigationStarted.compareAndSet(false, true)) return
                             try {
                                 cookieManager.flush()
+                                view.addJavascriptInterface(
+                                    CompletionResultBridge(view) { payload ->
+                                        try {
+                                            finish(JSONObject(payload))
+                                        } catch (error: Exception) {
+                                            fail(
+                                                "Could not decode the QUREO lesson completion response: " +
+                                                    (error.message ?: error.javaClass.simpleName)
+                                            )
+                                        }
+                                    },
+                                    "QureoNative"
+                                )
                                 view.webViewClient = object : WebViewClient() {
                                     override fun onReceivedError(
                                         webView: WebView,
@@ -145,19 +157,6 @@ object LessonPageBridge {
                                         }
 
                                         if (!completionStarted.compareAndSet(false, true)) return
-                                        webView.addJavascriptInterface(
-                                            CompletionResultBridge(webView) { payload ->
-                                                try {
-                                                    finish(JSONObject(payload))
-                                                } catch (error: Exception) {
-                                                    fail(
-                                                        "Could not decode the QUREO lesson completion response: " +
-                                                            (error.message ?: error.javaClass.simpleName)
-                                                    )
-                                                }
-                                            },
-                                            "QureoNative"
-                                        )
                                         val script = """
                                             (async () => {
                                               let result;
