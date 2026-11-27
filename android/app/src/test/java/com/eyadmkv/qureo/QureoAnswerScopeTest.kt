@@ -71,4 +71,33 @@ class QureoAnswerScopeTest {
         assertTrue(isQureoChapterComplete(JSONObject(), JSONObject().put("completed_at", "2026-11-27T10:00:00Z")))
     }
 
+    @Test
+    fun importsReferenceRepositoryCommunityArchiveForSelectedCourseOnly() {
+        val archive = JSONObject(
+            """
+            {
+              "511021": {
+                "511021010": ["choice", 5110210101],
+                "511021020": ["description", "print(1)"]
+              },
+              "90021": {
+                "90021010": ["choice", 900210101]
+              },
+              "531001": {
+                "531001010": ["choice", 5310010101]
+              }
+            }
+            """.trimIndent()
+        )
+
+        val answers = extractCommunityAnswers(archive, "python_short_ar")
+
+        assertEquals(2, answers.size)
+        assertEquals("choice", answers["511021010"]?.type)
+        assertEquals(5110210101L, answers["511021010"]?.choiceId)
+        assertEquals("print(1)", answers["511021020"]?.code)
+        assertFalse(answers.containsKey("90021010"))
+        assertFalse(answers.containsKey("531001010"))
+    }
+
 }
