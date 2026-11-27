@@ -301,6 +301,9 @@ class SprixSolver(
     }
 
     private suspend fun loadBank(subjectId: Int): SprixBank {
+        require(subjectId == 7 || subjectId == 3) {
+            "The installed SPRIX answer maps support Arabic subject 7 and English subject 3. Select one of those subjects."
+        }
         val mapUrl = if (subjectId == 7) {
             SPRIX_ARABIC_SOURCE + "spx_api_bank.json"
         } else {
