@@ -20,7 +20,7 @@ function asArray(value) {
   return [];
 }
 
-function isCompleted(progress, chapter = null) {
+export function isCompleted(progress, chapter = null) {
   const explicitlyCompleted = Boolean(
     progress?.completed_at || progress?.is_completed === true || progress?.completed === true
   );
@@ -205,24 +205,26 @@ export function prepareQuestionAnswer(item, answers = {}) {
   const verified = getQuestionAnswer(item, answers);
   if (verified) return { answer: verified, bootstrap: false };
 
+  const type = normalizedQuestionType(question, item);
+  const explicitlyChoice = /(?:choice|select|radio|option|mcq|multiple_choice)/u.test(type);
+  const explicitlyDescription = /(?:description|code|text|input|fill|blank|short_answer|program|free_response)/u.test(type);
   const choices = questionChoiceOptions(item, question);
-  if (choices.length) {
-    const firstChoiceId = choices.map(choiceOptionId).find(Boolean);
+  const firstChoiceId = choices.map(choiceOptionId).find(Boolean);
+
+  if (explicitlyChoice || (!type && choices.length > 0)) {
     return firstChoiceId
       ? { answer: { type: 'choice', choice_id: firstChoiceId }, bootstrap: true }
       : null;
   }
 
-  const type = normalizedQuestionType(question, item);
-  const explicitlyChoice = /(?:choice|select|radio|option|mcq|multiple_choice)/u.test(type);
-  const explicitlyDescription = /(?:description|code|text|input|fill|blank|short_answer|program|free_response)/u.test(type);
-  if (explicitlyChoice || (type && !explicitlyDescription)) return null;
-
-  if (savedAnswer?.type === 'description' && String(savedAnswer.answer_code ?? '').trim()) {
-    return { answer: { type: 'description', answer_code: String(savedAnswer.answer_code) }, bootstrap: false };
+  if (explicitlyDescription || !type) {
+    if (savedAnswer?.type === 'description' && String(savedAnswer.answer_code ?? '').trim()) {
+      return { answer: { type: 'description', answer_code: String(savedAnswer.answer_code) }, bootstrap: false };
+    }
+    return { answer: { type: 'description', answer_code: 'print(1)' }, bootstrap: true };
   }
 
-  return { answer: { type: 'description', answer_code: 'print(1)' }, bootstrap: true };
+  return null;
 }
 
 export function extractVerifiedAssessmentAnswers(payload) {
