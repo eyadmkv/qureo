@@ -545,7 +545,7 @@ class QureoSolver(
         val section = api.get("/sections/$sectionId")
         val chapters = jsonArrayAt(section, "chapters").objects()
             .sortedBy { it.optDouble("seq", it.optDouble("sequence", 0.0)) }
-        require(chapters.isNotEmpty()) { "No Python chapters were found." }
+        require(chapters.isNotEmpty()) { "No chapters were found for QUREO course $courseId." }
 
         val progress = api.get("/students/sections/$sectionId/chapters")
         val progressRows = jsonArrayAt(progress, "chapters").objects()
