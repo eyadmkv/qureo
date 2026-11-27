@@ -376,11 +376,7 @@ class SprixSolver(
         val data = completionResponse.optJSONObject("data")
         val explicitCompletion = data?.optBoolean("is_completed") == true ||
             data?.optBoolean("completed") == true
-        val gradedResponse = data?.optJSONObject("response")
-            ?: data?.optJSONObject("result")?.optJSONObject("response")
-            ?: data
-        val explicitPass = item.type == "test" && gradedResponse?.optBoolean("passed") == true
-        if (explicitCompletion || explicitPass) return original
+        if (explicitCompletion) return original
 
         repeat(4) { attempt ->
             val refreshed = api.curriculum(subjectId)
