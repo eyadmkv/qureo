@@ -1,6 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { formatProgressBar, summarizeSprixCurriculum } from '../src/qstudy.js';
+
+const entryPath = fileURLToPath(new URL('../src/qstudy-entry.js', import.meta.url));
+
+test('QStudy entrypoint exits cleanly for help and version', () => {
+  for (const [argument, expected] of [
+    ['--help', /QStudy 0\.6\.0 \| unified QUREO \+ SPRIX CLI/],
+    ['--version', /^0\.6\.0\s*$/]
+  ]) {
+    const result = spawnSync(process.execPath, [entryPath, argument], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(result.stdout, expected);
+    assert.doesNotMatch(result.stderr, /TypeError|Cannot read properties/);
+  }
+});
 
 test('summarizes SPRIX curriculum progress across sections', () => {
   const summary = summarizeSprixCurriculum({
