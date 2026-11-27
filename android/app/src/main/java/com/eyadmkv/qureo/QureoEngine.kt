@@ -855,32 +855,60 @@ class QureoSolver(
             val missingDetail = missingAnswerDetail(id.ifBlank { "unknown" }, answer, type, options)
 
             if (answer == null || id.isBlank()) {
-                missing.add(missingDetail)
+                when {
+                    explicitlyChoice && options.length() > 0 -> {
+                        val firstChoiceId = options.objects().firstNotNullOfOrNull(::choiceOptionId)
+                        if (firstChoiceId != null) {
+                            prepared.add(id to LocalAnswer("choice", choiceId = firstChoiceId, source = "bootstrap"))
+                        } else missing.add(missingDetail)
+                    }
+                    explicitlyDescription -> prepared.add(
+                        id to LocalAnswer("description", code = "print(1)", source = "bootstrap")
+                    )
+                    else -> missing.add(missingDetail)
+                }
                 continue
             }
 
-            when (answer.type) {
-                "choice" -> {
+            when {
+                explicitlyChoice -> {
+                    val validChoiceIds = options.objects().mapNotNull(::choiceOptionId)
+                    val storedChoiceId = answer.choiceId
+                    if (answer.type == "choice" && storedChoiceId != null && storedChoiceId > 0 &&
+                        (validChoiceIds.isEmpty() || storedChoiceId in validChoiceIds)) {
+                        prepared.add(id to answer)
+                    } else {
+                        val fallbackChoiceId = validChoiceIds.firstOrNull()
+                        if (fallbackChoiceId != null) {
+                            prepared.add(id to LocalAnswer("choice", choiceId = fallbackChoiceId, source = "bootstrap"))
+                        } else {
+                            missing.add(missingDetail)
+                        }
+                    }
+                }
+                explicitlyDescription -> {
+                    if (answer.type == "description" && !answer.code.isNullOrBlank()) {
+                        prepared.add(id to answer)
+                    } else {
+                        prepared.add(id to LocalAnswer("description", code = "print(1)", source = "bootstrap"))
+                    }
+                }
+                answer.type == "choice" -> {
                     val choiceId = answer.choiceId
-                    if (choiceId == null || choiceId <= 0 || explicitlyDescription) {
+                    if (choiceId == null || choiceId <= 0) {
                         missing.add(missingDetail)
                     } else if (options.length() > 0) {
-                        val exists = options.objects().any { choiceOptionId(it) == choiceId }
-                        if (exists) prepared.add(id to answer) else missing.add(missingDetail)
-                    } else if (explicitlyChoice) {
-                        prepared.add(id to answer)
+                        if (options.objects().any { choiceOptionId(it) == choiceId }) prepared.add(id to answer)
+                        else missing.add(missingDetail)
                     } else {
                         missing.add(missingDetail)
                     }
                 }
-                "description" -> {
-                    val supportedDescription = listOf(
-                        "description", "code", "text", "input", "fill", "blank",
-                        "short_answer", "program", "free_response"
-                    ).any(type::contains)
-                    if (answer.code.isNullOrBlank() || explicitlyChoice ||
-                        (type.isNotBlank() && !supportedDescription) ||
-                        (type.isBlank() && options.length() > 0)) {
+                answer.type == "description" -> {
+                    if (answer.code.isNullOrBlank() || (type.isNotBlank() && !listOf(
+                            "description", "code", "text", "input", "fill", "blank",
+                            "short_answer", "program", "free_response"
+                        ).any(type::contains)) || (type.isBlank() && options.length() > 0)) {
                         missing.add(missingDetail)
                     } else {
                         prepared.add(id to answer)
