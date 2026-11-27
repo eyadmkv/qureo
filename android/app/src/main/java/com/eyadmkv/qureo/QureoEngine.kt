@@ -38,7 +38,7 @@ private fun JSONObject.firstObject(vararg keys: String): JSONObject? {
     return null
 }
 
-private fun JSONObject.firstString(vararg keys: String): String {
+internal fun JSONObject.firstString(vararg keys: String): String {
     for (key in keys) {
         val value = opt(key)
         if (value != null && value != JSONObject.NULL && value !is JSONObject && value !is JSONArray) {
@@ -49,7 +49,7 @@ private fun JSONObject.firstString(vararg keys: String): String {
     return ""
 }
 
-private fun jsonObject(text: String): JSONObject {
+internal fun jsonObject(text: String): JSONObject {
     val value = JSONTokener(text).nextValue()
     return value as? JSONObject ?: throw IllegalStateException("The service returned a non-object JSON response.")
 }
@@ -66,7 +66,7 @@ private fun jsonArrayAt(root: JSONObject, vararg keys: String): JSONArray {
     return JSONArray()
 }
 
-private fun JSONArray.objects(): List<JSONObject> =
+internal fun JSONArray.objects(): List<JSONObject> =
     (0 until length()).mapNotNull { optJSONObject(it) }
 
 private fun JSONObject.chapterId(): String =
