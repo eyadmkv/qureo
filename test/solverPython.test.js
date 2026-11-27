@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted, prepareQuestionAnswer, solveChapter } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, isCompleted, markLectureCompleted, prepareQuestionAnswer, solveChapter } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -19,6 +19,13 @@ const pythonAnswers = {
   '511002080': { type: 'choice', choice_id: 5110020801 },
   '511002090': { type: 'choice', choice_id: 5110020901 }
 };
+
+test('recognizes completed chapters from best_correct_count when the count is complete', () => {
+  assert.equal(isCompleted({ best_correct_count: 5 }, { question_count: 5 }), true);
+  assert.equal(isCompleted({ best_correct_count: 4 }, { question_count: 5 }), false);
+  assert.equal(isCompleted({ best_correct_count: 5 }, { question_count: 0 }), false);
+  assert.equal(isCompleted({ completed_at: '2026-11-27T10:00:00Z' }, null), true);
+});
 
 test('uses a live choice option when a stale description answer is stored', () => {
   const prepared = prepareQuestionAnswer({
