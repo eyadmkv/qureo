@@ -32,29 +32,29 @@ qstudy status
 
 The dashboard reads the local QUREO database and the most recently synced SPRIX curriculum snapshot. It does not make network requests. `qstudy dashboard --refresh` refreshes both sources first. `qstudy status` performs read-only authentication checks against both services.
 
-## Interactive solver selection
+## Parallel solving
 
-Run:
+Run either command:
 
 ```powershell
+qstudy
 qstudy solve
 ```
 
-Move with the arrow keys, press **Space** to check or uncheck a target, then press **Enter** to start. You can select any combination of:
+The selector opens with **JavaScript** (QUREO) and **SPRIX** already selected. Press **Enter** to run both together. Use the arrow keys and **Space** to change the selection, including adding Python or running only one service. Press **Esc** or **q** to cancel.
 
-- **JavaScript**: QUREO course `javascript_ar`
-- **Python**: the existing QUREO Python solver
-- **SPRIX**: the existing SPRIX course solver
+QUREO and SPRIX run as separate workers at the same time. Each advances independently according to its platform's response speed. If both QUREO courses are selected, they run sequentially within the QUREO worker to avoid overlapping writes to the shared local QUREO state. SPRIX continues running while QUREO works or waits for its per-chapter confirmation.
 
-Press **Esc** or **q** to cancel. QUREO asks for confirmation before each chapter in a normal run. SPRIX keeps its own confirmation before submitting course actions.
+Before a real combined run, QStudy asks once for confirmation. SPRIX uses that confirmation and does not prompt again. QUREO retains its existing confirmation before each chapter. A failure in either worker is reported after both workers have stopped.
 
-Preview selected work without submitting answers:
+Preview the same selected targets without submitting answers:
 
 ```powershell
+qstudy --help
 qstudy solve --dry-run
 ```
 
-The QUREO targets need their local course answer banks and a valid QUREO session. SPRIX needs a valid SPRIX session and its local answer bank. The checklist only selects which existing solver to launch; it does not change their answer-matching or progress logic.
+The QUREO targets need their local course answer banks and a valid QUREO session. SPRIX needs a valid SPRIX session and its local answer bank. The combined runner reuses both existing solvers and their answer matching, unlock checks, and progress logic.
 
 ## Run existing commands
 
