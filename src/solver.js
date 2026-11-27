@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
-import { DATA_DIR, ROOT } from './paths.js';
+import { DATA_DIR } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
 import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
 import { listRetrievedAssessmentAnswers, saveRetrievedAnswer } from './db.js';
 import { QureoLectureBrowser } from './qureoBrowser.js';
 import { loadCommunityAnswers, mergeCommunityAnswers } from './communityAnswers.js';
 
-const ANSWER_ROOT = path.join(ROOT, 'answers');
+const ANSWER_ROOT = path.join(DATA_DIR, 'answers');
 
 function asArray(value) {
   if (Array.isArray(value)) return value;
