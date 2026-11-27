@@ -237,7 +237,7 @@ class MainActivity : ComponentActivity() {
         return card
     }
 
-    private fun addFieldLabel(value: String) {
+    private fun LinearLayout.addFieldLabel(value: String) {
         addView(label(value, 12f, pale, true).apply { setPadding(0, 0, 0, dp(5)) })
     }
 
