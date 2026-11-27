@@ -265,7 +265,7 @@ class MainActivity : ComponentActivity() {
         }
         val name = if (action == SolverService.ACTION_QUREO) "QUREO" else "SPRIX"
         appendLog(name + " task queued" + if (dryRun) " (preview only)." else ".")
-        SolverService.start(this, action, target, subject, single, dryRun, course)
+        SolverService.start(this, action, target, subject, course, single, dryRun)
     }
 
     private fun subscribeToProgress() {
