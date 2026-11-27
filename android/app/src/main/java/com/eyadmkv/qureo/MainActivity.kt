@@ -56,95 +56,155 @@ class MainActivity : ComponentActivity() {
     private fun buildInterface() {
         val page = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(18, 22, 18, 28)
+            setPadding(dp(20), dp(22), dp(20), dp(32))
             setBackgroundColor(ink)
         }
         val scroll = ScrollView(this).apply {
             isFillViewport = true
+            clipToPadding = false
             addView(page)
         }
 
-        page.addView(label("QUREO + SPRIX", 27f, Color.WHITE, true))
-        page.addView(label("Native Android course solver", 14f, pale, false))
-        statusView = label("Checking local sessions...", 13f, accent, true)
-        statusView.setPadding(0, 12, 0, 18)
-        page.addView(statusView)
-
-        page.addView(sectionTitle("QUREO"))
-        page.addView(label("Choose a course", 13f, pale, false))
-        qureoCourse = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@MainActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                listOf("Python · البرمجة بلغة Python", "JavaScript · البرمجة بلغة JavaScript")
-            )
-            setSelection(0)
+        val heading = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(20), dp(18), dp(18))
+            background = rounded(panel, 22)
         }
-        qureoId = input("Student ID", InputType.TYPE_CLASS_TEXT)
-        qureoPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        qureoChapter = input("Chapter number or ID (optional)", InputType.TYPE_CLASS_TEXT)
-        page.addView(qureoCourse)
-        page.addView(qureoId)
-        page.addView(qureoPassword)
-        page.addView(button("Sign in to QUREO") { loginQureo() })
-        page.addView(button("Sign out of QUREO", true) {
-            QureoClient(applicationContext).logout()
-            refreshSessionStatus()
-            appendLog("QUREO session removed.")
-        })
-        page.addView(button("Download / update selected answer bank", true) {
-            syncQureoAnswerBank(force = true)
-        })
-        page.addView(button("Import custom answer-bank JSON", true) {
-            answerBankPicker.launch(arrayOf("application/json", "text/plain", "*/*"))
-        })
-        page.addView(qureoChapter)
-        page.addView(button("Solve selected chapter") {
-            val target = qureoChapter.text.toString().trim().ifBlank { null }
-            startSolver(SolverService.ACTION_QUREO, target = target, course = currentQureoCourse(), single = true)
-        })
-        page.addView(button("Solve all remaining chapters") {
-            startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse())
-        })
-        page.addView(button("Preview remaining chapters", true) {
-            startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse(), dryRun = true)
-        })
-
-        page.addView(sectionTitle("SPRIX · Financial Literacy"))
-        sprixId = input("SPRIX Login ID", InputType.TYPE_CLASS_TEXT)
-        sprixPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        sprixSubject = input("Subject ID (7 Arabic · 3 English)", InputType.TYPE_CLASS_NUMBER).apply { setText("7") }
-        page.addView(sprixId)
-        page.addView(sprixPassword)
-        page.addView(sprixSubject)
-        page.addView(button("Sign in to SPRIX") { loginSprix() })
-        page.addView(button("Sign out of SPRIX", true) {
-            SprixClient(applicationContext).logout()
-            refreshSessionStatus()
-            appendLog("SPRIX session removed.")
-        })
-        page.addView(button("Solve all remaining SPRIX items") {
-            startSolver(SolverService.ACTION_SPRIX, subject = currentSubject())
-        })
-        page.addView(button("Solve next SPRIX chapter only") {
-            startSolver(SolverService.ACTION_SPRIX, subject = currentSubject(), single = true)
-        })
-        page.addView(button("Preview remaining SPRIX items", true) {
-            startSolver(SolverService.ACTION_SPRIX, subject = currentSubject(), dryRun = true)
-        })
-
-        page.addView(sectionTitle("Run log"))
-        logView = TextView(this).apply {
-            text = "No run started."
-            textSize = 12f
-            setTextColor(pale)
-            setPadding(14, 14, 14, 14)
-            setBackgroundColor(panel)
-            typeface = android.graphics.Typeface.MONOSPACE
-            minHeight = 160
-            setTextIsSelectable(true)
+        val brandRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
         }
-        page.addView(logView)
+        val mark = TextView(this).apply {
+            text = "›"
+            textSize = 34f
+            gravity = Gravity.CENTER
+            setTextColor(Color.WHITE)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            background = rounded(accent, 16)
+            layoutParams = LinearLayout.LayoutParams(dp(54), dp(54))
+        }
+        brandRow.addView(mark)
+        val brandText = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), 0, 0, 0)
+            addView(label("QUREO / SPRIX", 22f, Color.WHITE, true))
+            addView(label("PERSONAL CONTROL CENTER", 10f, pale, true))
+        }
+        brandRow.addView(brandText)
+        heading.addView(brandRow)
+        statusView = label("Checking local sessions...", 12f, accent, true).apply {
+            setPadding(0, dp(18), 0, 0)
+        }
+        heading.addView(statusView)
+        page.addView(heading, fullWidth().apply { bottomMargin = dp(18) })
+
+        page.addView(sectionCard("QUREO", "Course automation and answer-bank tools") {
+            addFieldLabel("Course")
+            qureoCourse = Spinner(this@MainActivity).apply {
+                adapter = ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    listOf("Python · البرمجة بلغة Python", "JavaScript · البرمجة بلغة JavaScript")
+                )
+                setSelection(0)
+            }
+            addView(qureoCourse, fullWidth().apply { bottomMargin = dp(10) })
+            qureoId = input("Student ID", InputType.TYPE_CLASS_TEXT)
+            qureoPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            qureoChapter = input("Chapter number or ID (optional)", InputType.TYPE_CLASS_TEXT)
+            addView(qureoId)
+            addView(qureoPassword)
+            addView(actionButton("Sign in to QUREO") { loginQureo() })
+            addView(actionButton("Sign out", true) {
+                QureoClient(applicationContext).logout()
+                refreshSessionStatus()
+                appendLog("QUREO session removed.")
+            })
+            addView(divider())
+            addView(actionButton("Update answer bank", true) { syncQureoAnswerBank(force = true) })
+            addView(actionButton("Import answer-bank JSON", true) {
+                answerBankPicker.launch(arrayOf("application/json", "text/plain", "*/*"))
+            })
+            addView(qureoChapter)
+            addView(actionButton("Solve selected chapter") {
+                val target = qureoChapter.text.toString().trim().ifBlank { null }
+                startSolver(SolverService.ACTION_QUREO, target = target, course = currentQureoCourse(), single = true)
+            })
+            addView(actionButton("Solve all remaining chapters") {
+                startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse())
+            })
+            addView(actionButton("Preview remaining chapters", true) {
+                startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse(), dryRun = true)
+            })
+        })
+
+        page.addView(sectionCard("SPRIX", "Financial Literacy · live curriculum tools") {
+            sprixId = input("SPRIX Login ID", InputType.TYPE_CLASS_TEXT)
+            sprixPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            sprixSubject = input("Subject ID (7 Arabic · 3 English)", InputType.TYPE_CLASS_NUMBER).apply { setText("7") }
+            addView(sprixId)
+            addView(sprixPassword)
+            addView(sprixSubject)
+            addView(actionButton("Sign in to SPRIX") { loginSprix() })
+            addView(actionButton("Sign out", true) {
+                SprixClient(applicationContext).logout()
+                refreshSessionStatus()
+                appendLog("SPRIX session removed.")
+            })
+            addView(divider())
+            addView(actionButton("Solve all remaining items") {
+                startSolver(SolverService.ACTION_SPRIX, subject = currentSubject())
+            })
+            addView(actionButton("Solve next chapter only") {
+                startSolver(SolverService.ACTION_SPRIX, subject = currentSubject(), single = true)
+            })
+            addView(actionButton("Preview remaining items", true) {
+                startSolver(SolverService.ACTION_SPRIX, subject = currentSubject(), dryRun = true)
+            })
+        })
+
+        val logs = sectionCard("RUN LOG", "Live activity from sign-in, sync and solver tasks") {
+            val logActions = LinearLayout(this@MainActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            val logHint = label("LATEST OUTPUT", 10f, accent, true)
+            logActions.addView(logHint, LinearLayout.LayoutParams(0, dp(36), 1f))
+            val clearButton = Button(this@MainActivity).apply {
+                text = "Clear logs"
+                isAllCaps = false
+                textSize = 12f
+                minHeight = dp(36)
+                minimumHeight = dp(36)
+                setPadding(dp(12), 0, dp(12), 0)
+                setTextColor(pale)
+                backgroundTintList = android.content.res.ColorStateList.valueOf(ink)
+                setOnClickListener {
+                    logView.text = "Logs cleared."
+                    Toast.makeText(this@MainActivity, "Run log cleared", Toast.LENGTH_SHORT).show()
+                }
+            }
+            logActions.addView(clearButton)
+            addView(logActions)
+            logView = TextView(this@MainActivity).apply {
+                text = "No run started."
+                textSize = 12f
+                setTextColor(pale)
+                setPadding(dp(14), dp(14), dp(14), dp(14))
+                background = rounded(ink, 14)
+                typeface = android.graphics.Typeface.MONOSPACE
+                minHeight = dp(170)
+                maxHeight = dp(280)
+                setTextIsSelectable(true)
+                setLineSpacing(dp(2).toFloat(), 1f)
+            }
+            val logScroll = ScrollView(this@MainActivity).apply {
+                isFillViewport = false
+                addView(logView)
+            }
+            addView(logScroll, fullWidth().apply { topMargin = dp(8) })
+        }
+        page.addView(logs)
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -162,8 +222,44 @@ class MainActivity : ComponentActivity() {
         LessonPageBridge.attach(webView)
     }
 
-    private fun sectionTitle(value: String): TextView =
-        label(value, 19f, Color.WHITE, true).apply { setPadding(0, 24, 0, 10) }
+    private fun sectionCard(title: String, subtitle: String, content: LinearLayout.() -> Unit): LinearLayout {
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(16), dp(16), dp(16), dp(16))
+            background = rounded(panel, 20)
+        }
+        card.addView(label(title, 17f, Color.WHITE, true))
+        card.addView(label(subtitle, 11f, Color.LTGRAY, false).apply {
+            setPadding(0, dp(4), 0, dp(14))
+        })
+        card.content()
+        card.layoutParams = fullWidth().apply { bottomMargin = dp(16) }
+        return card
+    }
+
+    private fun addFieldLabel(value: String) {
+        addView(label(value, 12f, pale, true).apply { setPadding(0, 0, 0, dp(5)) })
+    }
+
+    private fun divider(): View = View(this).apply {
+        setBackgroundColor(Color.rgb(55, 63, 71))
+        layoutParams = fullWidth().apply {
+            height = dp(1)
+            topMargin = dp(8)
+            bottomMargin = dp(12)
+        }
+    }
+
+    private fun rounded(color: Int, radius: Int): android.graphics.drawable.GradientDrawable =
+        android.graphics.drawable.GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(radius).toFloat()
+        }
+
+    private fun fullWidth(): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun label(value: String, size: Float, color: Int, bold: Boolean): TextView =
         TextView(this).apply {
@@ -177,30 +273,28 @@ class MainActivity : ComponentActivity() {
         EditText(this).apply {
             hint = hintText
             inputType = inputTypeValue
-            textSize = 15f
+            textSize = 14f
             setSingleLine(true)
             setTextColor(Color.WHITE)
-            setHintTextColor(Color.LTGRAY)
-            setPadding(14, 8, 14, 8)
-            backgroundTintList = android.content.res.ColorStateList.valueOf(accent)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 7 }
+            setHintTextColor(Color.rgb(151, 159, 167))
+            setPadding(dp(13), dp(8), dp(13), dp(8))
+            background = rounded(ink, 12)
+            backgroundTintList = null
+            layoutParams = fullWidth().apply { bottomMargin = dp(8) }
         }
 
-    private fun button(text: String, subtle: Boolean = false, action: () -> Unit): Button =
+    private fun actionButton(text: String, subtle: Boolean = false, action: () -> Unit): Button =
         Button(this).apply {
             this.text = text
             isAllCaps = false
-            textSize = 14f
+            textSize = 13f
+            minHeight = dp(46)
+            minimumHeight = dp(46)
+            setPadding(dp(12), dp(5), dp(12), dp(5))
             setTextColor(if (subtle) pale else Color.WHITE)
-            backgroundTintList = android.content.res.ColorStateList.valueOf(if (subtle) panel else accent)
+            backgroundTintList = android.content.res.ColorStateList.valueOf(if (subtle) ink else accent)
             setOnClickListener { action() }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 5 }
+            layoutParams = fullWidth().apply { bottomMargin = dp(7) }
         }
 
     private fun loginQureo() {
