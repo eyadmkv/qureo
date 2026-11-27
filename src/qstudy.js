@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { emitKeypressEvents } from 'node:readline';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin, stdout } from 'node:process';
 import { QureoHttpClient } from './http.js';
@@ -69,6 +69,8 @@ export function summarizeSprixCurriculum(snapshot) {
   };
 }
 
+export const DEFAULT_SOLVE_TARGETS = Object.freeze(['javascript', 'sprix']);
+
 const SOLVE_OPTIONS = [
   { id: 'javascript', label: 'JavaScript', service: 'QUREO' },
   { id: 'python', label: 'Python', service: 'QUREO' },
@@ -101,6 +103,14 @@ export function createSolvePlan(selected, { dryRun = false } = {}) {
 
     return { id: option.id, label: option.label, service, args };
   });
+}
+
+export function splitSolvePlan(plan) {
+  if (!Array.isArray(plan)) throw new TypeError('Solve plan must be an array.');
+  return {
+    qureo: plan.filter(task => task.service === 'qureo'),
+    sprix: plan.filter(task => task.service === 'sprix')
+  };
 }
 
 export function formatProgressBar(completed, total, width = 20) {
@@ -178,14 +188,15 @@ async function chooseSolveTargets() {
     let cursor = 0;
     let rendered = false;
     let renderedRows = 0;
-    let status = 'No targets selected yet.';
-    const selected = new Set();
+    let status = DEFAULT_SOLVE_TARGETS.length + ' target(s) selected by default.';
+    const selected = new Set(DEFAULT_SOLVE_TARGETS);
     const wasRaw = Boolean(stdin.isRaw);
 
     const render = () => {
       const lines = [
         color('  What would you like to solve?', 'accent'),
         color('  Use ↑/↓ to move, Space to toggle, Enter to continue, Esc to cancel.', 'muted'),
+        color('  Default: JavaScript + SPRIX. Add Python or change the selection as needed.', 'muted'),
         ''
       ];
 
@@ -261,6 +272,57 @@ async function chooseSolveTargets() {
   });
 }
 
+async function confirmParallelSolve(plan) {
+  const groups = splitSolvePlan(plan);
+  const qureoLabels = groups.qureo.map(task => task.label).join(', ');
+  const sprixLabels = groups.sprix.map(task => task.label).join(', ');
+
+  console.log('');
+  console.log(color('  PARALLEL SOLVE', 'accent'));
+  if (qureoLabels) console.log('  QUREO: ' + qureoLabels);
+  if (sprixLabels) console.log('  SPRIX: ' + sprixLabels);
+  console.log('  Both services will run at the same time. QUREO will keep its per-chapter confirmations.');
+  console.log('  SPRIX will start after this confirmation and continue while QUREO is working.');
+
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  try {
+    const response = await rl.question('  Start both solvers? [y/N] ');
+    return /^(?:y|yes)$/iu.test(response.trim());
+  } finally {
+    rl.close();
+  }
+}
+
+async function runServiceAsync(service, args = []) {
+  const entry = path.join(SOURCE_DIR, service === 'qureo' ? 'entry.js' : 'sprix-entry.js');
+  return new Promise(resolve => {
+    let settled = false;
+    const finish = statusCode => {
+      if (settled) return;
+      settled = true;
+      resolve(statusCode);
+    };
+
+    let child;
+    try {
+      child = spawn(process.execPath, [entry, ...args], {
+        stdio: 'inherit',
+        windowsHide: false
+      });
+    } catch (error) {
+      console.error('  ' + service.toUpperCase() + ' failed to start: ' + error.message);
+      finish(1);
+      return;
+    }
+
+    child.once('error', error => {
+      console.error('  ' + service.toUpperCase() + ' failed to start: ' + error.message);
+      finish(1);
+    });
+    child.once('close', code => finish(code === null ? 1 : code));
+  });
+}
+
 async function solve({ dryRun = false } = {}) {
   const selected = await chooseSolveTargets();
   if (!selected.length) {
@@ -269,14 +331,51 @@ async function solve({ dryRun = false } = {}) {
   }
 
   const plan = createSolvePlan(selected, { dryRun });
+  const groups = splitSolvePlan(plan);
   let failures = 0;
-  for (const task of plan) {
+
+  if (groups.qureo.length && groups.sprix.length) {
+    if (!dryRun && !await confirmParallelSolve(plan)) {
+      console.log('Parallel solve cancelled. No answers were submitted.');
+      return;
+    }
+
     console.log('');
-    console.log(color('  ' + (dryRun ? 'PREVIEW ' : 'SOLVE ') + task.label.toUpperCase(), 'accent'));
-    const statusCode = runService(task.service, task.args);
-    if (statusCode !== 0) {
+    console.log(color('  STARTING QUREO + SPRIX CONCURRENTLY', 'accent'));
+
+    const sprixTask = groups.sprix[0];
+    const sprixArgs = dryRun ? sprixTask.args : [...sprixTask.args, '--yes'];
+    const sprixRun = runServiceAsync('sprix', sprixArgs);
+
+    const qureoRun = (async () => {
+      let qureoFailures = 0;
+      for (const task of groups.qureo) {
+        console.log('');
+        console.log(color('  ' + (dryRun ? 'PREVIEW ' : 'SOLVE ') + task.label.toUpperCase(), 'accent'));
+        const statusCode = await runServiceAsync('qureo', task.args);
+        if (statusCode !== 0) {
+          qureoFailures++;
+          console.error('  ' + task.label + ' exited with status ' + statusCode + '.');
+        }
+      }
+      return qureoFailures;
+    })();
+
+    const [qureoFailures, sprixStatus] = await Promise.all([qureoRun, sprixRun]);
+    failures += qureoFailures;
+    if (sprixStatus !== 0) {
       failures++;
-      console.error('  ' + task.label + ' exited with status ' + statusCode + '.');
+      console.error('  SPRIX exited with status ' + sprixStatus + '.');
+    }
+  } else {
+    for (const task of plan) {
+      console.log('');
+      console.log(color('  ' + (dryRun ? 'PREVIEW ' : 'SOLVE ') + task.label.toUpperCase(), 'accent'));
+      const statusCode = runService(task.service, task.args);
+      if (statusCode !== 0) {
+        failures++;
+        console.error('  ' + task.label + ' exited with status ' + statusCode + '.');
+      }
     }
   }
 
@@ -419,6 +518,7 @@ function printHelp() {
   console.log('QStudy ' + VERSION + ' | unified QUREO + SPRIX CLI');
   console.log('');
   console.log('Usage:');
+  console.log('  qstudy                       Start the combined solver (JavaScript + SPRIX by default)');
   console.log('  qstudy login                 Sign in to QUREO and SPRIX with one prompt');
   console.log('  qstudy logout                Remove both saved sessions');
   console.log('  qstudy dashboard             Show combined local progress and data');
@@ -436,7 +536,8 @@ function printHelp() {
 
 export async function runQStudy(args = process.argv.slice(2)) {
   const [command, ...rest] = args;
-  if (!command || command === 'help' || command === '--help' || command === '-h') {
+  if (!command) return solve();
+  if (command === 'help' || command === '--help' || command === '-h') {
     printHelp();
     return;
   }
