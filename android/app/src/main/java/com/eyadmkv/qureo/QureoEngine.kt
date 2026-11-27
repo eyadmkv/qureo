@@ -448,28 +448,35 @@ class QureoAnswerBank(private val context: Context) {
         require(declaredCourse.isBlank() || declaredCourse == courseId) {
             "The selected answer file belongs to course $declaredCourse, not $courseId."
         }
-        val source = root.optJSONObject("answers")
-            ?: throw IllegalArgumentException("The answer file must contain an answers object.")
         val normalized = JSONObject()
         var imported = 0
-        for (questionId in source.keys()) {
-            if (!isCourseQuestionId(courseId, questionId)) continue
-            val row = source.optJSONObject(questionId) ?: continue
-            val type = row.optString("type")
-            when (type) {
-                "choice" -> {
-                    val choiceId = row.opt("choice_id")?.toString()?.toLongOrNull() ?: continue
-                    if (choiceId <= 0) continue
-                    normalized.put(questionId, JSONObject().put("type", "choice").put("choice_id", choiceId))
+        val source = root.optJSONObject("answers")
+        if (source != null) {
+            for (questionId in source.keys()) {
+                if (!isCourseQuestionId(courseId, questionId)) continue
+                val row = source.optJSONObject(questionId) ?: continue
+                val type = row.optString("type")
+                when (type) {
+                    "choice" -> {
+                        val choiceId = row.opt("choice_id")?.toString()?.toLongOrNull() ?: continue
+                        if (choiceId <= 0) continue
+                        normalized.put(questionId, JSONObject().put("type", "choice").put("choice_id", choiceId))
+                    }
+                    "description" -> {
+                        val code = row.optString("answer_code")
+                        if (code.isBlank()) continue
+                        normalized.put(questionId, JSONObject().put("type", "description").put("answer_code", code))
+                    }
+                    else -> continue
                 }
-                "description" -> {
-                    val code = row.optString("answer_code")
-                    if (code.isBlank()) continue
-                    normalized.put(questionId, JSONObject().put("type", "description").put("answer_code", code))
-                }
-                else -> continue
+                imported++
             }
-            imported++
+        } else {
+            val communityAnswers = extractCommunityAnswers(root, courseId)
+            for ((questionId, answer) in communityAnswers) {
+                normalized.put(questionId, answer.toJson())
+            }
+            imported = communityAnswers.size
         }
         require(imported > 0) { "No valid choice or description answers were found in the file." }
         importedDirectory.mkdirs()
@@ -489,30 +496,10 @@ class QureoAnswerBank(private val context: Context) {
         courseId: String
     ): Int {
         var merged = 0
-        for (chapterKey in archive.keys()) {
-            if (!isCommunityChapterForCourse(courseId, chapterKey)) continue
-            val chapter = archive.optJSONObject(chapterKey) ?: continue
-            for (questionId in chapter.keys()) {
-                if (target.containsKey(questionId) ||
-                    !isCommunityQuestionForCourse(courseId, chapterKey, questionId)) continue
-                val row = chapter.optJSONArray(questionId) ?: continue
-                if (!isValidCommunityAnswer(row)) continue
-                val answer = when (row.optString(0)) {
-                    "choice" -> LocalAnswer(
-                        "choice",
-                        choiceId = row.opt(1)?.toString()?.toLongOrNull(),
-                        source = "community"
-                    )
-                    "description" -> LocalAnswer(
-                        "description",
-                        code = row.optString(1),
-                        source = "community"
-                    )
-                    else -> null
-                } ?: continue
-                target[questionId] = answer
-                merged++
-            }
+        for ((questionId, answer) in extractCommunityAnswers(archive, courseId)) {
+            if (target.containsKey(questionId)) continue
+            target[questionId] = answer
+            merged++
         }
         return merged
     }
@@ -620,6 +607,37 @@ internal fun isQureoChapterComplete(chapter: JSONObject, progress: JSONObject?):
     val questionCount = chapter.optInt("question_count", 0)
     val bestCorrect = progress?.optInt("best_correct_count", 0) ?: 0
     return questionCount > 0 && bestCorrect >= questionCount
+}
+
+internal fun extractCommunityAnswers(
+    archive: JSONObject,
+    courseId: String
+): Map<String, LocalAnswer> {
+    val result = linkedMapOf<String, LocalAnswer>()
+    for (chapterId in archive.keys()) {
+        if (!isCommunityChapterForCourse(courseId, chapterId)) continue
+        val chapter = archive.optJSONObject(chapterId) ?: continue
+        for (questionId in chapter.keys()) {
+            if (!isCommunityQuestionForCourse(courseId, chapterId, questionId)) continue
+            val row = chapter.optJSONArray(questionId) ?: continue
+            if (!isValidCommunityAnswer(row)) continue
+            val answer = when (row.optString(0)) {
+                "choice" -> LocalAnswer(
+                    "choice",
+                    choiceId = row.opt(1)?.toString()?.toLongOrNull(),
+                    source = "community"
+                )
+                "description" -> LocalAnswer(
+                    "description",
+                    code = row.optString(1),
+                    source = "community"
+                )
+                else -> null
+            } ?: continue
+            result[questionId] = answer
+        }
+    }
+    return result
 }
 
 private fun isValidCommunityAnswer(answer: JSONArray): Boolean {
