@@ -95,8 +95,8 @@ class PersistentCookieJar(
                 builder.path(row.optString("path", "/"))
                 val expiresAt = row.optLong("expiresAt", Long.MAX_VALUE)
                 if (expiresAt != Long.MAX_VALUE) builder.expiresAt(expiresAt)
-                if (row.optBoolean("secure")) builder.secure
-                if (row.optBoolean("httpOnly")) builder.httpOnly
+                if (row.optBoolean("secure")) builder.secure()
+                if (row.optBoolean("httpOnly")) builder.httpOnly()
                 builder.build().let(result::add)
             }
             result
