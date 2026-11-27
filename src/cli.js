@@ -17,7 +17,7 @@ import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { getChapterAssessmentResultPath, solveCourse } from './solver.js';
-import { resolveChapterContext } from './chapterContext.js';
+import { resolveAccountChapterContext, resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
@@ -129,6 +129,17 @@ async function withClient(action) {
   const client = QureoHttpClient.loadSession();
   const user = await client.getUserInfo();
   return action(client, user);
+}
+
+async function resolveCommandChapter(client, user, chapterId) {
+  const context = await resolveAccountChapterContext(client, user, listApiCourses(), chapterId);
+  if (!context) {
+    throw new Error(
+      `Chapter ${chapterId} was not found in any course available to this account. ` +
+      'Run qureo sync to refresh course metadata or check the chapter ID.'
+    );
+  }
+  return context;
 }
 
 async function login() {
@@ -612,9 +623,11 @@ configureSolveCommand(python.command('solve [chapterRange]')
 
 program.command('lessons <chapterId>')
   .description('List every lesson ID and title in a chapter')
-  .action(async chapterId => withClient(async client => {
+  .action(async chapterId => withClient(async (client, user) => {
+    const context = await resolveCommandChapter(client, user, chapterId);
     const raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
     const lessons = asArray(raw?.lectures || raw?.chapter?.lectures || raw?.data?.lectures);
+    console.log(`Course: ${context.courseId}`);
     console.log(`Chapter ${chapterId}: ${lessons.length} lesson(s)`);
     for (const [index, lesson] of lessons.entries()) {
       console.log(`${String(index + 1).padStart(2, '0')}. ${lesson.title || lesson.name || '(untitled)'} | ${lesson.id ?? lesson.lecture_id ?? '?'}`);
@@ -638,10 +651,12 @@ program.command('progress')
 
 program.command('chapter <chapterId>')
   .description('Fetch chapter metadata, including its lesson list, using GET')
-  .action(async chapterId => withClient(async client => {
+  .action(async chapterId => withClient(async (client, user) => {
+    const context = await resolveCommandChapter(client, user, chapterId);
     const chapter = await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
     const lectures = asArray(chapter?.lectures || chapter?.chapter?.lectures || chapter?.data?.lectures);
     const cached = getApiChapter(chapterId);
+    console.log(`Course: ${context.courseId}`);
     console.log(`Chapter: ${cached?.title || chapter?.name || chapter?.chapter?.name || chapterId}`);
     console.log(`ID: ${chapterId}`);
     console.log(`Lessons: ${lectures.length}`);
@@ -653,8 +668,23 @@ program.command('chapter <chapterId>')
 
 program.command('questions <chapterId>')
   .description('Fetch and cache exercise questions and visible choices for a chapter')
-  .action(async chapterId => withClient(async client => {
-    const raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+  .action(async chapterId => withClient(async (client, user) => {
+    const context = await resolveCommandChapter(client, user, chapterId);
+    let raw;
+    try {
+      raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+    } catch (error) {
+      if (error?.code === 'PRECONDITION_NOT_FULFILLED') {
+        const chapter = await client.json(`/chapters/${encodeURIComponent(chapterId)}`).catch(() => null);
+        const lectures = asArray(chapter?.lectures || chapter?.chapter?.lectures || chapter?.data?.lectures);
+        throw new Error(
+          `QUREO has locked the assessment for chapter ${chapterId} in course ${context.courseId}. ` +
+          `The chapter lists ${lectures.length} lesson(s); QUREO requires its lesson progress before exposing assessment questions. ` +
+          'Use qureo solve with the matching course and chapter after checking that the local answer bank is ready.'
+        );
+      }
+      throw error;
+    }
     const questions = asArray(raw);
     if (!questions.length) {
       console.log('QUREO returned no question array for this chapter.');
@@ -662,6 +692,7 @@ program.command('questions <chapterId>')
       return;
     }
     for (const item of questions) saveApiQuestion(chapterId, item);
+    console.log(`Course: ${context.courseId}`);
     console.log(`Cached ${questions.length} question(s) for chapter ${chapterId}.`);
     for (const [i, item] of questions.entries()) {
       const q = extractQuestion(item);
@@ -674,7 +705,8 @@ program.command('questions <chapterId>')
 
 program.command('result <chapterId>')
   .description('Read an existing review or test result and save any model answers QUREO exposes')
-  .action(async chapterId => withClient(async client => {
+  .action(async chapterId => withClient(async (client, user) => {
+    const context = await resolveCommandChapter(client, user, chapterId);
     const chapterMeta = await client.json(`/chapters/${encodeURIComponent(chapterId)}`).catch(() => null);
     const testType = chapterMeta?.chapter?.test_type ||
       chapterMeta?.test_type ||
@@ -734,6 +766,7 @@ program.command('result <chapterId>')
         answerType: 'code', answerText: String(answerText), explanation: 'Model answer read from an existing QUREO result response.', sourceUrl });
       if (saved) harvested++;
     }
+    console.log(`Course: ${context.courseId}`);
     console.log(`Read existing ${resultPath.includes('/test/') ? 'test' : 'review'} result for chapter ${chapterId}. Stored ${harvested} new answer(s) from result data.`);
     if (failures.length) console.log(`Other endpoint response: ${failures.join(' | ')}`);
     outputJson(result);
