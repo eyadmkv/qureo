@@ -732,20 +732,33 @@ class QureoSolver(
             ).filterNotNull().firstOrNull { it.length() > 0 } ?: JSONArray()
             when (answer.type) {
                 "choice" -> {
-                    val type = question.optString("type").lowercase()
-                    if (options.length() > 0) {
-                        val exists = options.objects().any { it.opt("id")?.toString() == answer.choiceId.toString() }
+                    val type = question.optString("type").lowercase().replace(Regex("[\\s-]+"), "_")
+                    val explicitlyDescription = listOf("description", "code", "text", "input", "fill", "blank", "short_answer", "program", "free_response")
+                        .any(type::contains)
+                    val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq").any(type::contains)
+                    val exists = options.objects().any { option ->
+                        listOf("id", "choice_id", "option_id").any { key ->
+                            option.opt(key)?.toString() == answer.choiceId.toString()
+                        }
+                    }
+                    if (explicitlyDescription) {
+                        missing.add(id)
+                    } else if (options.length() > 0) {
                         if (exists) prepared.add(id to answer) else missing.add(id)
-                    } else if (type.contains("choice") || type.contains("select") || type.contains("radio") || type == "mcq") {
+                    } else if (explicitlyChoice) {
                         prepared.add(id to answer)
                     } else {
                         missing.add(id)
                     }
                 }
                 "description" -> {
-                    val type = question.optString("type").lowercase()
-                    if (answer.code.isNullOrBlank() || options.length() > 0 ||
-                        type.contains("choice") || type.contains("select") || type.contains("radio")) {
+                    val type = question.optString("type").lowercase().replace(Regex("[\\s-]+"), "_")
+                    val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq").any(type::contains)
+                    val supportedDescription = listOf("description", "code", "text", "input", "fill", "blank", "short_answer", "program", "free_response")
+                        .any(type::contains)
+                    if (answer.code.isNullOrBlank() || explicitlyChoice ||
+                        (type.isNotBlank() && !supportedDescription) ||
+                        (type.isBlank() && options.length() > 0)) {
                         missing.add(id)
                     } else {
                         prepared.add(id to answer)
