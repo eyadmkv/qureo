@@ -15,7 +15,8 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private const val SPRIX_ORIGIN = "https://egy.app.spx-learning-square.com"
-private const val SPRIX_ARCHIVE_ROOT =
+private const val SPRIX_ARABIC_SOURCE = "https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/main/"
+private const val SPRIX_ENGLISH_SOURCE =
     "https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/"
 private val SPRIX_JSON = "application/json; charset=utf-8".toMediaType()
 
@@ -300,8 +301,11 @@ class SprixSolver(
     }
 
     private suspend fun loadBank(subjectId: Int): SprixBank {
-        val mapName = if (subjectId == 7) "spx_api_bank.json" else "spx_api_bank_subject3.json"
-        val mapUrl = SPRIX_ARCHIVE_ROOT + mapName
+        val mapUrl = if (subjectId == 7) {
+            SPRIX_ARABIC_SOURCE + "spx_api_bank.json"
+        } else {
+            SPRIX_ENGLISH_SOURCE + "spx_api_bank_subject3.json"
+        }
         val map = downloadJson(mapUrl)
         val blocks = map.optJSONObject("block") ?: throw IllegalStateException("SPRIX block map is missing.")
         val tests = map.optJSONObject("test") ?: throw IllegalStateException("SPRIX test map is missing.")
@@ -309,7 +313,7 @@ class SprixSolver(
             throw IllegalStateException("SPRIX answer map looks incomplete (${blocks.length()} blocks, ${tests.length()} test answers).")
         }
         val archive = if (subjectId == 7) {
-            val archiveJson = downloadJson(SPRIX_ARCHIVE_ROOT + "answers_archive.json")
+            val archiveJson = downloadJson(SPRIX_ARABIC_SOURCE + "answers_archive.json")
             val lessons = archiveJson.optJSONArray("lessons") ?: JSONArray()
             buildList {
                 for (lesson in lessons.objects()) {
