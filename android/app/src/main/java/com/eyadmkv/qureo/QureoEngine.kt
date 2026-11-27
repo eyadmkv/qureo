@@ -94,6 +94,35 @@ data class LocalAnswer(
         .put("source", source)
 }
 
+internal fun communityCoursePrefix(courseId: String): String = when (courseId) {
+    "python_short_ar" -> "511"
+    "javascript_ar" -> "900"
+    else -> throw IllegalArgumentException("Unsupported QUREO course: $courseId")
+}
+
+internal fun isCourseQuestionId(courseId: String, questionId: String): Boolean {
+    val prefix = communityCoursePrefix(courseId)
+    return questionId.length in 7..10 &&
+        questionId.all(Char::isDigit) &&
+        questionId.startsWith(prefix)
+}
+
+internal fun isCommunityChapterForCourse(courseId: String, chapterId: String): Boolean {
+    val prefix = communityCoursePrefix(courseId)
+    return chapterId.length in 5..6 &&
+        chapterId.all(Char::isDigit) &&
+        chapterId.startsWith(prefix)
+}
+
+internal fun isCommunityQuestionForCourse(
+    courseId: String,
+    chapterId: String,
+    questionId: String
+): Boolean =
+    isCommunityChapterForCourse(courseId, chapterId) &&
+        isCourseQuestionId(courseId, questionId) &&
+        questionId.startsWith(chapterId)
+
 class QureoClient(context: Context) {
     private val appContext = context.applicationContext
     private val encryptedStore = EncryptedStore(appContext)
@@ -260,29 +289,29 @@ class QureoAnswerBank(private val context: Context) {
         }.getOrNull()
         asset?.let { raw ->
             runCatching { JSONObject(raw).optJSONObject("answers") }.getOrNull()
-                ?.let { addFlatAnswers(result, it, "bundled") }
+                ?.let { addFlatAnswers(result, it, "bundled", courseId) }
         }
 
         val downloadedFile = File(downloadedDirectory, "$courseId.json")
         if (downloadedFile.exists()) {
             runCatching { JSONObject(downloadedFile.readText()).optJSONObject("answers") }.getOrNull()
-                ?.let { addFlatAnswers(result, it, "downloaded") }
+                ?.let { addFlatAnswers(result, it, "downloaded", courseId) }
         }
 
         if (communityFile.exists()) {
             runCatching { JSONObject(communityFile.readText()) }.getOrNull()
-                ?.let { mergeCommunity(result, it) }
+                ?.let { mergeCommunity(result, it, courseId) }
         }
 
         val importedFile = File(importedDirectory, "$courseId.json")
         if (importedFile.exists()) {
             runCatching { JSONObject(importedFile.readText()).optJSONObject("answers") }.getOrNull()
-                ?.let { addFlatAnswers(result, it, "imported") }
+                ?.let { addFlatAnswers(result, it, "imported", courseId) }
         }
 
         if (verifiedFile.exists()) {
             runCatching { JSONObject(verifiedFile.readText()) }.getOrNull()
-                ?.let { addFlatAnswers(result, it, "qureo-result") }
+                ?.let { addFlatAnswers(result, it, "qureo-result", courseId) }
         }
         return result
     }
@@ -298,7 +327,8 @@ class QureoAnswerBank(private val context: Context) {
                 communityFile.isFile && now - communityFile.lastModified() < CACHE_TTL_MS
             if (fresh) {
                 val cachedCount = load(courseId).size
-                onProgress("Using the cached $courseId answer bank ($cachedCount answers).")
+                val communityCount = cachedCommunityCount(courseId)
+                onProgress("Using the cached $courseId answer bank ($cachedCount answers; $communityCount from the course-matched community archive).")
                 return@withContext cachedCount
             }
 
@@ -316,6 +346,7 @@ class QureoAnswerBank(private val context: Context) {
                 val normalized = JSONObject()
                 var validCount = 0
                 for (questionId in source.keys()) {
+                    if (!isCourseQuestionId(courseId, questionId)) continue
                     val row = source.optJSONObject(questionId) ?: continue
                     when (row.optString("type")) {
                         "choice" -> {
@@ -347,29 +378,25 @@ class QureoAnswerBank(private val context: Context) {
             try {
                 val parsed = jsonObject(downloadText(COMMUNITY_ANSWERS_URL))
                 var total = 0
+                var courseAnswers = 0
                 for (chapterId in parsed.keys()) {
                     val chapter = parsed.optJSONObject(chapterId) ?: continue
                     for (questionId in chapter.keys()) {
                         val answer = chapter.optJSONArray(questionId) ?: continue
-                        if (answer.length() != 2) continue
-                        val type = answer.optString(0)
-                        if (type == "choice" && (answer.opt(1)?.toString()?.toLongOrNull() ?: 0L) > 0L) total++
-                        if (type == "description" && answer.optString(1).isNotBlank()) total++
+                        if (!isValidCommunityAnswer(answer)) continue
+                        total++
+                        if (isCommunityQuestionForCourse(courseId, chapterId, questionId)) courseAnswers++
                     }
                 }
                 require(total >= MIN_COMMUNITY_ANSWERS) {
-                    "Downloaded community archive looks incomplete ($total answers)."
+                    "Downloaded community archive looks incomplete ($total valid answers)."
                 }
-                val expectedPrefix = if (courseId == "python_short_ar") "511" else "900"
-                val courseAnswers = parsed.keys().asSequence()
-                    .filter { it.startsWith(expectedPrefix) }
-                    .sumOf { parsed.optJSONObject(it)?.length() ?: 0 }
                 require(courseAnswers > 0) {
-                    "Downloaded community archive does not contain $courseId answers."
+                    "Downloaded community archive does not contain valid $courseId answers."
                 }
                 writeAtomically(communityFile, parsed.toString())
                 downloadedCommunity = true
-                onProgress("Downloaded the shared community archive ($total answers).")
+                onProgress("Downloaded the shared community archive ($total total; $courseAnswers for $courseId).")
             } catch (error: Exception) {
                 onProgress("Community archive update failed: ${error.message}")
             }
@@ -452,23 +479,54 @@ class QureoAnswerBank(private val context: Context) {
         return imported
     }
 
-    fun mergeCommunity(target: MutableMap<String, LocalAnswer>, archive: JSONObject) {
+    fun mergeCommunity(
+        target: MutableMap<String, LocalAnswer>,
+        archive: JSONObject,
+        courseId: String
+    ): Int {
+        var merged = 0
         for (chapterKey in archive.keys()) {
+            if (!isCommunityChapterForCourse(courseId, chapterKey)) continue
             val chapter = archive.optJSONObject(chapterKey) ?: continue
             for (questionId in chapter.keys()) {
-                if (target.containsKey(questionId)) continue
+                if (target.containsKey(questionId) ||
+                    !isCommunityQuestionForCourse(courseId, chapterKey, questionId)) continue
                 val row = chapter.optJSONArray(questionId) ?: continue
-                if (row.length() != 2) continue
-                val type = row.optString(0)
-                val value = row.opt(1)
-                val answer = when (type) {
-                    "choice" -> LocalAnswer(type, choiceId = value?.toString()?.toLongOrNull(), source = "community")
-                    "description" -> LocalAnswer(type, code = value?.toString(), source = "community")
+                if (!isValidCommunityAnswer(row)) continue
+                val answer = when (row.optString(0)) {
+                    "choice" -> LocalAnswer(
+                        "choice",
+                        choiceId = row.opt(1)?.toString()?.toLongOrNull(),
+                        source = "community"
+                    )
+                    "description" -> LocalAnswer(
+                        "description",
+                        code = row.optString(1),
+                        source = "community"
+                    )
                     else -> null
-                }
-                if (answer != null) target[questionId] = answer
+                } ?: continue
+                target[questionId] = answer
+                merged++
             }
         }
+        return merged
+    }
+
+    private fun cachedCommunityCount(courseId: String): Int {
+        if (!communityFile.isFile) return 0
+        return runCatching {
+            val archive = JSONObject(communityFile.readText())
+            archive.keys().asSequence()
+                .filter { isCommunityChapterForCourse(courseId, it) }
+                .sumOf { chapterId ->
+                    val chapter = archive.optJSONObject(chapterId) ?: return@sumOf 0
+                    chapter.keys().count { questionId ->
+                        isCommunityQuestionForCourse(courseId, chapterId, questionId) &&
+                            isValidCommunityAnswer(chapter.optJSONArray(questionId) ?: JSONArray())
+                    }
+                }
+        }.getOrDefault(0)
     }
 
     fun saveVerified(answers: Map<String, LocalAnswer>) {
@@ -487,25 +545,27 @@ class QureoAnswerBank(private val context: Context) {
     private fun addFlatAnswers(
         destination: MutableMap<String, LocalAnswer>,
         source: JSONObject,
-        answerSource: String
+        answerSource: String,
+        courseId: String
     ) {
         for (questionId in source.keys()) {
+            if (!isCourseQuestionId(courseId, questionId)) continue
             val row = source.optJSONObject(questionId) ?: continue
             val type = row.optString("type")
             val answer = when (type) {
-                "choice" -> LocalAnswer(
-                    type,
-                    choiceId = row.opt("choice_id")?.toString()?.toLongOrNull(),
-                    source = answerSource
-                )
-                "description" -> LocalAnswer(
-                    type,
-                    code = row.optString("answer_code").takeIf { it.isNotBlank() },
-                    source = answerSource
-                )
+                "choice" -> {
+                    val choiceId = row.opt("choice_id")?.toString()?.toLongOrNull()
+                    if (choiceId != null && choiceId > 0) {
+                        LocalAnswer(type, choiceId = choiceId, source = answerSource)
+                    } else null
+                }
+                "description" -> {
+                    val answerCode = row.optString("answer_code").takeIf { it.isNotBlank() }
+                    answerCode?.let { LocalAnswer(type, code = it, source = answerSource) }
+                }
                 else -> null
             }
-            if (answer != null && (answer.choiceId != null || answer.code != null)) destination[questionId] = answer
+            if (answer != null) destination[questionId] = answer
         }
     }
 
@@ -514,6 +574,15 @@ class QureoAnswerBank(private val context: Context) {
         private const val COURSE_BANK_BASE_URL = "https://raw.githubusercontent.com/eyadmkv/qureo/main/answers"
         private const val CACHE_TTL_MS = 24L * 60L * 60L * 1000L
         private const val MIN_COMMUNITY_ANSWERS = 100
+    }
+}
+
+private fun isValidCommunityAnswer(answer: JSONArray): Boolean {
+    if (answer.length() != 2) return false
+    return when (answer.optString(0)) {
+        "choice" -> (answer.opt(1)?.toString()?.toLongOrNull() ?: 0L) > 0L
+        "description" -> answer.opt(1) is String && answer.optString(1).isNotBlank()
+        else -> false
     }
 }
 
@@ -712,6 +781,47 @@ class QureoSolver(
         }
     }
 
+    private fun questionType(item: JSONObject, question: JSONObject): String =
+        question.optString("type").ifBlank { item.optString("type") }
+            .trim()
+            .lowercase()
+            .replace(Regex("[\\s-]+"), "_")
+
+    private fun questionOptions(item: JSONObject, question: JSONObject): JSONArray =
+        sequenceOf(
+            item.optJSONArray("choices"),
+            item.optJSONArray("options"),
+            item.optJSONArray("choice_options"),
+            question.optJSONArray("choices"),
+            question.optJSONArray("options"),
+            question.optJSONArray("choice_options")
+        ).filterNotNull().firstOrNull { it.length() > 0 } ?: JSONArray()
+
+    private fun choiceOptionId(option: JSONObject): Long? {
+        val direct = listOf("id", "choice_id", "option_id")
+            .firstNotNullOfOrNull { key -> option.opt(key)?.toString()?.toLongOrNull() }
+        val nested = option.optJSONObject("choice")?.opt("id")?.toString()?.toLongOrNull()
+        return (direct ?: nested)?.takeIf { it > 0 }
+    }
+
+    private fun missingAnswerDetail(
+        id: String,
+        answer: LocalAnswer?,
+        type: String,
+        options: JSONArray
+    ): String {
+        val stored = when (answer?.type) {
+            "choice" -> "choice:${answer.choiceId ?: "invalid"}"
+            "description" -> "description"
+            null -> "none"
+            else -> answer.type
+        }
+        val optionIds = options.objects().mapNotNull(::choiceOptionId)
+        val liveType = type.ifBlank { "unspecified" }
+        val liveOptions = if (optionIds.isEmpty()) "" else ", live-option-ids=${optionIds.joinToString("/")}"
+        return "$id [stored=$stored, live-type=$liveType$liveOptions]"
+    }
+
     private fun prepareAnswers(
         questions: List<JSONObject>,
         answers: Map<String, LocalAnswer>
@@ -720,51 +830,51 @@ class QureoSolver(
         val missing = mutableListOf<String>()
         for (item in questions) {
             val question = item.optJSONObject("question") ?: item
-            val id = question.firstString("id")
+            val id = question.firstString("id").ifBlank { item.firstString("id") }
             val answer = answers[id]
+            val options = questionOptions(item, question)
+            val type = questionType(item, question)
+            val explicitlyDescription = listOf(
+                "description", "code", "text", "input", "fill", "blank",
+                "short_answer", "program", "free_response"
+            ).any(type::contains)
+            val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq")
+                .any(type::contains)
+            val missingDetail = missingAnswerDetail(id.ifBlank { "unknown" }, answer, type, options)
+
             if (answer == null || id.isBlank()) {
-                missing.add(id.ifBlank { "unknown" })
+                missing.add(missingDetail)
                 continue
             }
-            val options = sequenceOf(
-                item.optJSONArray("choices"), item.optJSONArray("options"),
-                question.optJSONArray("choices"), question.optJSONArray("options")
-            ).filterNotNull().firstOrNull { it.length() > 0 } ?: JSONArray()
+
             when (answer.type) {
                 "choice" -> {
-                    val type = question.optString("type").lowercase().replace(Regex("[\\s-]+"), "_")
-                    val explicitlyDescription = listOf("description", "code", "text", "input", "fill", "blank", "short_answer", "program", "free_response")
-                        .any(type::contains)
-                    val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq").any(type::contains)
-                    val exists = options.objects().any { option ->
-                        listOf("id", "choice_id", "option_id").any { key ->
-                            option.opt(key)?.toString() == answer.choiceId.toString()
-                        }
-                    }
-                    if (explicitlyDescription) {
-                        missing.add(id)
+                    val choiceId = answer.choiceId
+                    if (choiceId == null || choiceId <= 0 || explicitlyDescription) {
+                        missing.add(missingDetail)
                     } else if (options.length() > 0) {
-                        if (exists) prepared.add(id to answer) else missing.add(id)
+                        val exists = options.objects().any { choiceOptionId(it) == choiceId }
+                        if (exists) prepared.add(id to answer) else missing.add(missingDetail)
                     } else if (explicitlyChoice) {
                         prepared.add(id to answer)
                     } else {
-                        missing.add(id)
+                        missing.add(missingDetail)
                     }
                 }
                 "description" -> {
-                    val type = question.optString("type").lowercase().replace(Regex("[\\s-]+"), "_")
-                    val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq").any(type::contains)
-                    val supportedDescription = listOf("description", "code", "text", "input", "fill", "blank", "short_answer", "program", "free_response")
-                        .any(type::contains)
+                    val supportedDescription = listOf(
+                        "description", "code", "text", "input", "fill", "blank",
+                        "short_answer", "program", "free_response"
+                    ).any(type::contains)
                     if (answer.code.isNullOrBlank() || explicitlyChoice ||
                         (type.isNotBlank() && !supportedDescription) ||
                         (type.isBlank() && options.length() > 0)) {
-                        missing.add(id)
+                        missing.add(missingDetail)
                     } else {
                         prepared.add(id to answer)
                     }
                 }
-                else -> missing.add(id)
+                else -> missing.add(missingDetail)
             }
         }
         return prepared to missing
@@ -775,25 +885,55 @@ class QureoSolver(
             val lessonId = lesson.firstString("id", "lecture_id")
             if (lessonId.isBlank()) continue
             val referer = "$QUREO_COURSE/chapter/$chapterId/lecture/$lessonId"
-            val direct = runCatching {
+            val directAttempt = runCatching {
                 api.rawPut("/students/lectures/$lessonId/complete", referer)
-            }.getOrNull()
+            }
+            val direct = directAttempt.getOrNull()
+            val directFailure = directAttempt.exceptionOrNull()
             when {
                 direct?.successful == true -> onProgress("Lesson $lessonId completed.")
                 direct?.status == 400 || direct?.status == 409 -> onProgress("Lesson $lessonId already completed.")
                 direct?.status == 404 || direct == null -> {
-                    val result = LessonPageBridge.complete(
-                        chapterId,
-                        lessonId,
-                        api.cookieHeaderForCourse()
-                    )
+                    val directDetail = when {
+                        directFailure != null -> directFailure.message ?: directFailure.javaClass.simpleName
+                        direct?.status == 404 -> "direct API returned HTTP 404"
+                        else -> null
+                    }
+                    if (directDetail != null) {
+                        onProgress("Lesson $lessonId direct completion request failed ($directDetail); trying the QUREO lesson page.")
+                    }
+                    val result = try {
+                        LessonPageBridge.complete(
+                            chapterId,
+                            lessonId,
+                            api.webViewCookiesForCourse()
+                        )
+                    } catch (error: Exception) {
+                        val detail = error.message ?: error.javaClass.simpleName
+                        throw IllegalStateException(
+                            "QUREO lesson $lessonId could not be completed through the lesson page: $detail" +
+                                (directDetail?.let { " (direct API: $it)" } ?: ""),
+                            error
+                        )
+                    }
                     if (result.optBoolean("ok") || result.optInt("status") in listOf(400, 409)) {
                         onProgress("Lesson $lessonId completed through the QUREO lesson page.")
                     } else {
-                        throw IllegalStateException("QUREO could not complete lesson $lessonId (HTTP ${result.optInt("status")}).")
+                        val status = result.optInt("status")
+                        val detail = sequenceOf(result.optString("error"), result.optString("body"))
+                            .firstOrNull { it.isNotBlank() }
+                            .orEmpty()
+                        val statusLabel = if (status == 0) "network/WebView error" else "HTTP ${status}"
+                        throw IllegalStateException(
+                            "QUREO could not complete lesson $lessonId ($statusLabel): " +
+                                (detail.ifBlank { "The lesson page did not confirm completion." }) +
+                                (directDetail?.let { " (direct API: $it)" } ?: "")
+                        )
                     }
                 }
-                else -> throw IllegalStateException("QUREO lesson $lessonId completion failed (HTTP ${direct.status}).")
+                else -> throw IllegalStateException(
+                    "QUREO lesson $lessonId completion failed (HTTP ${direct.status})."
+                )
             }
         }
     }
