@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
             setBackgroundColor(panel)
             typeface = android.graphics.Typeface.MONOSPACE
             minHeight = 160
-            textIsSelectable = true
+            setTextIsSelectable(true)
         }
         page.addView(logView)
 
