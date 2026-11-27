@@ -453,6 +453,7 @@ class QureoAnswerBank(private val context: Context) {
         val normalized = JSONObject()
         var imported = 0
         for (questionId in source.keys()) {
+            if (!isCourseQuestionId(courseId, questionId)) continue
             val row = source.optJSONObject(questionId) ?: continue
             val type = row.optString("type")
             when (type) {
