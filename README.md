@@ -58,6 +58,7 @@ npm link
 qstudy login
 qstudy sync
 qstudy dashboard
+qstudy solve
 qstudy qureo me
 qstudy sprix progress
 
@@ -75,6 +76,8 @@ sprix login
 | `qstudy login` / `logout` | Sign in to or clear both QUREO and SPRIX sessions with one command |
 | `qstudy dashboard` | Show combined QUREO and SPRIX progress and local data |
 | `qstudy sync` / `status` | Refresh both platforms or validate both saved sessions |
+| `qstudy solve` | Choose JavaScript, Python and/or SPRIX from an interactive checklist |
+| `qstudy solve --dry-run` | Preview selected solvers without submitting answers |
 | `qstudy qureo <command>` / `qstudy sprix <command>` | Run existing service commands through the unified entry point |
 | `qureo login` / `logout` | Create or remove the QUREO session; remains available directly |
 | `qureo me` | Show account identity, completed chapters and reward totals |
