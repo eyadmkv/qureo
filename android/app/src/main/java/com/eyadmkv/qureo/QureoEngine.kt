@@ -253,6 +253,9 @@ class QureoClient(context: Context) {
     fun cookieHeaderForCourse(): String =
         cookieJar.cookieHeader("$QUREO_COURSE/chapter/".toHttpUrl())
 
+    fun webViewCookiesForCourse(): List<String> =
+        cookieJar.webViewSetCookieHeaders("$QUREO_COURSE/chapter/".toHttpUrl())
+
     suspend fun getUser(): JSONObject = withContext(Dispatchers.IO) {
         val response = request("$QUREO_PORTAL/oauth2/userinfo")
         if (!response.successful) throw ApiFailure(response.status, null, "QUREO session is invalid. Sign in again.")
