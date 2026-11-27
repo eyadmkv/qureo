@@ -132,6 +132,20 @@ class PersistentCookieJar(
         "${it.name}=${it.value}"
     }
 
+    fun webViewSetCookieHeaders(url: HttpUrl): List<String> = synchronized(lock) {
+        val now = System.currentTimeMillis()
+        cookies.removeAll { it.expiresAt <= now }
+        cookies.filter { it.matches(url) }.map { cookie ->
+            buildList {
+                add("${cookie.name}=${cookie.value}")
+                add("Path=${cookie.path}")
+                if (!cookie.hostOnly) add("Domain=${cookie.domain}")
+                if (cookie.secure) add("Secure")
+                if (cookie.httpOnly) add("HttpOnly")
+            }.joinToString("; ")
+        }
+    }
+
     fun clear() {
         synchronized(lock) {
             cookies.clear()
