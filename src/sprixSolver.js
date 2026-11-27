@@ -88,7 +88,7 @@ function extractDataObject(source) {
   throw new Error('The DATA object appears to be incomplete.');
 }
 
-export function parseSprixAnswerArchive(source, sourceName = SPRIX_ARABIC_ARCHIVE_URL) {
+export function parseSprixAnswerArchive(source, sourceName = 'answers_archive.json') {
   let archive;
   try {
     archive = JSON.parse(String(source || ''));
@@ -400,10 +400,11 @@ export function loadSprixAnswerBank(subjectId = null) {
       subjectId: 3,
       imported_at: [englishBank.imported_at, englishArchive?.imported_at].filter(Boolean).sort().at(-1) || null,
       source: [englishBank.source_url, englishArchive?.source].filter(Boolean).join('; '),
-      total: questions.length || englishBank.total,
+      total: questions.length,
       answered: questions.length,
       unanswered: 0,
       questions,
+      archiveQuestionTotal: englishArchive?.total || 0,
       blockAnswers: englishBank.answers,
       blockAnswerSource: englishBank.source_url,
       testAnswers: englishBank.testAnswers && typeof englishBank.testAnswers === 'object'
@@ -1827,6 +1828,7 @@ function registerBankCommands(sprix) {
         console.log('Chapter block mappings: ' + (data.blockAnswerTotal ?? Object.keys(data.blockAnswers || {}).length));
         console.log('Test answer mappings: ' + (data.testAnswerTotal ?? Object.keys(data.testAnswers || {}).length));
       }
+      if (Number(options.subject) === 3) console.log('English archive questions: ' + (data.archiveQuestionTotal ?? 0));
       if (Number(options.subject) === 7) console.log('Arabic archive questions: ' + (data.archiveQuestionTotal ?? 0));
       const bankPath = Number(options.subject) === 3
         ? SPRIX_ENGLISH_BLOCK_BANK_PATH
