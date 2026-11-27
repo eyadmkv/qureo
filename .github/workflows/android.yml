@@ -46,9 +46,19 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish GitHub Release
+      - name: Publish versioned Android release
         if: startsWith(github.ref, 'refs/tags/android-v')
         uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
+          files: release/qureo-android.apk
+
+      - name: Publish latest Android build
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-build-${{ github.run_number }}
+          name: Android build ${{ github.run_number }}
+          prerelease: true
           generate_release_notes: true
           files: release/qureo-android.apk
