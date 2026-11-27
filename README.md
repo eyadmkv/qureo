@@ -79,7 +79,7 @@ The login command prompts for your student ID and a hidden password. The passwor
 | `qureo answer save ...` | Save a personal answer or solution note |
 | `qureo answers sync-community` | Download the public community answer archive into ignored local data for fallback matching |
 | `qureo solve [range]` | Choose a course interactively, then run the chapter solver |
-| `qureo python solve [range]` / `qureo solve python [range]` | Solve the Python course directly using course-specific answers and the optional community fallback archive |
+| `qureo python solve [range]` / `qureo solve python [range]` | Solve the Python course directly, refreshing the community fallback archive automatically and using the cached copy offline |
 | `qureo dashboard` | Show local cache and progress summary |
 | `qureo status` / `doctor` | Inspect local setup and connectivity |
 | `sprix sync` / `progress` | Sync the live curriculum and summarize saved progress |
