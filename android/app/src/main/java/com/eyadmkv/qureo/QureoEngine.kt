@@ -249,16 +249,29 @@ class QureoClient(context: Context) {
 class QureoAnswerBank(private val context: Context) {
     private val verifiedFile = File(context.filesDir, "qureo-verified-answers.json")
     private val importedDirectory = File(context.filesDir, "answer-banks")
+    private val downloadedDirectory = File(context.filesDir, "downloaded-answer-banks")
+    private val communityFile = File(context.filesDir, "community-qureo-answers.json")
 
     fun load(courseId: String): MutableMap<String, LocalAnswer> {
-        require(courseId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "Invalid QUREO course ID." }
+        require(courseId in SUPPORTED_COURSES) { "Choose Python or JavaScript as the QUREO course." }
         val result = linkedMapOf<String, LocalAnswer>()
         val asset = runCatching {
             context.assets.open("$courseId.json").bufferedReader().use { it.readText() }
         }.getOrNull()
         asset?.let { raw ->
             runCatching { JSONObject(raw).optJSONObject("answers") }.getOrNull()
-                ?.let { addFlatAnswers(result, it, "course") }
+                ?.let { addFlatAnswers(result, it, "bundled") }
+        }
+
+        val downloadedFile = File(downloadedDirectory, "$courseId.json")
+        if (downloadedFile.exists()) {
+            runCatching { JSONObject(downloadedFile.readText()).optJSONObject("answers") }.getOrNull()
+                ?.let { addFlatAnswers(result, it, "downloaded") }
+        }
+
+        if (communityFile.exists()) {
+            runCatching { JSONObject(communityFile.readText()) }.getOrNull()
+                ?.let { mergeCommunity(result, it) }
         }
 
         val importedFile = File(importedDirectory, "$courseId.json")
@@ -272,6 +285,130 @@ class QureoAnswerBank(private val context: Context) {
                 ?.let { addFlatAnswers(result, it, "qureo-result") }
         }
         return result
+    }
+
+    suspend fun sync(courseId: String, force: Boolean = false, onProgress: (String) -> Unit = {}): Int =
+        withContext(Dispatchers.IO) {
+            require(courseId in SUPPORTED_COURSES) { "Choose Python or JavaScript as the QUREO course." }
+            downloadedDirectory.mkdirs()
+            val courseFile = File(downloadedDirectory, "$courseId.json")
+            val now = System.currentTimeMillis()
+            val fresh = !force &&
+                courseFile.isFile && now - courseFile.lastModified() < CACHE_TTL_MS &&
+                communityFile.isFile && now - communityFile.lastModified() < CACHE_TTL_MS
+            if (fresh) {
+                val cachedCount = load(courseId).size
+                onProgress("Using the cached $courseId answer bank ($cachedCount answers).")
+                return@withContext cachedCount
+            }
+
+            var downloadedCourse = false
+            try {
+                val url = "$COURSE_BANK_BASE_URL/$courseId.json"
+                val content = downloadText(url)
+                val root = jsonObject(content)
+                val declaredCourse = root.optString("course_id")
+                require(declaredCourse == courseId) {
+                    "The downloaded answer bank is for $declaredCourse, expected $courseId."
+                }
+                val source = root.optJSONObject("answers")
+                    ?: throw IllegalStateException("The downloaded $courseId answer bank has no answers object.")
+                val normalized = JSONObject()
+                var validCount = 0
+                for (questionId in source.keys()) {
+                    val row = source.optJSONObject(questionId) ?: continue
+                    when (row.optString("type")) {
+                        "choice" -> {
+                            val choiceId = row.opt("choice_id")?.toString()?.toLongOrNull() ?: continue
+                            if (choiceId <= 0) continue
+                            normalized.put(questionId, JSONObject().put("type", "choice").put("choice_id", choiceId))
+                        }
+                        "description" -> {
+                            val code = row.optString("answer_code")
+                            if (code.isBlank()) continue
+                            normalized.put(questionId, JSONObject().put("type", "description").put("answer_code", code))
+                        }
+                    }
+                    if (normalized.has(questionId)) validCount++
+                }
+                require(validCount > 0) { "The downloaded $courseId answer bank contains no valid answers." }
+                writeAtomically(courseFile, JSONObject()
+                    .put("course_id", courseId)
+                    .put("answers", normalized)
+                    .toString(2))
+                downloadedCourse = true
+                onProgress("Downloaded the $courseId course bank ($validCount answers).")
+            } catch (error: Exception) {
+                onProgress("Course bank update failed: ${error.message}")
+                if (!courseFile.isFile) onProgress("No cached $courseId course bank exists; using the shared archive if available.")
+            }
+
+            var downloadedCommunity = false
+            try {
+                val parsed = jsonObject(downloadText(COMMUNITY_ANSWERS_URL))
+                var total = 0
+                for (chapterId in parsed.keys()) {
+                    val chapter = parsed.optJSONObject(chapterId) ?: continue
+                    for (questionId in chapter.keys()) {
+                        val answer = chapter.optJSONArray(questionId) ?: continue
+                        if (answer.length() != 2) continue
+                        val type = answer.optString(0)
+                        if (type == "choice" && (answer.opt(1)?.toString()?.toLongOrNull() ?: 0L) > 0L) total++
+                        if (type == "description" && answer.optString(1).isNotBlank()) total++
+                    }
+                }
+                require(total >= MIN_COMMUNITY_ANSWERS) {
+                    "Downloaded community archive looks incomplete ($total answers)."
+                }
+                val expectedPrefix = if (courseId == "python_short_ar") "511" else "900"
+                val courseAnswers = parsed.keys().asSequence()
+                    .filter { it.startsWith(expectedPrefix) }
+                    .sumOf { parsed.optJSONObject(it)?.length() ?: 0 }
+                require(courseAnswers > 0) {
+                    "Downloaded community archive does not contain $courseId answers."
+                }
+                writeAtomically(communityFile, parsed.toString())
+                downloadedCommunity = true
+                onProgress("Downloaded the shared community archive ($total answers).")
+            } catch (error: Exception) {
+                onProgress("Community archive update failed: ${error.message}")
+            }
+
+            val available = load(courseId).size
+            if (available == 0) {
+                throw IllegalStateException("No answer bank is available for $courseId. Connect to the internet and retry.")
+            }
+            if (!downloadedCourse && !downloadedCommunity) {
+                onProgress("Network unavailable. Continuing with cached and bundled answers ($available answers).")
+            }
+            available
+        }
+
+    private suspend fun downloadText(url: String): String = withContext(Dispatchers.IO) {
+        val client = OkHttpClient.Builder()
+            .followRedirects(true)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .build()
+        val request = Request.Builder().url(url).get().build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IllegalStateException("Download failed with HTTP ${response.code}.")
+            }
+            response.body?.string().orEmpty().also {
+                require(it.isNotBlank()) { "The answer-bank download was empty." }
+            }
+        }
+    }
+
+    private fun writeAtomically(destination: File, content: String) {
+        destination.parentFile?.mkdirs()
+        val temporary = File(destination.parentFile, destination.name + ".tmp")
+        temporary.writeText(content)
+        if (!temporary.renameTo(destination)) {
+            destination.writeText(temporary.readText())
+            temporary.delete()
+        }
     }
 
     fun importBank(courseId: String, content: String): Int {
@@ -373,22 +510,10 @@ class QureoAnswerBank(private val context: Context) {
     }
 
     companion object {
-        suspend fun downloadCommunity(): JSONObject = withContext(Dispatchers.IO) {
-            val client = OkHttpClient.Builder()
-                .followRedirects(true)
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(40, TimeUnit.SECONDS)
-                .build()
-            val request = Request.Builder().url(COMMUNITY_ANSWERS_URL).get().build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw IllegalStateException("Community answer archive download failed with HTTP ${response.code}.")
-                val parsed = jsonObject(response.body?.string().orEmpty())
-                var total = 0
-                for (chapterId in parsed.keys()) total += parsed.optJSONObject(chapterId)?.length() ?: 0
-                require(total >= 100) { "Downloaded community archive looks incomplete ($total answers)." }
-                parsed
-            }
-        }
+        val SUPPORTED_COURSES = setOf("python_short_ar", "javascript_ar")
+        private const val COURSE_BANK_BASE_URL = "https://raw.githubusercontent.com/eyadmkv/qureo/main/answers"
+        private const val CACHE_TTL_MS = 24L * 60L * 60L * 1000L
+        private const val MIN_COMMUNITY_ANSWERS = 100
     }
 }
 
@@ -405,17 +530,13 @@ class QureoSolver(
         single: Boolean = false,
         dryRun: Boolean = false
     ) {
-        require(courseId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "Invalid QUREO course ID." }
-        val answers = bank.load(courseId)
-        if (courseId == "python_short_ar") {
-            try {
-                val community = QureoAnswerBank.downloadCommunity()
-                bank.mergeCommunity(answers, community)
-                onProgress("Loaded community fallback answers.")
-            } catch (error: Exception) {
-                onProgress("Community archive unavailable: ${error.message}")
-            }
+        require(courseId in QureoAnswerBank.SUPPORTED_COURSES) {
+            "Choose Python (python_short_ar) or JavaScript (javascript_ar)."
         }
+        onProgress("Checking online answer banks for $courseId...")
+        val answerCount = bank.sync(courseId, onProgress = onProgress)
+        val answers = bank.load(courseId)
+        onProgress("Ready: $answerCount answer(s) available for $courseId.")
 
         val course = api.courseData(courseId)
         val sectionId = course.firstObject("basic_section")?.firstString("id")
@@ -445,7 +566,7 @@ class QureoSolver(
 
         val startIndex = if (targetIndex >= 0) targetIndex else chapters.indexOfFirst { !completed[it.firstString("id")].orFalse() }
         if (startIndex < 0) {
-            onProgress("All Python chapters are already complete.")
+            onProgress("All chapters for $courseId are already complete.")
             return
         }
         val endIndex = when {
