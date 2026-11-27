@@ -139,7 +139,7 @@ function normalizedQuestionType(question, item) {
   return String(question?.type ?? item?.type ?? '')
     .trim()
     .toLowerCase()
-    .replace(/[\\s-]+/gu, '_');
+    .replace(/[\s-]+/gu, '_');
 }
 
 export function getQuestionAnswer(item, answers) {
@@ -172,7 +172,7 @@ export function getQuestionAnswer(item, answers) {
     if (!answerCode.trim() || choices.length) return null;
 
     const explicitlyChoice = /(?:choice|select|radio|option|mcq)/u.test(type);
-    const supportedDescription = /^(?:description|code|text|input|fill_in|fill_blank|short_answer|program|programming|free_response)$/u.test(type);
+    const supportedDescription = /^(?:description|code|text|input|fill_in|fill_blank|fill_in_the_blank|short_answer|program|programming|free_response)$/u.test(type);
     if (explicitlyChoice || (type && !supportedDescription)) return null;
 
     return { type: 'description', answer_code: answerCode };
