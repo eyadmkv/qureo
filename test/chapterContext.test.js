@@ -74,3 +74,59 @@ test('stops when the saved QUREO session has expired', async () => {
     error => error.code === 'AUTH_EXPIRED' && error.status === 401
   );
 });
+
+
+test('initializes the matching course before requesting chapter assessment questions', async () => {
+  const calls = [];
+  const client = {
+    async request(url, options) {
+      calls.push({ type: 'page', url, method: options.method });
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      calls.push({ type: 'api', path });
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511021 }];
+      if (path === '/chapters/511021/test') return [{ question: { id: 511021030, type: 'choice' }, choices: [{ id: 5110210301, content: 'First' }] }];
+      throw new Error(`Unexpected path: ${path}`);
+    }
+  };
+
+  const { context, questions } = await (await import('../src/chapterContext.js'))
+    .fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021');
+
+  assert.deepEqual(context, { courseId: 'python_short_ar', sectionId: 106 });
+  assert.equal(questions.length, 1);
+  assert.deepEqual(calls, [
+    {
+      type: 'page',
+      url: 'https://me-tp.qureo.education/?content_id=python_short_ar',
+      method: 'GET'
+    },
+    { type: 'api', path: '/courses/python_short_ar' },
+    { type: 'api', path: '/sections/106' },
+    { type: 'api', path: '/chapters/511021/test' }
+  ]);
+});
+
+test('does not request assessment questions when chapter context cannot be resolved', async () => {
+  const calls = [];
+  const client = {
+    async request() {
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      calls.push(path);
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511020 }];
+      throw new Error(`Unexpected path: ${path}`);
+    }
+  };
+
+  await assert.rejects(
+    (await import('../src/chapterContext.js'))
+      .fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021'),
+    /Could not find chapter 511021/
+  );
+  assert.deepEqual(calls, ['/courses/python_short_ar', '/sections/106']);
+});
