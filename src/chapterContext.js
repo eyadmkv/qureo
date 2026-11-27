@@ -57,7 +57,10 @@ export async function resolveChapterContext(client, courses, chapterId) {
 export async function resolveAccountChapterContext(client, user, cachedCourses, chapterId) {
   const courses = new Map();
   for (const course of user?.available_courses || []) {
-    const id = String(course?.content_id ?? course?.id ?? '').trim();
+    const rawId = typeof course === 'string'
+      ? course
+      : course?.content_id ?? course?.course_id ?? course?.id;
+    const id = String(rawId ?? '').trim();
     if (id) courses.set(id, { id });
   }
   for (const course of cachedCourses || []) {
