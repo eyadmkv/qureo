@@ -675,10 +675,10 @@ program.command('questions <chapterId>')
     console.log(`Cached ${questions.length} question(s) for chapter ${chapterId}.`);
     for (const [i, item] of questions.entries()) {
       const q = extractQuestion(item);
-      console.log(`\\n${i + 1}. [${q.type}] ID ${q.id ?? '?'}`);
+      console.log(`\n${i + 1}. [${q.type}] ID ${q.id ?? '?'}`);
       console.log(q.prompt || '(Prompt is stored in the raw question data but did not match known fields.)');
       if (q.choices.length) for (const [j, choice] of q.choices.entries()) console.log(`   ${String.fromCharCode(65 + j)}. ${choice}`);
-      if (q.snippets.length && !q.prompt) console.log(q.snippets.join('\\n'));
+      if (q.snippets.length && !q.prompt) console.log(q.snippets.join('\n'));
     }
   }));
 
