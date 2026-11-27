@@ -123,22 +123,61 @@ async function requestJson(client, pathname, { method = 'GET', body, referer } =
   return payload;
 }
 
+function questionChoiceOptions(item, question) {
+  const candidates = [
+    item?.choices,
+    item?.options,
+    question?.choices,
+    question?.options,
+    item?.question?.choices,
+    item?.question?.options
+  ];
+  return candidates.find(candidate => Array.isArray(candidate) && candidate.length > 0) || [];
+}
+
+function normalizedQuestionType(question, item) {
+  return String(question?.type ?? item?.type ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/gu, '_');
+}
+
 export function getQuestionAnswer(item, answers) {
   const question = item?.question || item;
   const id = String(question?.id ?? '');
   const saved = answers[id];
-  if (!saved) return null;
-  if (saved.type !== question.type) return null;
-  if (question.type === 'choice') {
+  if (!saved || !id) return null;
+
+  const type = normalizedQuestionType(question, item);
+  const choices = questionChoiceOptions(item, question);
+
+  if (saved.type === 'choice') {
     const choiceId = Number(saved.choice_id);
-    if (!Number.isFinite(choiceId) || !asArray(item?.choices).some(choice => Number(choice.id) === choiceId)) return null;
+    if (!Number.isSafeInteger(choiceId) || choiceId <= 0) return null;
+
+    const explicitlyDescription = /^(?:description|code|text|input|fill_in|fill_blank|short_answer|program|programming)$/u.test(type);
+    if (explicitlyDescription) return null;
+
+    if (choices.length) {
+      if (!choices.some(choice => Number(choice?.id) === choiceId)) return null;
+    } else if (!/(?:choice|select|radio|option|mcq)/u.test(type)) {
+      return null;
+    }
+
     return { type: 'choice', choice_id: choiceId };
   }
-  if (question.type === 'description') {
+
+  if (saved.type === 'description') {
     const answerCode = String(saved.answer_code ?? '');
-    if (!answerCode.trim()) return null;
+    if (!answerCode.trim() || choices.length) return null;
+
+    const explicitlyChoice = /(?:choice|select|radio|option|mcq)/u.test(type);
+    const supportedDescription = /^(?:description|code|text|input|fill_in|fill_blank|fill_in_the_blank|short_answer|program|programming|free_response)$/u.test(type);
+    if (explicitlyChoice || (type && !supportedDescription)) return null;
+
     return { type: 'description', answer_code: answerCode };
   }
+
   return null;
 }
 
