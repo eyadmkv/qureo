@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveChapterContext } from '../src/chapterContext.js';
+import { fetchChapterQuestions, resolveChapterContext } from '../src/chapterContext.js';
 
 test('initializes each candidate course before resolving a chapter from its section', async () => {
   const calls = [];
@@ -92,8 +92,7 @@ test('initializes the matching course before requesting chapter assessment quest
     }
   };
 
-  const { context, questions } = await (await import('../src/chapterContext.js'))
-    .fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021');
+  const { context, questions } = await fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021');
 
   assert.deepEqual(context, { courseId: 'python_short_ar', sectionId: 106 });
   assert.equal(questions.length, 1);
@@ -124,8 +123,7 @@ test('does not request assessment questions when chapter context cannot be resol
   };
 
   await assert.rejects(
-    (await import('../src/chapterContext.js'))
-      .fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021'),
+    fetchChapterQuestions(client, [{ id: 'python_short_ar' }], '511021'),
     /Could not find chapter 511021/
   );
   assert.deepEqual(calls, ['/courses/python_short_ar', '/sections/106']);
