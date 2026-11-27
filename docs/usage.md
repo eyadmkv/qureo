@@ -94,12 +94,12 @@ The guide is downloaded only when the local cache is missing. The solver saves e
 - `data/qureo.db`: course metadata, cached questions and personal answer notes.
 - `data/session.dpapi`: encrypted session cookies.
 - `data/command-history.json`: command labels and timestamps.
-- `data/solve-checkpoint.json`: last observed solver checkpoint.
-- `exports/`: generated JSON exports.
-- `answers/`: local answer-bank files used by the solver.
-- `qureo.config.json`: local terminal preferences.
+- `%LOCALAPPDATA%\\QStudy\\solve-checkpoint.json`: last observed solver checkpoint.
+- `%LOCALAPPDATA%\\QStudy\\exports/`: generated JSON exports.
+- `%LOCALAPPDATA%\\QStudy\\answers/`: local answer-bank files used by the solver.
+- `%LOCALAPPDATA%\\QStudy\\config.json`: local terminal preferences.
 
-Do not commit session files, databases, command history, checkpoints or personal exports. The repository's `.gitignore` excludes the local data directory and configuration.
+On Windows, these files live outside the source checkout under `%LOCALAPPDATA%\\QStudy`. Existing project-local data is copied there on first launch. Set `QSTUDY_DATA_DIR` to override the location.
 
 
 ## Study the SPRIX financial-literacy course

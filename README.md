@@ -66,7 +66,7 @@ qureo login
 sprix login
 ```
 
-The login command prompts for your student ID and a hidden password. The password is sent to the QUREO login endpoint and is not saved by this CLI. The resulting session cookies are encrypted for the current Windows account.
+`qstudy login` prompts once for the shared student ID/Login ID and hidden password, then authenticates with QUREO and SPRIX independently. The password is not saved. Each service's session cookies are encrypted separately with Windows DPAPI for the current Windows account.
 
 ## Common commands
 

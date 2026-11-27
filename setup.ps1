@@ -37,4 +37,4 @@ Write-Host 'Next: qstudy login'
 Write-Host 'Then: qstudy sync'
 Write-Host 'Then: qstudy dashboard'
 Write-Host "Your QStudy data directory is $env:LOCALAPPDATA\QStudy"
-Write-Host 'Course export: .\exports\qureo-export.json'
+Write-Host "Course export: $env:LOCALAPPDATA\QStudy\exports\qureo-export.json"
