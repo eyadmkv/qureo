@@ -25,7 +25,7 @@ qureo doctor
 
 ## Configuration
 
-The first CLI invocation creates `qureo.config.json` in the project root. This file is ignored by Git.
+The first CLI invocation creates `config.json` in the QStudy data directory (`%LOCALAPPDATA%\QStudy` on Windows). Set `QSTUDY_DATA_DIR` to override this location.
 
 Default configuration:
 
@@ -66,7 +66,7 @@ Color output is disabled when stdout is not an interactive terminal, when `NO_CO
 
 ## Command history
 
-`qureo history` displays the most recent 30 entries. The local history file is `data/command-history.json`. Each entry contains only a command label and timestamp. Arguments, passwords, answer text and search terms are not recorded.
+`qureo history` displays the most recent 30 entries. The local history file is `%LOCALAPPDATA%\QStudy\command-history.json`. Each entry contains only a command label and timestamp. Arguments, passwords, answer text and search terms are not recorded.
 
 ## PowerShell completion
 
