@@ -104,28 +104,56 @@ class QureoClient(context: Context) {
         body: JSONObject? = null,
         referer: String? = null
     ): HttpResult {
-        val parsed = url.toHttpUrl()
-        require(parsed.isHttps && parsed.host in setOf("me-portal.qureo.education", "me-tp.qureo.education")) {
-            "Blocked request outside the known QUREO HTTPS hosts."
-        }
+        var currentUrl = url
+        var currentMethod = method.uppercase()
+        var currentBody = body
+        var currentReferer = referer
 
-        val builder = Request.Builder()
-            .url(parsed)
-            .header("User-Agent", "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36")
-            .header("Accept", "application/json, text/plain, */*")
-            .header("Origin", if (parsed.host == "me-portal.qureo.education") QUREO_PORTAL else QUREO_COURSE)
-            .header("Referer", referer ?: if (parsed.host == "me-portal.qureo.education") "$QUREO_PORTAL/login" else "$QUREO_COURSE/")
-        val requestBody = body?.toString()?.toRequestBody(JSON_MEDIA)
-        when (method.uppercase()) {
-            "GET" -> builder.get()
-            "POST" -> builder.post(requestBody ?: "{}".toRequestBody(JSON_MEDIA))
-            "PUT" -> builder.put(requestBody ?: "{}".toRequestBody(JSON_MEDIA))
-            else -> error("Unsupported QUREO HTTP method: $method")
-        }
+        for (hop in 0..5) {
+            val parsed = currentUrl.toHttpUrl()
+            require(parsed.isHttps && parsed.host in setOf("me-portal.qureo.education", "me-tp.qureo.education")) {
+                "Blocked request outside the known QUREO HTTPS hosts."
+            }
 
-        client.newCall(builder.build()).execute().use { response ->
-            return HttpResult(response.code, response.body?.string().orEmpty())
+            val builder = Request.Builder()
+                .url(parsed)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36")
+                .header("Accept", "application/json, text/plain, */*")
+                .header("Origin", if (parsed.host == "me-portal.qureo.education") QUREO_PORTAL else QUREO_COURSE)
+                .header("Referer", currentReferer ?: if (parsed.host == "me-portal.qureo.education") "$QUREO_PORTAL/login" else "$QUREO_COURSE/")
+            val requestBody = currentBody?.toString()?.toRequestBody(JSON_MEDIA)
+            when (currentMethod) {
+                "GET" -> builder.get()
+                "POST" -> builder.post(requestBody ?: "{}".toRequestBody(JSON_MEDIA))
+                "PUT" -> builder.put(requestBody ?: "{}".toRequestBody(JSON_MEDIA))
+                else -> error("Unsupported QUREO HTTP method: $currentMethod")
+            }
+
+            val responseData = client.newCall(builder.build()).execute().use { response ->
+                HttpResult(response.code, if (response.code in listOf(301, 302, 303, 307, 308)) {
+                    response.header("Location").orEmpty()
+                } else {
+                    response.body?.string().orEmpty()
+                })
+            }
+            if (responseData.status !in listOf(301, 302, 303, 307, 308)) return responseData
+            if (responseData.body.isBlank()) throw IllegalStateException("QUREO returned a redirect without a destination.")
+            if (hop == 5) throw IllegalStateException("QUREO redirected too many times.")
+
+            val next = parsed.resolve(responseData.body)
+                ?: throw IllegalStateException("QUREO returned an invalid redirect destination.")
+            require(next.isHttps && next.host in setOf("me-portal.qureo.education", "me-tp.qureo.education")) {
+                "Blocked redirect outside the known QUREO HTTPS hosts."
+            }
+            if (responseData.status == 303 ||
+                ((responseData.status == 301 || responseData.status == 302) && currentMethod == "POST")) {
+                currentMethod = "GET"
+                currentBody = null
+            }
+            currentReferer = currentUrl
+            currentUrl = next.toString()
         }
+        throw IllegalStateException("QUREO redirect handling failed.")
     }
 
     private fun requestJson(
