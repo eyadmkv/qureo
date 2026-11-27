@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -228,8 +229,8 @@ class SprixSolver(
                 "review" -> {
                     if (dryRun) onProgress("Would complete review ${item.id}.")
                     else {
-                        api.completeReview(item.id)
-                        units = confirmItem(subjectId.toString(), item, units)
+                        val completion = api.completeReview(item.id)
+                        units = confirmItem(subjectId.toString(), item, completion, units)
                         onProgress("SPRIX confirmed review ${item.id} as complete.")
                     }
                 }
@@ -264,7 +265,7 @@ class SprixSolver(
                                 ". Stopped before the next course item."
                         )
                     }
-                    units = confirmItem(subjectId.toString(), item, units)
+                    units = confirmItem(subjectId.toString(), item, submitted, units)
                     onProgress("SPRIX confirmed test ${item.id} passed.")
                 }
                 "chapter" -> {
@@ -289,7 +290,7 @@ class SprixSolver(
                         val completed = api.completeChapter(item.id)
                         val score = completed.optJSONObject("data")?.opt("star_score")
                         if (score != null) onProgress("Star score: $score")
-                        units = confirmItem(subjectId.toString(), item, units)
+                        units = confirmItem(subjectId.toString(), item, completed, units)
                         onProgress("SPRIX confirmed chapter ${item.id} as complete.")
                     }
                 }
@@ -366,15 +367,33 @@ class SprixSolver(
         return result
     }
 
-    private suspend fun confirmItem(subjectId: String, item: SprixCourseItem, original: JSONArray): JSONArray {
+    private suspend fun confirmItem(
+        subjectId: String,
+        item: SprixCourseItem,
+        completionResponse: JSONObject,
+        original: JSONArray
+    ): JSONArray {
+        val data = completionResponse.optJSONObject("data")
+        val explicitCompletion = data?.optBoolean("is_completed") == true ||
+            data?.optBoolean("completed") == true
+        val gradedResponse = data?.optJSONObject("response")
+            ?: data?.optJSONObject("result")?.optJSONObject("response")
+            ?: data
+        val explicitPass = item.type == "test" && gradedResponse?.optBoolean("passed") == true
+        if (explicitCompletion || explicitPass) return original
+
         repeat(4) { attempt ->
             val refreshed = api.curriculum(subjectId)
-            val current = flattenCurriculum(refreshed).firstOrNull { it.type == item.type && it.id == item.id }
-                ?: throw IllegalStateException("SPRIX item ${item.id} disappeared after completion.")
+            val current = flattenCurriculum(refreshed).firstOrNull {
+                it.type == item.type && it.id == item.id
+            } ?: throw IllegalStateException("SPRIX item ${item.id} disappeared after completion.")
             if (current.completed) return refreshed
             if (attempt < 3) delay(350)
         }
-        return original
+
+        throw IllegalStateException(
+            "SPRIX accepted the completion request for ${item.type} ${item.id}, but the curriculum did not confirm completion. Stopping the course run."
+        )
     }
 
     private fun buildChapterPlan(data: JSONObject, bank: SprixBank): Pair<List<Pair<String, String>>, List<String>> {
@@ -437,7 +456,7 @@ class SprixSolver(
 
             if (mappedId != null && selected == null) unmatched.add("$testQuestionId (mapped option missing)")
             else if (selected == null) unmatched.add(testQuestionId.ifBlank { "unknown" })
-            else if (selected.optBoolean("is_correct") == false) unmatched.add("$testQuestionId (source marks option incorrect)")
+            else if (selected.has("is_correct") && !selected.optBoolean("is_correct")) unmatched.add("$testQuestionId (source marks option incorrect)")
             else result.add(testQuestionId to selected.opt("id").toString())
         }
         return result to unmatched
