@@ -234,15 +234,23 @@ class QureoClient(context: Context) {
 
 class QureoAnswerBank(private val context: Context) {
     private val verifiedFile = File(context.filesDir, "qureo-verified-answers.json")
+    private val importedDirectory = File(context.filesDir, "answer-banks")
 
     fun load(courseId: String): MutableMap<String, LocalAnswer> {
+        require(courseId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "Invalid QUREO course ID." }
         val result = linkedMapOf<String, LocalAnswer>()
-        if (courseId == "python_short_ar") {
-            val local = runCatching {
-                JSONObject(context.assets.open("python_short_ar.json").bufferedReader().use { it.readText() })
-            }.getOrNull()
-            val entries = local?.optJSONObject("answers")
-            entries?.let { addFlatAnswers(result, it, "course") }
+        val asset = runCatching {
+            context.assets.open("$courseId.json").bufferedReader().use { it.readText() }
+        }.getOrNull()
+        asset?.let { raw ->
+            runCatching { JSONObject(raw).optJSONObject("answers") }.getOrNull()
+                ?.let { addFlatAnswers(result, it, "course") }
+        }
+
+        val importedFile = File(importedDirectory, "$courseId.json")
+        if (importedFile.exists()) {
+            runCatching { JSONObject(importedFile.readText()).optJSONObject("answers") }.getOrNull()
+                ?.let { addFlatAnswers(result, it, "imported") }
         }
 
         if (verifiedFile.exists()) {
@@ -250,6 +258,47 @@ class QureoAnswerBank(private val context: Context) {
                 ?.let { addFlatAnswers(result, it, "qureo-result") }
         }
         return result
+    }
+
+    fun importBank(courseId: String, content: String): Int {
+        require(courseId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "Invalid QUREO course ID." }
+        val root = jsonObject(content)
+        val declaredCourse = root.optString("course_id")
+        require(declaredCourse.isBlank() || declaredCourse == courseId) {
+            "The selected answer file belongs to course $declaredCourse, not $courseId."
+        }
+        val source = root.optJSONObject("answers")
+            ?: throw IllegalArgumentException("The answer file must contain an answers object.")
+        val normalized = JSONObject()
+        var imported = 0
+        for (questionId in source.keys()) {
+            val row = source.optJSONObject(questionId) ?: continue
+            val type = row.optString("type")
+            when (type) {
+                "choice" -> {
+                    val choiceId = row.opt("choice_id")?.toString()?.toLongOrNull() ?: continue
+                    if (choiceId <= 0) continue
+                    normalized.put(questionId, JSONObject().put("type", "choice").put("choice_id", choiceId))
+                }
+                "description" -> {
+                    val code = row.optString("answer_code")
+                    if (code.isBlank()) continue
+                    normalized.put(questionId, JSONObject().put("type", "description").put("answer_code", code))
+                }
+                else -> continue
+            }
+            imported++
+        }
+        require(imported > 0) { "No valid choice or description answers were found in the file." }
+        importedDirectory.mkdirs()
+        val destination = File(importedDirectory, "$courseId.json")
+        val temporary = File(importedDirectory, "$courseId.json.tmp")
+        temporary.writeText(JSONObject().put("course_id", courseId).put("answers", normalized).toString(2))
+        if (!temporary.renameTo(destination)) {
+            destination.writeText(temporary.readText())
+            temporary.delete()
+        }
+        return imported
     }
 
     fun mergeCommunity(target: MutableMap<String, LocalAnswer>, archive: JSONObject) {
@@ -336,24 +385,28 @@ class QureoSolver(
 ) {
     private val bank = QureoAnswerBank(context)
 
-    suspend fun solvePython(
+    suspend fun solveCourse(
+        courseId: String = "python_short_ar",
         chapterTarget: String? = null,
         single: Boolean = false,
         dryRun: Boolean = false
     ) {
-        val answers = bank.load("python_short_ar")
-        try {
-            val community = QureoAnswerBank.downloadCommunity()
-            bank.mergeCommunity(answers, community)
-            onProgress("Loaded community fallback answers.")
-        } catch (error: Exception) {
-            onProgress("Community archive unavailable: ${error.message}")
+        require(courseId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "Invalid QUREO course ID." }
+        val answers = bank.load(courseId)
+        if (courseId == "python_short_ar") {
+            try {
+                val community = QureoAnswerBank.downloadCommunity()
+                bank.mergeCommunity(answers, community)
+                onProgress("Loaded community fallback answers.")
+            } catch (error: Exception) {
+                onProgress("Community archive unavailable: ${error.message}")
+            }
         }
 
-        val course = api.courseData("python_short_ar")
+        val course = api.courseData(courseId)
         val sectionId = course.firstObject("basic_section")?.firstString("id")
             ?: course.firstObject("course")?.firstObject("basic_section")?.firstString("id")
-            ?: throw IllegalStateException("Python course response did not include a section ID.")
+            ?: throw IllegalStateException("QUREO course $courseId response did not include a section ID.")
         val section = api.get("/sections/$sectionId")
         val chapters = jsonArrayAt(section, "chapters").objects()
             .sortedBy { it.optDouble("seq", it.optDouble("sequence", 0.0)) }
