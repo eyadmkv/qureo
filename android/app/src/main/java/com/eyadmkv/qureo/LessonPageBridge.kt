@@ -1,19 +1,30 @@
 package com.eyadmkv.qureo
 
+import android.net.Uri
+import android.net.http.SslError
 import android.webkit.CookieManager
+import android.webkit.SslErrorHandler
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 import org.json.JSONTokener
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 object LessonPageBridge {
+    private const val COURSE_HOST = "me-tp.qureo.education"
+    private const val COURSE_ORIGIN = "https://$COURSE_HOST"
+    private const val TIMEOUT_MS = 90_000L
     private val attached = AtomicReference<WebView?>(null)
 
     fun attach(webView: WebView) {
@@ -24,89 +35,203 @@ object LessonPageBridge {
         attached.compareAndSet(webView, null)
     }
 
-    suspend fun complete(chapterId: String, lessonId: String, cookieHeader: String): JSONObject =
-        withTimeout(90_000) {
-            val view = attached.get() ?: throw IllegalStateException(
-                "Keep the QUREO app open while a lesson needs browser initialization."
-            )
-            withContext(Dispatchers.Main) {
-                suspendCancellableCoroutine { continuation ->
-                    val targetUrl = "https://me-tp.qureo.education/chapter/$chapterId/lecture/$lessonId"
-                    val expectedPath = "/chapter/$chapterId/lecture/$lessonId"
-                    val cookieManager = CookieManager.getInstance()
-                    cookieManager.setAcceptCookie(true)
-                    cookieHeader.split(';')
-                        .map { it.trim() }
-                        .filter { it.contains('=') }
-                        .forEach { pair ->
-                            cookieManager.setCookie(
-                                "https://me-tp.qureo.education/",
-                                "$pair; Path=/; Secure"
+    suspend fun complete(
+        chapterId: String,
+        lessonId: String,
+        cookies: List<String>
+    ): JSONObject {
+        require(chapterId.matches(Regex("\\d{5,10}"))) { "Invalid QUREO chapter ID." }
+        require(lessonId.matches(Regex("\\d{5,12}"))) { "Invalid QUREO lesson ID." }
+
+        return try {
+            withTimeout(TIMEOUT_MS) {
+                val view = attached.get() ?: throw IllegalStateException(
+                    "The QUREO lesson WebView is unavailable. Return to the app and retry."
+                )
+                withContext(Dispatchers.Main) {
+                    suspendCancellableCoroutine { continuation ->
+                        val cookieManager = CookieManager.getInstance()
+                        cookieManager.setAcceptCookie(true)
+
+                        val targetUrl = "$COURSE_ORIGIN/chapter/$chapterId/lecture/$lessonId"
+                        val expectedPath = "/chapter/$chapterId/lecture/$lessonId"
+                        val settled = AtomicBoolean(false)
+                        val remainingCookies = AtomicInteger(cookies.size)
+                        val rejectedCookies = AtomicInteger(0)
+                        val navigationStarted = AtomicBoolean(false)
+
+                        fun finish(result: JSONObject) {
+                            if (!settled.compareAndSet(false, true)) return
+                            if (continuation.isActive) continuation.resume(result)
+                        }
+
+                        fun fail(message: String, status: Int = 0) {
+                            finish(
+                                JSONObject()
+                                    .put("ok", false)
+                                    .put("status", status)
+                                    .put("error", message)
                             )
                         }
-                    cookieManager.flush()
 
-                    var completed = false
-                    fun finish(result: JSONObject) {
-                        if (completed) return
-                        completed = true
-                        if (continuation.isActive) continuation.resume(result)
-                    }
+                        fun loadLessonPage() {
+                            if (settled.get() || !navigationStarted.compareAndSet(false, true)) return
+                            try {
+                                cookieManager.flush()
+                                view.webViewClient = object : WebViewClient() {
+                                    override fun onReceivedError(
+                                        webView: WebView,
+                                        request: WebResourceRequest,
+                                        error: WebResourceError
+                                    ) {
+                                        if (!request.isForMainFrame) return
+                                        fail(
+                                            "Lesson page navigation failed " +
+                                                "(${error.errorCode}): ${error.description}"
+                                        )
+                                    }
 
-                    continuation.invokeOnCancellation {
-                        view.post {
-                            if (!completed) completed = true
-                            view.stopLoading()
-                        }
-                    }
+                                    override fun onReceivedHttpError(
+                                        webView: WebView,
+                                        request: WebResourceRequest,
+                                        response: WebResourceResponse
+                                    ) {
+                                        if (!request.isForMainFrame || response.statusCode < 400) return
+                                        fail(
+                                            "QUREO lesson page returned HTTP ${response.statusCode} " +
+                                                response.reasonPhrase.orEmpty(),
+                                            response.statusCode
+                                        )
+                                    }
 
-                    view.webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(webView: WebView, url: String) {
-                            if (completed) return
-                            val parsed = runCatching { android.net.Uri.parse(url) }.getOrNull()
-                            if (parsed?.host != "me-tp.qureo.education") return
-                            if (parsed.path != expectedPath) {
-                                if (parsed.path?.contains("/login") == true) {
-                                    if (continuation.isActive) continuation.resumeWithException(
-                                        IllegalStateException("QUREO redirected the lesson to login. Sign in again.")
-                                    )
-                                    completed = true
+                                    override fun onReceivedSslError(
+                                        webView: WebView,
+                                        handler: SslErrorHandler,
+                                        error: SslError
+                                    ) {
+                                        handler.cancel()
+                                        fail("TLS error while loading the QUREO lesson page (code ${error.primaryError}).")
+                                    }
+
+                                    override fun onPageFinished(webView: WebView, url: String) {
+                                        if (settled.get()) return
+                                        val parsed = runCatching { Uri.parse(url) }.getOrNull() ?: return
+                                        if (parsed.scheme != "https") return
+
+                                        if (parsed.host != COURSE_HOST) {
+                                            if (parsed.host == "me-portal.qureo.education" ||
+                                                parsed.path.orEmpty().contains("login", ignoreCase = true)) {
+                                                fail("QUREO redirected the lesson page to sign-in. Sign in again.")
+                                            }
+                                            return
+                                        }
+
+                                        if (parsed.path != expectedPath) {
+                                            fail("QUREO redirected the lesson page to an unexpected URL: $url")
+                                            return
+                                        }
+
+                                        val script = """
+                                            (async () => {
+                                              try {
+                                                const response = await fetch('/api/study/students/lectures/$lessonId/complete', {
+                                                  method: 'PUT',
+                                                  credentials: 'include',
+                                                  cache: 'no-store',
+                                                  headers: {
+                                                    Accept: 'application/json, text/plain, */*',
+                                                    'Content-Type': 'application/json'
+                                                  },
+                                                  body: '{}'
+                                                });
+                                                const body = await response.text();
+                                                return JSON.stringify({
+                                                  status: response.status,
+                                                  ok: response.ok,
+                                                  body: body.slice(0, 1000)
+                                                });
+                                              } catch (error) {
+                                                const detail = error instanceof Error
+                                                  ? error.name + ': ' + error.message
+                                                  : String(error);
+                                                return JSON.stringify({
+                                                  status: 0,
+                                                  ok: false,
+                                                  error: detail
+                                                });
+                                              }
+                                            })()
+                                        """.trimIndent()
+
+                                        webView.evaluateJavascript(script) { encoded ->
+                                            try {
+                                                val decoded = JSONTokener(encoded ?: "null").nextValue() as? String
+                                                    ?: throw IllegalStateException(
+                                                        "QUREO lesson completion returned no JavaScript result."
+                                                    )
+                                                finish(JSONObject(decoded))
+                                            } catch (error: Exception) {
+                                                fail(
+                                                    "Could not decode the QUREO lesson completion response: " +
+                                                        (error.message ?: error.javaClass.simpleName)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
-                                return
+                                view.stopLoading()
+                                view.loadUrl(targetUrl)
+                            } catch (error: Exception) {
+                                fail(
+                                    "Could not open the QUREO lesson page: " +
+                                        (error.message ?: error.javaClass.simpleName)
+                                )
                             }
+                        }
 
-                            val script = """
-                                (async () => {
-                                  try {
-                                    const response = await fetch('/api/study/students/lectures/$lessonId/complete', {
-                                      method: 'PUT',
-                                      credentials: 'include',
-                                      headers: { Accept: '*/*', 'Content-Type': 'application/json' }
-                                    });
-                                    return JSON.stringify({
-                                      status: response.status,
-                                      ok: response.ok,
-                                      body: (await response.text()).slice(0, 500)
-                                    });
-                                  } catch (error) {
-                                    return JSON.stringify({ status: 0, ok: false, body: String(error) });
-                                  }
-                                })()
-                            """.trimIndent()
-                            webView.evaluateJavascript(script) { encoded ->
+                        continuation.invokeOnCancellation {
+                            view.post {
+                                if (settled.compareAndSet(false, true)) view.stopLoading()
+                            }
+                        }
+
+                        if (cookies.isEmpty()) {
+                            fail("No QUREO session cookies are available for the lesson WebView. Sign in again.")
+                        } else {
+                            cookies.forEach { cookie ->
                                 try {
-                                    val decoded = JSONTokener(encoded ?: "null").nextValue()?.toString()
-                                        ?: throw IllegalStateException("QUREO lesson returned no completion result.")
-                                    finish(JSONObject(decoded))
+                                    cookieManager.setCookie(COURSE_ORIGIN, cookie) { accepted ->
+                                        if (accepted != true) rejectedCookies.incrementAndGet()
+                                        if (remainingCookies.decrementAndGet() == 0 && !settled.get()) {
+                                            if (rejectedCookies.get() > 0) {
+                                                fail(
+                                                    "Android rejected ${rejectedCookies.get()} QUREO session cookie(s). " +
+                                                        "Sign in again and retry."
+                                                )
+                                            } else {
+                                                loadLessonPage()
+                                            }
+                                        }
+                                    }
                                 } catch (error: Exception) {
-                                    if (continuation.isActive) continuation.resumeWithException(error)
-                                    completed = true
+                                    rejectedCookies.incrementAndGet()
+                                    if (remainingCookies.decrementAndGet() == 0 && !settled.get()) {
+                                        fail(
+                                            "Could not install QUREO session cookies: " +
+                                                (error.message ?: error.javaClass.simpleName)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                    view.loadUrl(targetUrl)
                 }
             }
+        } catch (error: TimeoutCancellationException) {
+            throw IllegalStateException(
+                "Timed out waiting for QUREO to initialize the lesson page or finish its completion request after 90 seconds.",
+                error
+            )
         }
+    }
 }
