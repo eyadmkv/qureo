@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { formatProgressBar, summarizeSprixCurriculum } from '../src/qstudy.js';
+import { createSolvePlan, formatProgressBar, summarizeSprixCurriculum } from '../src/qstudy.js';
 
 const entryPath = fileURLToPath(new URL('../src/qstudy-entry.js', import.meta.url));
 
@@ -16,6 +16,43 @@ test('QStudy entrypoint exits cleanly for help and version', () => {
     assert.match(result.stdout, expected);
     assert.doesNotMatch(result.stderr, /TypeError|Cannot read properties/);
   }
+});
+
+test('builds an ordered solve plan for selected QUREO and SPRIX targets', () => {
+  assert.deepEqual(createSolvePlan(['sprix', 'python', 'javascript']), [
+    {
+      id: 'javascript',
+      label: 'JavaScript',
+      service: 'qureo',
+      args: ['solve', '--course', 'javascript_ar', '--interactive']
+    },
+    {
+      id: 'python',
+      label: 'Python',
+      service: 'qureo',
+      args: ['python', 'solve', '--interactive']
+    },
+    {
+      id: 'sprix',
+      label: 'SPRIX',
+      service: 'sprix',
+      args: ['solve']
+    }
+  ]);
+});
+
+test('adds dry-run to every selected solver without chapter confirmations', () => {
+  const plan = createSolvePlan(['javascript', 'python', 'sprix'], { dryRun: true });
+  assert.deepEqual(plan.map(task => task.args), [
+    ['solve', '--course', 'javascript_ar', '--dry-run'],
+    ['python', 'solve', '--dry-run'],
+    ['solve', '--dry-run']
+  ]);
+});
+
+test('deduplicates solve targets and rejects unsupported targets', () => {
+  assert.equal(createSolvePlan(['python', 'python']).length, 1);
+  assert.throws(() => createSolvePlan(['biology']), /Unknown solve target/);
 });
 
 test('summarizes SPRIX curriculum progress across sections', () => {
