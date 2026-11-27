@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted, solveChapter } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted, prepareQuestionAnswer, solveChapter } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -19,6 +19,146 @@ const pythonAnswers = {
   '511002080': { type: 'choice', choice_id: 5110020801 },
   '511002090': { type: 'choice', choice_id: 5110020901 }
 };
+
+test('uses a live choice option when a stale description answer is stored', () => {
+  const prepared = prepareQuestionAnswer({
+    question: { id: 511021030, type: 'choice' },
+    choices: [{ id: 5110210302 }, { id: 5110210301 }]
+  }, {
+    '511021030': { type: 'description', answer_code: 'print(1)' }
+  });
+
+  assert.deepEqual(prepared, {
+    answer: { type: 'choice', choice_id: 5110210302 },
+    bootstrap: true
+  });
+});
+
+test('uses a temporary description when a stale choice answer is stored', () => {
+  const prepared = prepareQuestionAnswer({
+    question: { id: 511021050, type: 'description' },
+    choices: []
+  }, {
+    '511021050': { type: 'choice', choice_id: 5110210501 }
+  });
+
+  assert.deepEqual(prepared, {
+    answer: { type: 'description', answer_code: 'print(1)' },
+    bootstrap: true
+  });
+});
+
+test('uses the first available option when a question type is omitted but choices exist', () => {
+  const prepared = prepareQuestionAnswer({
+    question: { id: 511021060 },
+    choices: [{ id: 5110210602 }, { id: 5110210601 }]
+  }, {});
+
+  assert.deepEqual(prepared, {
+    answer: { type: 'choice', choice_id: 5110210602 },
+    bootstrap: true
+  });
+});
+
+test('does not guess a choice question when its live options have no usable IDs', () => {
+  assert.equal(prepareQuestionAnswer({
+    question: { id: 511021070, type: 'choice' },
+    choices: [{ text: 'Option without an ID' }]
+  }, {}), null);
+});
+
+test('completes a type-safe bootstrap attempt, harvests official answers, and retries', async () => {
+  const questionRows = [
+    {
+      question: { id: 511021030, type: 'choice' },
+      choices: [{ id: 5110210302 }, { id: 5110210301 }]
+    },
+    {
+      question: { id: 511021050, type: 'description' },
+      choices: []
+    }
+  ];
+  const answers = {
+    '511021030': { type: 'description', answer_code: 'print(1)' },
+    '511021050': { type: 'choice', choice_id: 5110210501 }
+  };
+  const officialDescription = 'print("QUREO model answer")';
+  const answerCalls = [];
+  const attempts = [];
+  let attempt = 0;
+  const client = {
+    async request(url, options) {
+      const pathname = new URL(url).pathname;
+      if (pathname.endsWith('/students/chapters/511021/test')) {
+        attempt++;
+        attempts.push(attempt);
+        return new Response('{}', { status: 200 });
+      }
+
+      const match = pathname.match(/\/students\/review-questions\/(\d+)\/answer\/(choice|description)$/);
+      assert.ok(match, 'unexpected request: ' + pathname);
+      const body = JSON.parse(options.body);
+      answerCalls.push({ attempt, questionId: match[1], type: match[2], body });
+      const correct = attempt > 1;
+      return new Response(JSON.stringify({ result: { correct } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    },
+    async json(pathname) {
+      assert.equal(pathname, '/students/chapters/511021/review/result');
+      return {
+        result: {
+          correct_count: attempt > 1 ? 2 : 0,
+          choice_results: [{
+            question_id: '511021030',
+            choices: [
+              { choice: { id: 5110210302 }, correct: false },
+              { choice: { id: 5110210301 }, correct: true }
+            ]
+          }],
+          description_results: [{
+            question_id: '511021050',
+            model_answer: officialDescription
+          }]
+        }
+      };
+    }
+  };
+  const persisted = [];
+
+  const result = await solveChapter(
+    client,
+    { id: 511021, seq: 21, name: 'Python', test_type: 'review' },
+    { lectures: [] },
+    questionRows,
+    answers,
+    {
+      dryRun: false,
+      lessonsAlreadyCompleted: true,
+      onProgress: () => {},
+      persistRetrievedAnswer: record => {
+        persisted.push(record);
+        return { answer_id: persisted.length };
+      }
+    }
+  );
+
+  assert.equal(result.attempts, 2);
+  assert.equal(result.correct, 2);
+  assert.deepEqual(attempts, [1, 2]);
+  assert.deepEqual(answerCalls.slice(0, 2), [
+    { attempt: 1, questionId: '511021030', type: 'choice', body: { choice_id: 5110210302 } },
+    { attempt: 1, questionId: '511021050', type: 'description', body: { answer_code: 'print(1)' } }
+  ]);
+  assert.deepEqual(answerCalls.slice(2), [
+    { attempt: 2, questionId: '511021030', type: 'choice', body: { choice_id: 5110210301 } },
+    { attempt: 2, questionId: '511021050', type: 'description', body: { answer_code: officialDescription } }
+  ]);
+  assert.equal(answers['511021030'].choice_id, 5110210301);
+  assert.equal(answers['511021050'].answer_code, officialDescription);
+  assert.equal(persisted.length, 2);
+});
 
 test('resolves Python choice questions against their actual option IDs', () => {
   const result = getQuestionAnswer({
@@ -241,13 +381,15 @@ test('resolves all nine verified Python chapter 2 answers against QUREO types an
 });
 
 
-test('opens a lesson in the hidden browser after the direct completion API returns 404', async () => {
+test('initializes a lesson before opening the hidden browser after completion returns 404', async () => {
   const requests = [];
   const browserCalls = [];
   const client = {
     async request(url, options) {
       requests.push({ url, method: options.method });
-      return new Response('Not found', { status: 404 });
+      return requests.length === 1
+        ? new Response('{}', { status: 200 })
+        : new Response('Not found', { status: 404 });
     }
   };
   const browser = {
@@ -267,10 +409,16 @@ test('opens a lesson in the hidden browser after the direct completion API retur
     browser
   );
 
-  assert.deepEqual(requests, [{
-    url: 'https://me-tp.qureo.education/api/study/students/lectures/511002030/complete',
-    method: 'PUT'
-  }]);
+  assert.deepEqual(requests, [
+    {
+      url: 'https://me-tp.qureo.education/api/study/students/lectures/511002030',
+      method: 'PUT'
+    },
+    {
+      url: 'https://me-tp.qureo.education/api/study/students/lectures/511002030/complete',
+      method: 'PUT'
+    }
+  ]);
   assert.deepEqual(browserCalls, [{
     lessonId: 511002030,
     lectureUrl: 'https://me-tp.qureo.education/chapter/511002/lecture/511002030'
@@ -278,10 +426,12 @@ test('opens a lesson in the hidden browser after the direct completion API retur
   assert.equal(progress.at(-1), '  lesson 511002030: completed');
 });
 
-test('does not open a browser when the direct completion API succeeds', async () => {
+test('does not open a browser when lesson initialization and completion succeed', async () => {
+  const requests = [];
   const client = {
-    async request() {
-      return new Response('', { status: 200 });
+    async request(url, options) {
+      requests.push({ url, method: options.method });
+      return new Response('{}', { status: 200 });
     }
   };
   const browser = {
@@ -298,6 +448,10 @@ test('does not open a browser when the direct completion API succeeds', async ()
     () => {},
     browser
   );
+  assert.deepEqual(requests.map(row => new URL(row.url).pathname), [
+    '/api/study/students/lectures/511002010',
+    '/api/study/students/lectures/511002010/complete'
+  ]);
 });
 
 test('does not retry a completion 404 after browser initialization also fails', async () => {
@@ -305,7 +459,9 @@ test('does not retry a completion 404 after browser initialization also fails', 
   const client = {
     async request() {
       directRequests++;
-      return new Response('Not found', { status: 404 });
+      return directRequests === 1
+        ? new Response('{}', { status: 200 })
+        : new Response('Not found', { status: 404 });
     }
   };
   const browser = {
@@ -325,7 +481,7 @@ test('does not retry a completion 404 after browser initialization also fails', 
     ),
     error => error.code === 'LESSON_COMPLETION_FAILED' && error.status === 404
   );
-  assert.equal(directRequests, 1);
+  assert.equal(directRequests, 2);
 });
 
 test('completes a failed assessment attempt, harvests QUREO model answers, and retries the same chapter', async () => {
