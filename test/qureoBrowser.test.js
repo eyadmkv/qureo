@@ -48,7 +48,13 @@ test('maps domain cookies and converts expiry to CDP seconds', () => {
 test('builds a same-origin lesson completion request for the browser page', () => {
   const script = buildLectureCompletionScript('511002030');
 
-  assert.match(script, /fetch\('\/api\/study\/students\/lectures\/511002030\/complete'/);
+  const startRequest = script.indexOf("fetch('/api/study/students/lectures/511002030'");
+  const completionRequest = script.indexOf("fetch('/api/study/students/lectures/511002030/complete'");
+  assert.notEqual(startRequest, -1);
+  assert.notEqual(completionRequest, -1);
+  assert.ok(startRequest < completionRequest);
+  assert.match(script, /stage: 'start'/);
+  assert.match(script, /stage: 'complete'/);
   assert.match(script, /method: 'PUT'/);
   assert.match(script, /credentials: 'include'/);
 });
