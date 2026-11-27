@@ -86,7 +86,8 @@ data class LocalAnswer(
 }
 
 class QureoClient(context: Context) {
-    private val encryptedStore = EncryptedStore(context)
+    private val appContext = context.applicationContext
+    private val encryptedStore = EncryptedStore(appContext)
     val cookieJar = PersistentCookieJar(context, encryptedStore, "qureo.cookies")
     private val client = OkHttpClient.Builder()
         .cookieJar(cookieJar)
@@ -175,7 +176,7 @@ class QureoClient(context: Context) {
     fun logout() {
         cookieJar.clear()
         encryptedStore.remove("qureo.student")
-        FileSessionStore.clear(context = null)
+        File(appContext.filesDir, "qureo-verified-answers.json").delete()
     }
 
     fun cookieHeaderForCourse(): String =
@@ -202,11 +203,6 @@ class QureoClient(context: Context) {
     }
 }
 
-private object FileSessionStore {
-    fun clear(context: Context?) {
-        context?.let { File(it.filesDir, "qureo-verified-answers.json").delete() }
-    }
-}
 
 class QureoAnswerBank(private val context: Context) {
     private val verifiedFile = File(context.filesDir, "qureo-verified-answers.json")
@@ -372,7 +368,7 @@ class QureoSolver(
                 onProgress("Skipping completed chapter $sequence: $title")
                 continue
             }
-            solveChapter(chapter, chapterId, sequence, title, answers, dryRun)
+            solveChapter(chapter, chapterId, sectionId, sequence, title, answers, dryRun)
         }
         onProgress(if (dryRun) "Dry run complete." else "QUREO solve run complete.")
     }
@@ -380,6 +376,7 @@ class QureoSolver(
     private suspend fun solveChapter(
         chapter: JSONObject,
         chapterId: String,
+        sectionId: String,
         sequence: Int,
         title: String,
         answers: MutableMap<String, LocalAnswer>,
@@ -403,6 +400,11 @@ class QureoSolver(
             val expected = meta.optJSONObject("chapter")?.optInt("question_count", meta.optInt("question_count", 0))
                 ?: meta.optInt("question_count", 0)
             val covered = answers.keys.count { it.startsWith(chapterId) }
+            if (dryRun) {
+                throw IllegalStateException(
+                    "Chapter $sequence is still locked. Dry-run will not complete lessons or change course progress."
+                )
+            }
             if (expected > 0 && covered < expected) {
                 throw IllegalStateException(
                     "Chapter $sequence is locked and the installed answer sources cover $covered/$expected question IDs. Nothing was changed."
@@ -478,7 +480,7 @@ class QureoSolver(
             onProgress("QUREO result: $latestScore/${rows.size}; recovered ${recovered.size} official answer(s).")
 
             if (correct == rows.size || latestScore == rows.size) {
-                verifyChapterComplete(sectionId = null, chapterId = chapterId, expectedQuestions = rows.size)
+                verifyChapterComplete(sectionId = sectionId, chapterId = chapterId, expectedQuestions = rows.size)
                 return
             }
             if (attempt == 3 || changed == 0) {
@@ -567,11 +569,7 @@ class QureoSolver(
         }
     }
 
-    private suspend fun verifyChapterComplete(sectionId: String?, chapterId: String, expectedQuestions: Int) {
-        if (sectionId == null) {
-            onProgress("Assessment returned $expectedQuestions/$expectedQuestions correct. QUREO completion is recorded by the portal.")
-            return
-        }
+    private suspend fun verifyChapterComplete(sectionId: String, chapterId: String, expectedQuestions: Int) {
         repeat(6) { attempt ->
             val progress = api.get("/students/sections/$sectionId/chapters")
             val rows = jsonArrayAt(progress, "chapters").objects()
@@ -583,7 +581,9 @@ class QureoSolver(
             }
             if (attempt < 5) kotlinx.coroutines.delay(500)
         }
-        onProgress("QUREO accepted all answers for chapter $chapterId. Its completion flag has not refreshed yet.")
+        throw IllegalStateException(
+            "QUREO accepted $expectedQuestions/$expectedQuestions answers for chapter $chapterId, but its progress endpoint did not confirm completion. Stopping before the next chapter."
+        )
     }
 
     private fun extractOfficialAnswers(result: JSONObject): Map<String, LocalAnswer> {
