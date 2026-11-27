@@ -169,3 +169,46 @@ test('infers description answers from an answer-capable question with no choice 
     answer_code: 'print("ok")'
   });
 });
+
+
+test('accepts an archived description when QUREO includes non-answer option metadata', () => {
+  const answers = {
+    '511021030': {
+      type: 'description',
+      answer_code: 'math = 100\\nenglish = 100\\nif math == 100:\\n    print("Math is 100 points")'
+    }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: { id: 511021030, type: 'fill_in_the_blank', options: [{ label: 'Code editor' }] }
+  }, answers), {
+    type: 'description',
+    answer_code: answers['511021030'].answer_code
+  });
+});
+
+test('matches community choice IDs stored under choice_id or option_id', () => {
+  const answers = {
+    '511021050': { type: 'choice', choice_id: 5110210501 }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: {
+      id: 511021050,
+      type: 'single_select',
+      options: [{ choice_id: 5110210501 }, { option_id: 5110210502 }]
+    }
+  }, answers), {
+    type: 'choice',
+    choice_id: 5110210501
+  });
+});
+
+test('keeps rejecting community answers when the live question type conflicts', () => {
+  assert.equal(getQuestionAnswer({
+    question: { id: 511021030, type: 'single_select' },
+    options: [{ id: 5110210301 }]
+  }, {
+    '511021030': { type: 'description', answer_code: 'print("wrong type")' }
+  }), null);
+});

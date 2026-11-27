@@ -127,12 +127,21 @@ function questionChoiceOptions(item, question) {
   const candidates = [
     item?.choices,
     item?.options,
+    item?.choice_options,
     question?.choices,
     question?.options,
+    question?.choice_options,
     item?.question?.choices,
-    item?.question?.options
+    item?.question?.options,
+    item?.question?.choice_options
   ];
   return candidates.find(candidate => Array.isArray(candidate) && candidate.length > 0) || [];
+}
+
+function choiceOptionId(choice) {
+  const value = choice?.id ?? choice?.choice_id ?? choice?.option_id ?? choice?.choice?.id;
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
 function normalizedQuestionType(question, item) {
@@ -155,12 +164,13 @@ export function getQuestionAnswer(item, answers) {
     const choiceId = Number(saved.choice_id);
     if (!Number.isSafeInteger(choiceId) || choiceId <= 0) return null;
 
-    const explicitlyDescription = /^(?:description|code|text|input|fill_in|fill_blank|short_answer|program|programming)$/u.test(type);
+    const explicitlyDescription = /(?:description|code|text|input|fill|blank|short_answer|program|free_response)/u.test(type);
     if (explicitlyDescription) return null;
 
+    const explicitlyChoice = /(?:choice|select|radio|option|mcq)/u.test(type);
     if (choices.length) {
-      if (!choices.some(choice => Number(choice?.id) === choiceId)) return null;
-    } else if (!/(?:choice|select|radio|option|mcq)/u.test(type)) {
+      if (!choices.some(choice => choiceOptionId(choice) === choiceId)) return null;
+    } else if (!explicitlyChoice) {
       return null;
     }
 
@@ -169,11 +179,11 @@ export function getQuestionAnswer(item, answers) {
 
   if (saved.type === 'description') {
     const answerCode = String(saved.answer_code ?? '');
-    if (!answerCode.trim() || choices.length) return null;
+    if (!answerCode.trim()) return null;
 
     const explicitlyChoice = /(?:choice|select|radio|option|mcq)/u.test(type);
-    const supportedDescription = /^(?:description|code|text|input|fill_in|fill_blank|fill_in_the_blank|short_answer|program|programming|free_response)$/u.test(type);
-    if (explicitlyChoice || (type && !supportedDescription)) return null;
+    const supportedDescription = /(?:description|code|text|input|fill|blank|short_answer|program|free_response)/u.test(type);
+    if (explicitlyChoice || (type && !supportedDescription) || (!type && choices.length > 0)) return null;
 
     return { type: 'description', answer_code: answerCode };
   }
@@ -371,9 +381,23 @@ export async function solveChapter(client, chapter, chapterMeta, questions, answ
     return { item, question, answer: getQuestionAnswer(item, answers) };
   });
   let prepared = prepareQuestions();
-  const missing = prepared.filter(row => !row.answer).map(row => row.question?.id);
+  const missing = prepared.filter(row => !row.answer);
   if (missing.length) {
-    throw new Error(`No verified local solution for question(s): ${missing.join(', ')}. No answers were submitted and the chapter was left untouched.`);
+    const details = missing.map(({ item, question }) => {
+      const id = String(question?.id ?? 'unknown');
+      const saved = answers[id];
+      const type = normalizedQuestionType(question, item) || 'unspecified';
+      const options = questionChoiceOptions(item, question);
+      const optionIds = options.map(choiceOptionId).filter(Boolean);
+      const stored = saved
+        ? `stored=${saved.type}${saved.type === 'choice' ? `(${saved.choice_id})` : ''}`
+        : 'no stored answer';
+      const optionsText = optionIds.length ? ` live-option-ids=${optionIds.join('/')}` : '';
+      return `${id} [${stored}, live-type=${type}${optionsText}]`;
+    });
+    throw new Error(
+      `No verified local solution for question(s): ${details.join('; ')}. No answers were submitted and the chapter was left untouched.`
+    );
   }
 
   const lectures = asArray(chapterMeta?.lectures || chapterMeta?.chapter?.lectures || chapterMeta?.data?.lectures);
