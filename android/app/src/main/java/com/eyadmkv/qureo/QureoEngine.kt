@@ -589,6 +589,39 @@ class QureoAnswerBank(private val context: Context) {
     }
 }
 
+internal fun inferQureoQuestionKind(
+    rawType: String,
+    hasChoices: Boolean,
+    storedType: String?
+): String? {
+    val type = rawType.trim().lowercase().replace(Regex("[\\s-]+"), "_")
+    val choiceType = listOf("choice", "select", "radio", "option", "mcq", "multiple_choice")
+        .any(type::contains)
+    val descriptionType = listOf(
+        "description", "code", "text", "input", "fill", "blank",
+        "short_answer", "program", "free_response"
+    ).any(type::contains)
+
+    return when {
+        hasChoices || choiceType -> "choice"
+        descriptionType -> "description"
+        type.isBlank() && storedType in setOf("choice", "description") -> storedType
+        type.isBlank() -> "description"
+        else -> null
+    }
+}
+
+internal fun isQureoChapterComplete(chapter: JSONObject, progress: JSONObject?): Boolean {
+    val explicitlyCompleted = progress?.optBoolean("completed") == true ||
+        progress?.optBoolean("is_completed") == true ||
+        progress?.optString("completed_at").orEmpty().isNotBlank()
+    if (explicitlyCompleted) return true
+
+    val questionCount = chapter.optInt("question_count", 0)
+    val bestCorrect = progress?.optInt("best_correct_count", 0) ?: 0
+    return questionCount > 0 && bestCorrect >= questionCount
+}
+
 private fun isValidCommunityAnswer(answer: JSONArray): Boolean {
     if (answer.length() != 2) return false
     return when (answer.optString(0)) {
@@ -630,13 +663,7 @@ class QureoSolver(
 
         val progress = api.get("/students/sections/$sectionId/chapters")
         val progressRows = jsonArrayAt(progress, "chapters").objects()
-        val completed = progressRows.associate { row ->
-            row.chapterId() to (
-                row.optBoolean("completed") ||
-                    row.optBoolean("is_completed") ||
-                    row.optString("completed_at").isNotBlank()
-                )
-        }
+        val progressByChapter = progressRows.associateBy { it.chapterId() }
 
         val target = chapterTarget?.trim().orEmpty()
         val targetIndex = if (target.isBlank()) -1 else chapters.indexOfFirst {
@@ -645,7 +672,9 @@ class QureoSolver(
         }
         if (target.isNotBlank() && targetIndex < 0) throw IllegalArgumentException("Chapter '$target' was not found.")
 
-        val startIndex = if (targetIndex >= 0) targetIndex else chapters.indexOfFirst { !completed[it.firstString("id")].orFalse() }
+        val startIndex = if (targetIndex >= 0) targetIndex else chapters.indexOfFirst {
+            !isQureoChapterComplete(it, progressByChapter[it.firstString("id")])
+        }
         if (startIndex < 0) {
             onProgress("All chapters for $courseId are already complete.")
             return
@@ -661,7 +690,7 @@ class QureoSolver(
             val chapterId = chapter.firstString("id")
             val sequence = chapter.optInt("seq", chapter.optInt("sequence", index + 1))
             val title = chapter.firstString("name", "title").ifBlank { "Chapter $sequence" }
-            if (completed[chapterId] == true) {
+            if (isQureoChapterComplete(chapter, progressByChapter[chapterId])) {
                 onProgress("Skipping completed chapter $sequence: $title")
                 continue
             }
@@ -850,12 +879,7 @@ class QureoSolver(
             val answer = answers[id]
             val options = questionOptions(item, question)
             val type = questionType(item, question)
-            val explicitlyDescription = listOf(
-                "description", "code", "text", "input", "fill", "blank",
-                "short_answer", "program", "free_response"
-            ).any(type::contains)
-            val explicitlyChoice = listOf("choice", "select", "radio", "option", "mcq")
-                .any(type::contains)
+            val liveKind = inferQureoQuestionKind(type, options.length() > 0, answer?.type)
             val missingDetail = missingAnswerDetail(id.ifBlank { "unknown" }, answer, type, options)
 
             if (id.isBlank()) {
@@ -865,13 +889,13 @@ class QureoSolver(
 
             if (answer == null) {
                 when {
-                    explicitlyChoice && options.length() > 0 -> {
+                    liveKind == "choice" -> {
                         val firstChoiceId = options.objects().firstNotNullOfOrNull(::choiceOptionId)
                         if (firstChoiceId != null) {
                             prepared.add(id to LocalAnswer("choice", choiceId = firstChoiceId, source = "bootstrap"))
                         } else missing.add(missingDetail)
                     }
-                    explicitlyDescription -> prepared.add(
+                    liveKind == "description" -> prepared.add(
                         id to LocalAnswer("description", code = "print(1)", source = "bootstrap")
                     )
                     else -> missing.add(missingDetail)
@@ -880,7 +904,7 @@ class QureoSolver(
             }
 
             when {
-                explicitlyChoice -> {
+                liveKind == "choice" -> {
                     val validChoiceIds = options.objects().mapNotNull(::choiceOptionId)
                     val storedChoiceId = answer.choiceId
                     if (answer.type == "choice" && storedChoiceId != null && storedChoiceId > 0 &&
@@ -895,7 +919,7 @@ class QureoSolver(
                         }
                     }
                 }
-                explicitlyDescription -> {
+                liveKind == "description" -> {
                     if (answer.type == "description" && !answer.code.isNullOrBlank()) {
                         prepared.add(id to answer)
                     } else {
