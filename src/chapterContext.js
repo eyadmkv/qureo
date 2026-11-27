@@ -53,3 +53,17 @@ export async function resolveChapterContext(client, courses, chapterId) {
   if (lastError && !(lastError?.status === 403 || lastError?.status === 404)) throw lastError;
   return null;
 }
+
+
+export async function fetchChapterQuestions(client, courses, chapterId) {
+  const context = await resolveChapterContext(client, courses, chapterId);
+  if (!context) {
+    throw new Error(
+      `Could not find chapter ${chapterId} in the available QUREO courses. ` +
+      'Run qureo sync to refresh the course index, then retry.'
+    );
+  }
+
+  const questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+  return { context, questions };
+}
