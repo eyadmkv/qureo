@@ -41,5 +41,5 @@ test('formats progress bars for complete, partial and empty progress', () => {
   assert.equal(formatProgressBar(3, 4, 8), '[██████░░] 75%');
   assert.equal(formatProgressBar(4, 4, 8), '[████████] 100%');
   assert.equal(formatProgressBar(0, 0, 8), '[░░░░░░░░] 0%');
-  assert.equal(formatProgressBar(1, 2, 0), '[████████████████████] 50%');
+  assert.equal(formatProgressBar(1, 2, 0), '[██████████░░░░░░░░░░] 50%');
 });
