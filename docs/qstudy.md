@@ -32,6 +32,30 @@ qstudy status
 
 The dashboard reads the local QUREO database and the most recently synced SPRIX curriculum snapshot. It does not make network requests. `qstudy dashboard --refresh` refreshes both sources first. `qstudy status` performs read-only authentication checks against both services.
 
+## Interactive solver selection
+
+Run:
+
+```powershell
+qstudy solve
+```
+
+Move with the arrow keys, press **Space** to check or uncheck a target, then press **Enter** to start. You can select any combination of:
+
+- **JavaScript**: QUREO course `javascript_ar`
+- **Python**: the existing QUREO Python solver
+- **SPRIX**: the existing SPRIX course solver
+
+Press **Esc** or **q** to cancel. QUREO asks for confirmation before each chapter in a normal run. SPRIX keeps its own confirmation before submitting course actions.
+
+Preview selected work without submitting answers:
+
+```powershell
+qstudy solve --dry-run
+```
+
+The QUREO targets need their local course answer banks and a valid QUREO session. SPRIX needs a valid SPRIX session and its local answer bank. The checklist only selects which existing solver to launch; it does not change their answer-matching or progress logic.
+
 ## Run existing commands
 
 All existing commands can be used through the unified executable:
