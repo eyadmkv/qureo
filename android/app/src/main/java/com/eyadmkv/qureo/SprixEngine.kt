@@ -15,7 +15,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private const val SPRIX_ORIGIN = "https://egy.app.spx-learning-square.com"
-private const val SPRIX_ARABIC_SOURCE = "https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/main/"
+private const val SPRIX_ARABIC_SOURCE = "https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/"
 private const val SPRIX_ENGLISH_SOURCE =
     "https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/"
 private val SPRIX_JSON = "application/json; charset=utf-8".toMediaType()
@@ -186,6 +186,20 @@ class SprixClient(context: Context) {
         withContext(Dispatchers.IO) { request("tests/$testId/submit", "POST") }
 }
 
+internal fun extractSprixArchiveAnswers(archiveJson: JSONObject): List<Pair<String, String>> {
+    val lessons = archiveJson.optJSONArray("lessons") ?: JSONArray()
+    return buildList {
+        for (lesson in lessons.objects()) {
+            val questions = lesson.optJSONArray("questions") ?: JSONArray()
+            for (row in questions.objects()) {
+                val question = row.optString("question").trim()
+                val answer = row.optJSONObject("answer")?.optString("text").orEmpty().trim()
+                if (question.isNotBlank() && answer.isNotBlank()) add(question to answer)
+            }
+        }
+    }
+}
+
 private data class SprixBank(
     val subjectId: Int,
     val blockAnswers: JSONObject,
@@ -315,20 +329,12 @@ class SprixSolver(
         if (blocks.length() < 200 || tests.length() < 100) {
             throw IllegalStateException("SPRIX answer map looks incomplete (${blocks.length()} blocks, ${tests.length()} test answers).")
         }
-        val archive = if (subjectId == 7) {
-            val archiveJson = downloadJson(SPRIX_ARABIC_SOURCE + "answers_archive.json")
-            val lessons = archiveJson.optJSONArray("lessons") ?: JSONArray()
-            buildList {
-                for (lesson in lessons.objects()) {
-                    val questions = lesson.optJSONArray("questions") ?: JSONArray()
-                    for (row in questions.objects()) {
-                        val question = row.optString("question").trim()
-                        val answer = row.optJSONObject("answer")?.optString("text").orEmpty().trim()
-                        if (question.isNotBlank() && answer.isNotBlank()) add(question to answer)
-                    }
-                }
-            }
-        } else emptyList()
+        val archiveUrl = if (subjectId == 7) {
+            SPRIX_ARABIC_SOURCE + "answers_archive.json"
+        } else {
+            SPRIX_ENGLISH_SOURCE + "answers_archive_subject3.json"
+        }
+        val archive = extractSprixArchiveAnswers(downloadJson(archiveUrl))
         onProgress("Loaded SPRIX answer maps: ${blocks.length()} block IDs, ${tests.length()} test IDs.")
         return SprixBank(subjectId, blocks, tests, archive)
     }
