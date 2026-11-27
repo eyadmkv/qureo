@@ -718,6 +718,10 @@ class QureoSolver(
         require(rows.isNotEmpty()) { "Chapter $sequence returned no assessment questions." }
 
         var prepared = prepareAnswers(rows, answers)
+        val bootstrapCount = prepared.first.count { it.second.source == "bootstrap" }
+        if (bootstrapCount > 0) {
+            onProgress("Using $bootstrapCount temporary type-safe answer(s) to recover the official QUREO answers.")
+        }
         if (prepared.second.isNotEmpty()) {
             throw IllegalStateException(
                 "No verified answer for ${prepared.second.joinToString()}. No assessment answers were submitted."
@@ -854,7 +858,12 @@ class QureoSolver(
                 .any(type::contains)
             val missingDetail = missingAnswerDetail(id.ifBlank { "unknown" }, answer, type, options)
 
-            if (answer == null || id.isBlank()) {
+            if (id.isBlank()) {
+                missing.add(missingDetail)
+                continue
+            }
+
+            if (answer == null) {
                 when {
                     explicitlyChoice && options.length() > 0 -> {
                         val firstChoiceId = options.objects().firstNotNullOfOrNull(::choiceOptionId)
