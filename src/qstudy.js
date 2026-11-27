@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
+import { emitKeypressEvents } from 'node:readline';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin, stdout } from 'node:process';
@@ -68,6 +69,40 @@ export function summarizeSprixCurriculum(snapshot) {
   };
 }
 
+const SOLVE_OPTIONS = [
+  { id: 'javascript', label: 'JavaScript', service: 'QUREO' },
+  { id: 'python', label: 'Python', service: 'QUREO' },
+  { id: 'sprix', label: 'SPRIX', service: 'SPRIX' }
+];
+
+export function createSolvePlan(selected, { dryRun = false } = {}) {
+  if (!Array.isArray(selected)) throw new TypeError('Selected solve targets must be an array.');
+  const selectedIds = new Set(selected);
+  const validIds = new Set(SOLVE_OPTIONS.map(option => option.id));
+  const unknown = [...selectedIds].filter(id => !validIds.has(id));
+  if (unknown.length) throw new Error('Unknown solve target(s): ' + unknown.join(', '));
+
+  return SOLVE_OPTIONS.filter(option => selectedIds.has(option.id)).map(option => {
+    let service;
+    let args;
+    if (option.id === 'javascript') {
+      service = 'qureo';
+      args = ['solve', '--course', 'javascript_ar'];
+    } else if (option.id === 'python') {
+      service = 'qureo';
+      args = ['python', 'solve'];
+    } else {
+      service = 'sprix';
+      args = ['solve'];
+    }
+
+    if (dryRun) args.push('--dry-run');
+    else if (service === 'qureo') args.push('--interactive');
+
+    return { id: option.id, label: option.label, service, args };
+  });
+}
+
 export function formatProgressBar(completed, total, width = 20) {
   const safeWidth = Number.isInteger(width) && width > 0 ? Math.min(width, 80) : 20;
   const ratio = total > 0 ? Math.max(0, Math.min(1, completed / total)) : 0;
@@ -132,6 +167,132 @@ function printDashboard({ compact = false } = {}) {
   console.log('  DATA    ' + DATA_DIR);
   console.log('');
   console.log(color('  qstudy qureo --help   qstudy sprix --help   qstudy status', 'muted'));
+}
+
+async function chooseSolveTargets() {
+  if (!stdin.isTTY || !stdout.isTTY || typeof stdin.setRawMode !== 'function') {
+    throw new Error('qstudy solve requires an interactive terminal. Run it from PowerShell 7 or use the individual qureo and sprix commands.');
+  }
+
+  return new Promise(resolve => {
+    let cursor = 0;
+    let rendered = false;
+    let renderedRows = 0;
+    let status = 'No targets selected yet.';
+    const selected = new Set();
+    const wasRaw = Boolean(stdin.isRaw);
+
+    const render = () => {
+      const lines = [
+        color('  What would you like to solve?', 'accent'),
+        color('  Use ↑/↓ to move, Space to toggle, Enter to continue, Esc to cancel.', 'muted'),
+        ''
+      ];
+
+      for (const [index, option] of SOLVE_OPTIONS.entries()) {
+        const pointer = index === cursor ? color('❯', 'accent') : ' ';
+        const checkbox = selected.has(option.id) ? color('x', 'success') : ' ';
+        lines.push('  ' + pointer + ' [' + checkbox + '] ' + option.label + color('  (' + option.service + ')', 'muted'));
+      }
+
+      lines.push('');
+      lines.push(color('  ' + status, status.startsWith('Select at least') ? 'warning' : 'muted'));
+
+      if (rendered) stdout.write('\u001b[' + renderedRows + 'A');
+      for (const line of lines) stdout.write('\u001b[2K' + line + '\n');
+      renderedRows = lines.length;
+      rendered = true;
+    };
+
+    const finish = value => {
+      stdin.off('keypress', onKeypress);
+      try {
+        stdin.setRawMode(wasRaw);
+      } catch {}
+      if (!wasRaw) stdin.pause();
+      stdout.write('\n');
+      resolve(value);
+    };
+
+    const onKeypress = (character, key = {}) => {
+      if (key.ctrl && key.name === 'c') {
+        status = 'Cancelled.';
+        finish([]);
+        return;
+      }
+      if (key.name === 'escape' || character?.toLowerCase() === 'q') {
+        status = 'Cancelled.';
+        finish([]);
+        return;
+      }
+      if (key.name === 'up') {
+        cursor = (cursor + SOLVE_OPTIONS.length - 1) % SOLVE_OPTIONS.length;
+        render();
+        return;
+      }
+      if (key.name === 'down') {
+        cursor = (cursor + 1) % SOLVE_OPTIONS.length;
+        render();
+        return;
+      }
+      if (key.name === 'space' || character === ' ') {
+        const id = SOLVE_OPTIONS[cursor].id;
+        if (selected.has(id)) selected.delete(id);
+        else selected.add(id);
+        status = selected.size + ' target(s) selected.';
+        render();
+        return;
+      }
+      if (key.name === 'return') {
+        if (!selected.size) {
+          status = 'Select at least one target, or press Esc to cancel.';
+          render();
+          return;
+        }
+        finish(SOLVE_OPTIONS.filter(option => selected.has(option.id)).map(option => option.id));
+      }
+    };
+
+    emitKeypressEvents(stdin);
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.on('keypress', onKeypress);
+    render();
+  });
+}
+
+async function solve({ dryRun = false } = {}) {
+  const selected = await chooseSolveTargets();
+  if (!selected.length) {
+    console.log('Solve selection cancelled.');
+    return;
+  }
+
+  const plan = createSolvePlan(selected, { dryRun });
+  let failures = 0;
+  for (const task of plan) {
+    console.log('');
+    console.log(color('  ' + (dryRun ? 'PREVIEW ' : 'SOLVE ') + task.label.toUpperCase(), 'accent'));
+    const statusCode = runService(task.service, task.args);
+    if (statusCode !== 0) {
+      failures++;
+      console.error('  ' + task.label + ' exited with status ' + statusCode + '.');
+    }
+  }
+
+  if (failures) process.exitCode = 1;
+}
+
+function printSolveHelp() {
+  console.log('Usage: qstudy solve [--dry-run]');
+  console.log('');
+  console.log('Choose one or more targets with the interactive checklist:');
+  console.log('  JavaScript  QUREO JavaScript course');
+  console.log('  Python      QUREO Python course');
+  console.log('  SPRIX       SPRIX financial-literacy course');
+  console.log('');
+  console.log('Keyboard: ↑/↓ move, Space toggle, Enter start, Esc cancel.');
+  console.log('--dry-run previews every selected target without submitting answers.');
 }
 
 async function promptStudentId() {
@@ -264,6 +425,8 @@ function printHelp() {
   console.log('  qstudy dashboard --refresh  Sync both platforms before showing progress');
   console.log('  qstudy sync                  Refresh QUREO and SPRIX progress');
   console.log('  qstudy status                Validate both saved sessions');
+  console.log('  qstudy solve                 Choose JavaScript, Python and/or SPRIX');
+  console.log('  qstudy solve --dry-run       Preview selected solvers without submitting');
   console.log('  qstudy qureo <command>       Run an existing QUREO command');
   console.log('  qstudy sprix <command>       Run an existing SPRIX command');
   console.log('  qstudy --version             Print version');
@@ -293,6 +456,15 @@ export async function runQStudy(args = process.argv.slice(2)) {
     return;
   }
   if (command === 'status') return status();
+  if (command === 'solve') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      printSolveHelp();
+      return;
+    }
+    const unsupported = rest.filter(argument => argument !== '--dry-run');
+    if (unsupported.length) throw new Error('Unsupported qstudy solve option(s): ' + unsupported.join(' '));
+    return solve({ dryRun: rest.includes('--dry-run') });
+  }
   if (command === 'sync') {
     syncServices();
     return;
