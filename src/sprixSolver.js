@@ -10,8 +10,10 @@ export const SPRIX_BANK_PATH = path.join(SPRIX_DIR, 'answer-bank.json');
 export const SPRIX_ENGLISH_BLOCK_BANK_PATH = path.join(SPRIX_DIR, 'block-answer-bank-subject3.json');
 export const SPRIX_ARABIC_BLOCK_BANK_PATH = path.join(SPRIX_DIR, 'block-answer-bank-subject7.json');
 export const SPRIX_ARABIC_ARCHIVE_PATH = path.join(SPRIX_DIR, 'answer-archive-subject7.json');
-const SPRIX_ANSWER_SOURCE_BASE_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/main';
-const SPRIX_ENGLISH_BLOCK_BANK_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db/spx_api_bank_subject3.json';
+export const SPRIX_ENGLISH_ARCHIVE_PATH = path.join(SPRIX_DIR, 'answer-archive-subject3.json');
+const SPRIX_ANSWER_SOURCE_BASE_URL = 'https://raw.githubusercontent.com/kky84rgkjy-maker/mohammad/9e73d17e0667c6eb8f358ceda53c2abec2e9a7db';
+const SPRIX_ENGLISH_BLOCK_BANK_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/spx_api_bank_subject3.json';
+const SPRIX_ENGLISH_ARCHIVE_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/answers_archive_subject3.json';
 const SPRIX_ARABIC_BLOCK_BANK_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/spx_api_bank.json';
 const SPRIX_ARABIC_ARCHIVE_URL = SPRIX_ANSWER_SOURCE_BASE_URL + '/answers_archive.json';
 
@@ -91,11 +93,11 @@ export function parseSprixAnswerArchive(source, sourceName = SPRIX_ARABIC_ARCHIV
   try {
     archive = JSON.parse(String(source || ''));
   } catch {
-    throw new Error('The Arabic SPRIX answer archive is not valid JSON.');
+    throw new Error('The SPRIX answer archive is not valid JSON.');
   }
 
   if (!archive || !Array.isArray(archive.lessons)) {
-    throw new Error('The Arabic SPRIX answer archive must contain a lessons array.');
+    throw new Error('The SPRIX answer archive must contain a lessons array.');
   }
 
   const questions = [];
@@ -122,7 +124,7 @@ export function parseSprixAnswerArchive(source, sourceName = SPRIX_ARABIC_ARCHIV
   }
 
   if (!questions.length) {
-    throw new Error('The Arabic SPRIX answer archive contains no answered questions.');
+    throw new Error('The SPRIX answer archive contains no answered questions.');
   }
 
   return {
@@ -264,6 +266,16 @@ function saveSprixBlockAnswerBank(bank, outputPath = SPRIX_ENGLISH_BLOCK_BANK_PA
   fs.renameSync(temporaryPath, outputPath);
 }
 
+function saveSprixArchiveBank(bank, outputPath) {
+  fs.mkdirSync(SPRIX_DIR, { recursive: true });
+  const temporaryPath = outputPath + '.tmp';
+  fs.writeFileSync(temporaryPath, JSON.stringify(bank, null, 2) + '\n', {
+    encoding: 'utf8',
+    mode: 0o600
+  });
+  fs.renameSync(temporaryPath, outputPath);
+}
+
 function readLocalSprixBank(filePath, label) {
   if (!fs.existsSync(filePath)) return null;
   let data;
@@ -377,16 +389,21 @@ export function loadSprixAnswerBank(subjectId = null) {
       throw new Error('The local English SPRIX answer map has an unsupported format. Run sprix bank import-english again.');
     }
 
+    const englishArchive = readLocalSprixBank(
+      SPRIX_ENGLISH_ARCHIVE_PATH,
+      'English SPRIX answer archive'
+    );
+    const questions = mergeSprixQuestionBanks(englishArchive);
     return {
       format: 'sprix-answer-bank',
       schema_version: 1,
       subjectId: 3,
-      imported_at: englishBank.imported_at,
-      source: englishBank.source_url,
-      total: englishBank.total,
-      answered: englishBank.total,
+      imported_at: [englishBank.imported_at, englishArchive?.imported_at].filter(Boolean).sort().at(-1) || null,
+      source: [englishBank.source_url, englishArchive?.source].filter(Boolean).join('; '),
+      total: questions.length || englishBank.total,
+      answered: questions.length,
       unanswered: 0,
-      questions: [],
+      questions,
       blockAnswers: englishBank.answers,
       blockAnswerSource: englishBank.source_url,
       testAnswers: englishBank.testAnswers && typeof englishBank.testAnswers === 'object'
@@ -1719,29 +1736,41 @@ function registerBankCommands(sprix) {
     });
 
   bank.command('import-english')
-    .description('Download the public English Financial Literacy subject-3 chapter and test answer maps into the ignored local data directory')
+    .description('Download the public English Financial Literacy subject-3 ID maps and text archive into the ignored local data directory')
     .action(async () => {
-      let response;
-      try {
-        response = await fetch(SPRIX_ENGLISH_BLOCK_BANK_URL, {
+      const [mapResponse, archiveResponse] = await Promise.all([
+        fetch(SPRIX_ENGLISH_BLOCK_BANK_URL, {
           headers: { Accept: 'application/json' },
           signal: AbortSignal.timeout(20000)
-        });
-      } catch (error) {
-        throw new Error('Could not download the English SPRIX answer map: ' + error.message);
+        }),
+        fetch(SPRIX_ENGLISH_ARCHIVE_URL, {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(20000)
+        })
+      ]);
+      if (!mapResponse.ok) {
+        throw new Error('The public English SPRIX answer map download failed (HTTP ' + mapResponse.status + ').');
       }
-      if (!response.ok) {
-        throw new Error('The public English SPRIX answer map download failed (HTTP ' + response.status + ').');
+      if (!archiveResponse.ok) {
+        throw new Error('The public English SPRIX answer archive download failed (HTTP ' + archiveResponse.status + ').');
       }
 
-      const source = await response.text();
-      const imported = parseSprixBlockAnswerBank(source, SPRIX_ENGLISH_BLOCK_BANK_URL);
+      const [mapSource, archiveSource] = await Promise.all([
+        mapResponse.text(),
+        archiveResponse.text()
+      ]);
+      const imported = parseSprixBlockAnswerBank(mapSource, SPRIX_ENGLISH_BLOCK_BANK_URL);
+      const archive = parseSprixAnswerArchive(archiveSource, SPRIX_ENGLISH_ARCHIVE_URL);
       saveSprixBlockAnswerBank(imported);
+      saveSprixArchiveBank(archive, SPRIX_ENGLISH_ARCHIVE_PATH);
       console.log('Imported ' + imported.total + ' English subject-3 chapter block-answer mappings.');
       console.log('Imported ' + imported.testTotal + ' English subject-3 test-answer mappings.');
+      console.log('Imported ' + archive.total + ' English subject-3 text answers for fallback matching.');
       console.log('Source: ' + imported.source_url);
+      console.log('Text archive: ' + archive.source);
       console.log('Saved locally: ' + SPRIX_ENGLISH_BLOCK_BANK_PATH);
-      console.log('The solver checks every mapped option ID against the live chapter or test options before using it.');
+      console.log('Saved locally: ' + SPRIX_ENGLISH_ARCHIVE_PATH);
+      console.log('The solver validates mapped option IDs against live options and uses the text archive when no ID mapping exists.');
       console.log('This third-party answer data is unverified and is stored locally only.');
     });
 
