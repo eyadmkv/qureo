@@ -64,10 +64,11 @@ class SolverService : Service() {
                 when (action) {
                     ACTION_QUREO -> {
                         val target = intent?.getStringExtra(EXTRA_TARGET)?.takeIf { it.isNotBlank() }
+                        val course = intent?.getStringExtra(EXTRA_COURSE) ?: "python_short_ar"
                         val single = intent?.getBooleanExtra(EXTRA_SINGLE, false) ?: false
                         val dryRun = intent?.getBooleanExtra(EXTRA_DRY_RUN, false) ?: false
                         val solver = QureoSolver(applicationContext, QureoClient(applicationContext), ::report)
-                        solver.solvePython(target, single, dryRun)
+                        solver.solveCourse(course, target, single, dryRun)
                     }
                     ACTION_SPRIX -> {
                         val subject = intent?.getStringExtra(EXTRA_SUBJECT) ?: "7"
@@ -143,6 +144,7 @@ class SolverService : Service() {
     companion object {
         const val EXTRA_ACTION = "solver_action"
         const val EXTRA_TARGET = "target_chapter"
+        const val EXTRA_COURSE = "course_id"
         const val EXTRA_SUBJECT = "subject_id"
         const val EXTRA_SINGLE = "single"
         const val EXTRA_DRY_RUN = "dry_run"
@@ -156,11 +158,13 @@ class SolverService : Service() {
             action: String,
             target: String? = null,
             subject: String? = null,
+            course: String = "python_short_ar",
             single: Boolean = false,
             dryRun: Boolean = false
         ) {
             val intent = Intent(context, SolverService::class.java)
                 .putExtra(EXTRA_ACTION, action)
+                .putExtra(EXTRA_COURSE, course)
                 .putExtra(EXTRA_SINGLE, single)
                 .putExtra(EXTRA_DRY_RUN, dryRun)
             target?.let { intent.putExtra(EXTRA_TARGET, it) }
