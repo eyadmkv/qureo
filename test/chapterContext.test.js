@@ -87,6 +87,8 @@ test('initializes the matching course before requesting chapter assessment quest
       calls.push({ type: 'api', path });
       if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
       if (path === '/sections/106') return [{ id: 511021 }];
+      if (path === '/students/sections/106/chapters') return [{ chapter_id: 511021 }];
+      if (path === '/chapters/511021') return { chapter: { id: 511021, question_count: 10 } };
       if (path === '/chapters/511021/test') return [{ question: { id: 511021030, type: 'choice' }, choices: [{ id: 5110210301, content: 'First' }] }];
       throw new Error(`Unexpected path: ${path}`);
     }
@@ -104,6 +106,8 @@ test('initializes the matching course before requesting chapter assessment quest
     },
     { type: 'api', path: '/courses/python_short_ar' },
     { type: 'api', path: '/sections/106' },
+    { type: 'api', path: '/students/sections/106/chapters' },
+    { type: 'api', path: '/chapters/511021' },
     { type: 'api', path: '/chapters/511021/test' }
   ]);
 });
