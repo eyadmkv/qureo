@@ -47,7 +47,7 @@ export function summarizeSprixCurriculum(snapshot) {
   if (!snapshot || snapshot.format !== 'sprix-curriculum-snapshot' || !Array.isArray(snapshot.units)) return null;
   const units = snapshot.units.map((unit, index) => {
     const items = sectionsOf(unit).flatMap(section => Array.isArray(section?.items) ? section.items : []);
-    const completed = items.filter(item => item?.is_completed === true).length;
+    const completed = items.filter(item => Boolean(item?.is_completed)).length;
     return {
       id: unit.id ?? null,
       title: unit.title || unit.name || 'Unit ' + (index + 1),
