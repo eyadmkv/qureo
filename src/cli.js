@@ -17,7 +17,7 @@ import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { getChapterAssessmentResultPath, solveCourse } from './solver.js';
-import { resolveChapterContext } from './chapterContext.js';
+import { fetchChapterQuestions, resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
@@ -653,8 +653,18 @@ program.command('chapter <chapterId>')
 
 program.command('questions <chapterId>')
   .description('Fetch and cache exercise questions and visible choices for a chapter')
-  .action(async chapterId => withClient(async client => {
-    const raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+  .action(async chapterId => withClient(async (client, user) => {
+    const candidates = [
+      ...(user?.available_courses || []).map(course => ({
+        id: String(course?.content_id || course?.id || '')
+      })),
+      ...listApiCourses().map(course => ({ id: String(course.course_id || '') })),
+      { id: PYTHON_COURSE_ID },
+      { id: 'javascript_ar' }
+    ].filter(course => course.id);
+    const uniqueCourses = [...new Map(candidates.map(course => [course.id, course])).values()];
+    const { context, questions: raw } = await fetchChapterQuestions(client, uniqueCourses, chapterId);
+    console.log(`Course: ${context.courseId} | section ${context.sectionId}`);
     const questions = asArray(raw);
     if (!questions.length) {
       console.log('QUREO returned no question array for this chapter.');
@@ -665,10 +675,10 @@ program.command('questions <chapterId>')
     console.log(`Cached ${questions.length} question(s) for chapter ${chapterId}.`);
     for (const [i, item] of questions.entries()) {
       const q = extractQuestion(item);
-      console.log(`\n${i + 1}. [${q.type}] ID ${q.id ?? '?'}`);
+      console.log(`\\n${i + 1}. [${q.type}] ID ${q.id ?? '?'}`);
       console.log(q.prompt || '(Prompt is stored in the raw question data but did not match known fields.)');
       if (q.choices.length) for (const [j, choice] of q.choices.entries()) console.log(`   ${String.fromCharCode(65 + j)}. ${choice}`);
-      if (q.snippets.length && !q.prompt) console.log(q.snippets.join('\n'));
+      if (q.snippets.length && !q.prompt) console.log(q.snippets.join('\\n'));
     }
   }));
 
