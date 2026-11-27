@@ -112,3 +112,60 @@ test('preserves complete archived Chapter 9 programs until QUREO supplies its mo
     answer_code: 'a = 4\nb = 3\nif a >= 2 and b >= 3:\n    print("The condition is met")'
   });
 });
+
+
+test('resolves archived answers when QUREO uses alternate answer type names and nested options', () => {
+  const answers = {
+    '511021030': {
+      type: 'description',
+      answer_code: 'math = 100\\nenglish = 100\\nif math == 100:\\n    print("Math is 100 points")\\nif english == 100:\\n    print("Math and English are 100 points")'
+    },
+    '511021050': {
+      type: 'choice',
+      choice_id: 5110210501
+    }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: { id: 511021030, type: 'programming' },
+    choices: []
+  }, answers), {
+    type: 'description',
+    answer_code: answers['511021030'].answer_code
+  });
+
+  assert.deepEqual(getQuestionAnswer({
+    question: {
+      id: 511021050,
+      type: 'single_select',
+      options: [{ id: 5110210501 }, { id: 5110210502 }]
+    }
+  }, answers), {
+    type: 'choice',
+    choice_id: 5110210501
+  });
+});
+
+test('does not accept an archived choice when the live option IDs disagree', () => {
+  assert.equal(getQuestionAnswer({
+    question: {
+      id: 511021050,
+      type: 'single_select',
+      options: [{ id: 5110210502 }, { id: 5110210503 }]
+    }
+  }, {
+    '511021050': { type: 'choice', choice_id: 5110210501 }
+  }), null);
+});
+
+test('infers description answers from an answer-capable question with no choice options', () => {
+  assert.deepEqual(getQuestionAnswer({
+    question: { id: 511021030, type: 'fill_in_the_blank' },
+    options: []
+  }, {
+    '511021030': { type: 'description', answer_code: 'print("ok")' }
+  }), {
+    type: 'description',
+    answer_code: 'print("ok")'
+  });
+});
