@@ -15,6 +15,8 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Spinner
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var logView: TextView
     private lateinit var statusView: TextView
     private lateinit var qureoId: EditText
-    private lateinit var qureoCourse: EditText
+    private lateinit var qureoCourse: Spinner
     private lateinit var qureoPassword: EditText
     private lateinit var qureoChapter: EditText
     private lateinit var sprixId: EditText
@@ -68,32 +70,43 @@ class MainActivity : ComponentActivity() {
         statusView.setPadding(0, 12, 0, 18)
         page.addView(statusView)
 
-        page.addView(sectionTitle("QUREO · Python"))
+        page.addView(sectionTitle("QUREO"))
+        page.addView(label("Choose a course", 13f, pale, false))
+        qureoCourse = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                listOf("Python · البرمجة بلغة Python", "JavaScript · البرمجة بلغة JavaScript")
+            )
+            setSelection(0)
+        }
         qureoId = input("Student ID", InputType.TYPE_CLASS_TEXT)
         qureoPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        qureoCourse = input("Course ID (Python: python_short_ar)", InputType.TYPE_CLASS_TEXT).apply { setText("python_short_ar") }
         qureoChapter = input("Chapter number or ID (optional)", InputType.TYPE_CLASS_TEXT)
+        page.addView(qureoCourse)
         page.addView(qureoId)
         page.addView(qureoPassword)
-        page.addView(qureoCourse)
-        page.addView(button("Import QUREO answer-bank JSON", true) {
-            answerBankPicker.launch(arrayOf("application/json", "text/plain", "*/*"))
-        })
         page.addView(button("Sign in to QUREO") { loginQureo() })
         page.addView(button("Sign out of QUREO", true) {
             QureoClient(applicationContext).logout()
             refreshSessionStatus()
             appendLog("QUREO session removed.")
         })
+        page.addView(button("Download / update selected answer bank", true) {
+            syncQureoAnswerBank(force = true)
+        })
+        page.addView(button("Import custom answer-bank JSON", true) {
+            answerBankPicker.launch(arrayOf("application/json", "text/plain", "*/*"))
+        })
         page.addView(qureoChapter)
         page.addView(button("Solve selected chapter") {
             val target = qureoChapter.text.toString().trim().ifBlank { null }
             startSolver(SolverService.ACTION_QUREO, target = target, course = currentQureoCourse(), single = true)
         })
-        page.addView(button("Solve all remaining Python chapters") {
+        page.addView(button("Solve all remaining chapters") {
             startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse())
         })
-        page.addView(button("Preview remaining Python chapters", true) {
+        page.addView(button("Preview remaining chapters", true) {
             startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse(), dryRun = true)
         })
 
@@ -226,7 +239,22 @@ class MainActivity : ComponentActivity() {
     private fun currentSubject(): String = sprixSubject.text.toString().trim().ifBlank { "7" }
 
     private fun currentQureoCourse(): String =
-        qureoCourse.text.toString().trim().ifBlank { "python_short_ar" }
+        if (qureoCourse.selectedItemPosition == 1) "javascript_ar" else "python_short_ar"
+
+    private fun syncQureoAnswerBank(force: Boolean) {
+        val courseId = currentQureoCourse()
+        lifecycleScope.launch {
+            try {
+                appendLog("Updating the $courseId answer bank...")
+                val count = QureoAnswerBank(applicationContext).sync(courseId, force) { message ->
+                    appendLog(message)
+                }
+                appendLog("Answer bank ready for $courseId: $count answer(s).")
+            } catch (error: Exception) {
+                appendLog("Answer-bank update failed: ${error.message}")
+            }
+        }
+    }
 
     private fun importQureoAnswerBank(uri: Uri) {
         val courseId = currentQureoCourse()
