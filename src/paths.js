@@ -33,7 +33,11 @@ function copyMissingFiles(source, destination) {
     if (entry.isDirectory()) {
       copyMissingFiles(sourcePath, destinationPath);
     } else if (entry.isFile() && !fs.existsSync(destinationPath)) {
-      fs.copyFileSync(sourcePath, destinationPath);
+      try {
+        fs.copyFileSync(sourcePath, destinationPath, fs.constants.COPYFILE_EXCL);
+      } catch (error) {
+        if (error.code !== 'EEXIST') throw error;
+      }
     }
   }
 }

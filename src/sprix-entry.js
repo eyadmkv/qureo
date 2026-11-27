@@ -5,7 +5,7 @@ import { registerSprixCommands } from './sprix.js';
 const program = new Command()
   .name('sprix')
   .description('SPRIX Learning Square API and local study CLI')
-  .version('0.5.0');
+  .version('0.6.0');
 
 registerSprixCommands(program, { standalone: true });
 program.showHelpAfterError();
