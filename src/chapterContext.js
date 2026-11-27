@@ -64,6 +64,8 @@ export async function fetchChapterQuestions(client, courses, chapterId) {
     );
   }
 
+  await client.json(`/students/sections/${encodeURIComponent(context.sectionId)}/chapters`);
+  await client.json(`/chapters/${encodeURIComponent(chapterId)}`);
   const questions = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
   return { context, questions };
 }
