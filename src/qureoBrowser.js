@@ -36,12 +36,29 @@ export function toCdpCookie(cookie) {
 export function buildLectureCompletionScript(lessonId) {
   const id = encodeURIComponent(String(lessonId));
   return `(async () => {
+    const headers = { Accept: '*/*', 'Content-Type': 'application/json' };
+    const started = await fetch('/api/study/students/lectures/${id}', {
+      method: 'PUT',
+      credentials: 'include',
+      headers
+    });
+    const startBody = (await started.text()).slice(0, 500);
+    if (!started.ok && started.status !== 400 && started.status !== 409) {
+      return {
+        stage: 'start',
+        status: started.status,
+        ok: false,
+        body: startBody
+      };
+    }
+
     const response = await fetch('/api/study/students/lectures/${id}/complete', {
       method: 'PUT',
       credentials: 'include',
-      headers: { Accept: '*/*', 'Content-Type': 'application/json' }
+      headers
     });
     return {
+      stage: 'complete',
       status: response.status,
       ok: response.ok,
       body: (await response.text()).slice(0, 500)
