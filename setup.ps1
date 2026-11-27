@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $ProjectRoot = $PSScriptRoot
 Set-Location $ProjectRoot
 
-Write-Host 'QUREO Personal CLI 0.3.0 setup' -ForegroundColor Cyan
+Write-Host 'QStudy CLI 0.6.0 setup' -ForegroundColor Cyan
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     throw 'Node.js is not installed. Install Node.js 22.12 or newer, reopen PowerShell, then retry.'
@@ -27,14 +27,14 @@ Write-Host '[2/3] Checking source files...' -ForegroundColor Yellow
 npm run check
 if ($LASTEXITCODE -ne 0) { throw 'JavaScript syntax validation failed.' }
 
-Write-Host '[3/3] Registering the private qureo command...' -ForegroundColor Yellow
+Write-Host '[3/3] Registering qstudy, qureo and sprix commands...' -ForegroundColor Yellow
 npm link
 if ($LASTEXITCODE -ne 0) { throw 'npm link failed.' }
 
 Write-Host ''
 Write-Host 'Setup complete. No Playwright package or browser driver is installed.' -ForegroundColor Green
-Write-Host 'Next: qureo login'
-Write-Host 'Then: qureo sync'
-Write-Host 'Then: qureo export'
-Write-Host 'Your SQLite database stays in .\data\qureo.db'
-Write-Host 'Course export: .\exports\qureo-export.json'
+Write-Host 'Next: qstudy login'
+Write-Host 'Then: qstudy sync'
+Write-Host 'Then: qstudy dashboard'
+Write-Host "Your QStudy data directory is $env:LOCALAPPDATA\QStudy"
+Write-Host "Course export: $env:LOCALAPPDATA\QStudy\exports\qureo-export.json"

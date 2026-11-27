@@ -1,15 +1,16 @@
-# QUREO Personal CLI
+# QStudy CLI
 
 [![CI](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml/badge.svg)](https://github.com/eyadmkv/qureo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An unofficial, Windows-focused command-line toolkit for your own QUREO account and the SPRIX financial-literacy course. It includes QUREO sync and a progress-aware solver, plus a standalone SPRIX CLI for live curriculum and lesson workflows, encrypted browser-session import, and local study data.
+An unofficial, Windows-focused command-line toolkit that unifies QUREO and SPRIX under one account dashboard and keeps the original `qureo` and `sprix` commands available. It includes QUREO sync and a progress-aware solver, plus a standalone SPRIX CLI for live curriculum and lesson workflows, encrypted browser-session import, and local study data.
 
 This project is independent and is not affiliated with, endorsed by, or supported by QUREO or its operators. It uses undocumented service endpoints that may change without notice.
 
 ## Features
 
-- Authenticate with QUREO and store the session encrypted using Windows DPAPI.
+- Sign in to QUREO and SPRIX through one shared credential prompt while preserving separate encrypted service sessions.
+- Use `qstudy` for a unified dashboard, account checks and cross-platform sync, or keep using `qureo` and `sprix` directly.
 - Sync account, course, chapter and progress metadata.
 - Cache retrieved question data in a local SQLite database.
 - Export course metadata, lessons and available assessment questions to JSON.
@@ -54,20 +55,31 @@ npm link
 ## Quick start
 
 ```powershell
+qstudy login
+qstudy sync
+qstudy dashboard
+qstudy solve
+qstudy qureo me
+qstudy sprix progress
+
+# The original commands remain available
 qureo login
-qureo sync
-qureo me
-qureo dashboard
-qureo export
+sprix login
 ```
 
-The login command prompts for your student ID and a hidden password. The password is sent to the QUREO login endpoint and is not saved by this CLI. The resulting session cookies are encrypted for the current Windows account.
+`qstudy login` prompts once for the shared student ID/Login ID and hidden password, then authenticates with QUREO and SPRIX independently. The password is not saved. Each service's session cookies are encrypted separately with Windows DPAPI for the current Windows account.
 
 ## Common commands
 
 | Command | Purpose |
 | --- | --- |
-| `qureo login` / `logout` | Create or remove the local authenticated session |
+| `qstudy login` / `logout` | Sign in to or clear both QUREO and SPRIX sessions with one command |
+| `qstudy dashboard` | Show combined QUREO and SPRIX progress and local data |
+| `qstudy sync` / `status` | Refresh both platforms or validate both saved sessions |
+| `qstudy solve` | Choose JavaScript, Python and/or SPRIX from an interactive checklist |
+| `qstudy solve --dry-run` | Preview selected solvers without submitting answers |
+| `qstudy qureo <command>` / `qstudy sprix <command>` | Run existing service commands through the unified entry point |
+| `qureo login` / `logout` | Create or remove the QUREO session; remains available directly |
 | `qureo me` | Show account identity, completed chapters and reward totals |
 | `qureo check` | Check portal and learning API connectivity |
 | `qureo courses` / `sync` | List or refresh course metadata and progress |
@@ -117,9 +129,9 @@ The solver makes state-changing requests to QUREO when you explicitly run it. Re
 
 ## Local data and privacy
 
-The `data/` directory contains the SQLite database, encrypted session, command history and checkpoints. It is ignored by Git. Do not upload or commit it.
+Runtime data is stored in `%LOCALAPPDATA%\QStudy` on Windows, including the SQLite database, encrypted sessions, command history, checkpoints and local answer banks. Existing `data/` and `answers/` folders in a source checkout are copied into the new location on first launch. Set `QSTUDY_DATA_DIR` to use a different data directory.
 
-SPRIX session cookies, lesson captures, extracted questions and personal reference keys are stored under `data/sprix/`. Session cookies are encrypted with Windows DPAPI. Local captures and notes stay on your computer; API requests are sent directly to SPRIX only when you run the corresponding command. Review any exported content before sharing it.
+SPRIX session cookies, lesson captures, extracted questions and personal reference keys are stored under `%LOCALAPPDATA%\QStudy\sprix` on Windows. Session cookies are encrypted with Windows DPAPI. Local captures and notes stay on your computer; API requests are sent directly to SPRIX only when you run the corresponding command. Review any exported content before sharing it.
 
 - Session cookies are encrypted with Windows DPAPI and tied to the Windows user account.
 - Passwords are not stored in the database, configuration or command history.
@@ -143,6 +155,10 @@ The repository currently includes generated files under `exports/` containing co
 ## Contributing
 
 Bug reports, reproducible issue reports and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), the [Code of Conduct](CODE_OF_CONDUCT.md) and [Security Policy](SECURITY.md) first.
+
+## Package
+
+The npm package is prepared as `@eyadmkv/qstudy-cli` and exposes three executables: `qstudy`, `qureo` and `sprix`. Build and inspect the package with `npm pack --dry-run`. Once published, it can be installed globally with `npm install -g @eyadmkv/qstudy-cli`. Publication is a separate release step.
 
 ## License
 
