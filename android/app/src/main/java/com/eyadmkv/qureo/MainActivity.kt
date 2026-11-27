@@ -3,6 +3,7 @@ package com.eyadmkv.qureo
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -17,6 +18,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -30,12 +32,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var logView: TextView
     private lateinit var statusView: TextView
     private lateinit var qureoId: EditText
+    private lateinit var qureoCourse: EditText
     private lateinit var qureoPassword: EditText
     private lateinit var qureoChapter: EditText
     private lateinit var sprixId: EditText
     private lateinit var sprixPassword: EditText
     private lateinit var sprixSubject: EditText
     private lateinit var webView: WebView
+    private val answerBankPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) importQureoAnswerBank(uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,9 +71,14 @@ class MainActivity : ComponentActivity() {
         page.addView(sectionTitle("QUREO · Python"))
         qureoId = input("Student ID", InputType.TYPE_CLASS_TEXT)
         qureoPassword = input("Password", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+        qureoCourse = input("Course ID (Python: python_short_ar)", InputType.TYPE_CLASS_TEXT).apply { setText("python_short_ar") }
         qureoChapter = input("Chapter number or ID (optional)", InputType.TYPE_CLASS_TEXT)
         page.addView(qureoId)
         page.addView(qureoPassword)
+        page.addView(qureoCourse)
+        page.addView(button("Import QUREO answer-bank JSON", true) {
+            answerBankPicker.launch(arrayOf("application/json", "text/plain", "*/*"))
+        })
         page.addView(button("Sign in to QUREO") { loginQureo() })
         page.addView(button("Sign out of QUREO", true) {
             QureoClient(applicationContext).logout()
@@ -77,13 +88,13 @@ class MainActivity : ComponentActivity() {
         page.addView(qureoChapter)
         page.addView(button("Solve selected chapter") {
             val target = qureoChapter.text.toString().trim().ifBlank { null }
-            startSolver(SolverService.ACTION_QUREO, target = target, single = true)
+            startSolver(SolverService.ACTION_QUREO, target = target, course = currentQureoCourse(), single = true)
         })
         page.addView(button("Solve all remaining Python chapters") {
-            startSolver(SolverService.ACTION_QUREO)
+            startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse())
         })
         page.addView(button("Preview remaining Python chapters", true) {
-            startSolver(SolverService.ACTION_QUREO, dryRun = true)
+            startSolver(SolverService.ACTION_QUREO, course = currentQureoCourse(), dryRun = true)
         })
 
         page.addView(sectionTitle("SPRIX · Financial Literacy"))
@@ -214,10 +225,28 @@ class MainActivity : ComponentActivity() {
 
     private fun currentSubject(): String = sprixSubject.text.toString().trim().ifBlank { "7" }
 
+    private fun currentQureoCourse(): String =
+        qureoCourse.text.toString().trim().ifBlank { "python_short_ar" }
+
+    private fun importQureoAnswerBank(uri: Uri) {
+        val courseId = currentQureoCourse()
+        lifecycleScope.launch {
+            try {
+                val content = contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    ?: throw IllegalStateException("Could not read the selected answer file.")
+                val count = QureoAnswerBank(applicationContext).importBank(courseId, content)
+                appendLog("Imported $count answer(s) for QUREO course $courseId.")
+            } catch (error: Exception) {
+                appendLog("Answer-bank import failed: " + error.message)
+            }
+        }
+    }
+
     private fun startSolver(
         action: String,
         target: String? = null,
         subject: String? = null,
+        course: String = "python_short_ar",
         single: Boolean = false,
         dryRun: Boolean = false
     ) {
@@ -236,7 +265,7 @@ class MainActivity : ComponentActivity() {
         }
         val name = if (action == SolverService.ACTION_QUREO) "QUREO" else "SPRIX"
         appendLog(name + " task queued" + if (dryRun) " (preview only)." else ".")
-        SolverService.start(this, action, target, subject, single, dryRun)
+        SolverService.start(this, action, target, subject, single, dryRun, course)
     }
 
     private fun subscribeToProgress() {
