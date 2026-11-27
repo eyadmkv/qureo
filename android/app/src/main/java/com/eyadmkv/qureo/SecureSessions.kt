@@ -95,8 +95,8 @@ class PersistentCookieJar(
                 builder.path(row.optString("path", "/"))
                 val expiresAt = row.optLong("expiresAt", Long.MAX_VALUE)
                 if (expiresAt != Long.MAX_VALUE) builder.expiresAt(expiresAt)
-                if (row.optBoolean("secure")) builder.secure()
-                if (row.optBoolean("httpOnly")) builder.httpOnly()
+                if (row.optBoolean("secure")) builder.secure
+                if (row.optBoolean("httpOnly")) builder.httpOnly
                 builder.build().let(result::add)
             }
             result
@@ -110,11 +110,11 @@ class PersistentCookieJar(
         synchronized(lock) {
             for (cookie in cookies) {
                 this.cookies.removeAll {
-                    it.name() == cookie.name() &&
-                        it.domain() == cookie.domain() &&
-                        it.path() == cookie.path()
+                    it.name == cookie.name &&
+                        it.domain == cookie.domain &&
+                        it.path == cookie.path
                 }
-                if (cookie.expiresAt() > System.currentTimeMillis()) this.cookies.add(cookie)
+                if (cookie.expiresAt > System.currentTimeMillis()) this.cookies.add(cookie)
             }
             persist()
         }
@@ -123,13 +123,13 @@ class PersistentCookieJar(
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         synchronized(lock) {
             val now = System.currentTimeMillis()
-            cookies.removeAll { it.expiresAt() <= now }
+            cookies.removeAll { it.expiresAt <= now }
             return cookies.filter { it.matches(url) }
         }
     }
 
     fun cookieHeader(url: HttpUrl): String = loadForRequest(url).joinToString("; ") {
-        "${it.name()}=${it.value()}"
+        "${it.name}=${it.value}"
     }
 
     fun clear() {
@@ -144,14 +144,14 @@ class PersistentCookieJar(
         for (cookie in cookies) {
             array.put(
                 JSONObject()
-                    .put("name", cookie.name())
-                    .put("value", cookie.value())
-                    .put("domain", cookie.domain())
-                    .put("path", cookie.path())
-                    .put("expiresAt", cookie.expiresAt())
-                    .put("hostOnly", cookie.hostOnly())
-                    .put("secure", cookie.secure())
-                    .put("httpOnly", cookie.httpOnly())
+                    .put("name", cookie.name)
+                    .put("value", cookie.value)
+                    .put("domain", cookie.domain)
+                    .put("path", cookie.path)
+                    .put("expiresAt", cookie.expiresAt)
+                    .put("hostOnly", cookie.hostOnly)
+                    .put("secure", cookie.secure)
+                    .put("httpOnly", cookie.httpOnly)
             )
         }
         store.put(storageKey, array.toString())
