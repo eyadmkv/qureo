@@ -271,7 +271,7 @@ function printHelp() {
   console.log('The standalone qureo and sprix commands remain available.');
 }
 
-export function runQStudy(args = process.argv.slice(2)) {
+export async function runQStudy(args = process.argv.slice(2)) {
   const [command, ...rest] = args;
   if (!command || command === 'help' || command === '--help' || command === '-h') {
     printHelp();
