@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveChapterContext } from '../src/chapterContext.js';
+import { resolveAccountChapterContext, resolveChapterContext } from '../src/chapterContext.js';
 
 test('initializes each candidate course before resolving a chapter from its section', async () => {
   const calls = [];
@@ -72,5 +72,53 @@ test('stops when the saved QUREO session has expired', async () => {
   await assert.rejects(
     resolveChapterContext(client, [{ id: 'python_short_ar' }], '511002'),
     error => error.code === 'AUTH_EXPIRED' && error.status === 401
+  );
+});
+
+test('resolves chapter commands from the signed-in account and cached CLI courses', async () => {
+  const pageSelections = [];
+  const client = {
+    async request(url, options) {
+      pageSelections.push({ url, method: options.method });
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      if (path === '/courses/javascript_ar') return { basic_section: { id: 105 } };
+      if (path === '/sections/105') return [{ id: 900001 }];
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511021 }];
+      throw new Error('Unexpected path: ' + path);
+    }
+  };
+
+  const result = await resolveAccountChapterContext(
+    client,
+    { available_courses: [{ content_id: 'javascript_ar' }, { content_id: 'python_short_ar' }] },
+    [{ course_id: 'javascript_ar' }],
+    '511021'
+  );
+
+  assert.deepEqual(result, { courseId: 'python_short_ar', sectionId: 106 });
+  assert.deepEqual(pageSelections.map(row => new URL(row.url).searchParams.get('content_id')), [
+    'javascript_ar',
+    'python_short_ar'
+  ]);
+});
+
+test('uses cached courses when the account profile omits its course list', async () => {
+  const client = {
+    async request() {
+      return new Response('<html>QUREO</html>', { status: 200 });
+    },
+    async json(path) {
+      if (path === '/courses/python_short_ar') return { basic_section: { id: 106 } };
+      if (path === '/sections/106') return [{ id: 511021 }];
+      throw new Error('Unexpected path: ' + path);
+    }
+  };
+
+  assert.deepEqual(
+    await resolveAccountChapterContext(client, {}, [{ course_id: 'python_short_ar' }], '511021'),
+    { courseId: 'python_short_ar', sectionId: 106 }
   );
 });
