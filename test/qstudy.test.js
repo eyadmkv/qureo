@@ -18,6 +18,13 @@ test('QStudy entrypoint exits cleanly for help and version', () => {
   }
 });
 
+test('bare qstudy starts the interactive combined solver', () => {
+  const result = spawnSync(process.execPath, [entryPath], { encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /qstudy solve requires an interactive terminal/);
+  assert.doesNotMatch(result.stdout, /unified QUREO \+ SPRIX CLI/);
+});
+
 test('defaults bare QStudy to JavaScript and SPRIX', () => {
   assert.deepEqual(DEFAULT_SOLVE_TARGETS, ['javascript', 'sprix']);
 });
