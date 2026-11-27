@@ -520,15 +520,23 @@ class QureoAnswerBank(private val context: Context) {
         if (!communityFile.isFile) return 0
         return runCatching {
             val archive = JSONObject(communityFile.readText())
-            archive.keys().asSequence()
-                .filter { isCommunityChapterForCourse(courseId, it) }
-                .sumOf { chapterId ->
-                    val chapter = archive.optJSONObject(chapterId) ?: return@sumOf 0
-                    chapter.keys().count { questionId ->
-                        isCommunityQuestionForCourse(courseId, chapterId, questionId) &&
-                            isValidCommunityAnswer(chapter.optJSONArray(questionId) ?: JSONArray())
+            var count = 0
+            val chapterKeys = archive.keys()
+            while (chapterKeys.hasNext()) {
+                val chapterId = chapterKeys.next()
+                if (!isCommunityChapterForCourse(courseId, chapterId)) continue
+                val chapter = archive.optJSONObject(chapterId) ?: continue
+                val questionKeys = chapter.keys()
+                while (questionKeys.hasNext()) {
+                    val questionId = questionKeys.next()
+                    val answer = chapter.optJSONArray(questionId) ?: continue
+                    if (isCommunityQuestionForCourse(courseId, chapterId, questionId) &&
+                        isValidCommunityAnswer(answer)) {
+                        count++
                     }
                 }
+            }
+            count
         }.getOrDefault(0)
     }
 
