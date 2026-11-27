@@ -3,15 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { QureoHttpClient } from './http.js';
 import { getStats, listApiCourses, listApiChapters } from './db.js';
-import { DB_PATH } from './paths.js';
+import { DATA_DIR, DB_PATH, CONFIG_PATH, SESSION_PATH } from './paths.js';
 import { formatDashboardMetrics } from './terminal.js';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = path.join(ROOT, 'data');
-const CONFIG_PATH = path.join(ROOT, 'qureo.config.json');
+const DATA = DATA_DIR;
 const HISTORY_PATH = path.join(DATA, 'command-history.json');
 const DEFAULT = { theme: 'auto', progressBars: true, commandSuggestions: true, historyLimit: 100, dashboard: { compact: false } };
 const THEMES = {
@@ -98,7 +95,7 @@ function dashboard(config) {
   }
 }
 function status(config) {
-  const session = fs.existsSync(path.join(DATA, 'session.dpapi'));
+  const session = fs.existsSync(SESSION_PATH);
   const chapters = listApiChapters();
   heading('QUREO STATUS', config);
   console.log('  Session file  ' + paint(session ? 'present' : 'missing', session ? 'success' : 'warning', config));
@@ -115,7 +112,7 @@ async function doctor(config) {
     ['Windows DPAPI platform', process.platform === 'win32'],
     ['PowerShell 7', process.platform !== 'win32' || spawnSync('pwsh', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { encoding: 'utf8', windowsHide: true }).status === 0],
     ['SQLite database', fs.existsSync(DB_PATH)],
-    ['Encrypted session', fs.existsSync(path.join(DATA, 'session.dpapi'))],
+    ['Encrypted session', fs.existsSync(SESSION_PATH)],
     ['Configuration file', fs.existsSync(CONFIG_PATH)]
   ];
   let failures = 0;
@@ -123,7 +120,7 @@ async function doctor(config) {
     console.log('  ' + paint(item[1] ? 'PASS' : 'FAIL', item[1] ? 'success' : 'warning', config) + '  ' + item[0]);
     if (!item[1]) failures++;
   }
-  if (fs.existsSync(path.join(DATA, 'session.dpapi'))) {
+  if (fs.existsSync(SESSION_PATH)) {
     try {
       await QureoHttpClient.loadSession().getUserInfo();
       console.log('  ' + paint('PASS', 'success', config) + '  QUREO portal authentication');

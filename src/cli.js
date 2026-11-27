@@ -15,7 +15,7 @@ import { answerIndexUrl, searchAnswers, syncPublicGuides } from './publicAnswers
 import { COMMUNITY_ANSWER_ARCHIVE_PATH, syncCommunityAnswers } from './communityAnswers.js';
 import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
-import { DB_PATH, ROOT } from './paths.js';
+import { DB_PATH, DATA_DIR } from './paths.js';
 import { getChapterAssessmentResultPath, solveCourse } from './solver.js';
 import { resolveAccountChapterContext, resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
@@ -25,7 +25,7 @@ const program = new Command();
 program
   .name('qureo')
   .description('Private QUREO HTTP client, course index and local answer search')
-  .version('0.5.0');
+  .version('0.6.0');
 
 function outputJson(value) { console.log(JSON.stringify(value, null, 2)); }
 
@@ -63,7 +63,7 @@ async function chooseSolveCourse(user) {
   const courses = listSolvableCourses(
     user?.available_courses || [],
     listApiCourses(),
-    courseId => fs.existsSync(path.join(ROOT, 'answers', courseId + '.json'))
+    courseId => fs.existsSync(path.join(DATA_DIR, 'answers', courseId + '.json'))
   );
   if (!courses.length) {
     throw new Error('No available course has a local answer bank. Run qureo sync and add answers/<course_id>.json before solving.');
@@ -383,7 +383,7 @@ program.command('export')
       errors: []
     };
 
-    const outputPath = options.out ? path.resolve(options.out) : path.join(ROOT, 'exports', 'qureo-export.json');
+    const outputPath = options.out ? path.resolve(options.out) : path.join(DATA_DIR, 'exports', 'qureo-export.json');
     const saveCheckpoint = () => {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       const temporaryPath = outputPath + '.tmp';
