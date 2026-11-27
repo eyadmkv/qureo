@@ -193,8 +193,13 @@ class QureoClient(context: Context) {
 
         val user = request("$QUREO_PORTAL/oauth2/userinfo")
         if (!user.successful) throw ApiFailure(user.status, null, "QUREO login could not be verified.")
+        if (!user.body.trimStart().startsWith("{")) {
+            throw IllegalStateException("QUREO login verification did not return JSON. Complete any required account step and sign in again.")
+        }
         val portalUser = runCatching { jsonObject(user.body) }.getOrNull()
-        request("$QUREO_COURSE/?content_id=python_short_ar", referer = "$QUREO_PORTAL/")
+        runCatching {
+            request("$QUREO_COURSE/?content_id=javascript_ar", referer = "$QUREO_PORTAL/")
+        }
         encryptedStore.put("qureo.student", studentId.trim())
         portalUser?.firstString("name", "student_name", "email").orEmpty().ifBlank { "Signed in" }
     }
