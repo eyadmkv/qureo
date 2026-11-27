@@ -553,10 +553,24 @@ function configureSolveCommand(command, { includeCourse = true } = {}) {
 async function runSolve(courseId, chapterRange, options) {
   await withClient(async (client, user) => {
     const selectedCourseId = courseId || options.course || await chooseSolveCourse(user);
-    if (selectedCourseId === PYTHON_COURSE_ID && !fs.existsSync(COMMUNITY_ANSWER_ARCHIVE_PATH)) {
-      console.log('The community answer archive is missing. Downloading it before the Python solve...');
-      const downloaded = await syncCommunityAnswers();
-      console.log(`Installed ${downloaded.answerCount} fallback answer(s) across ${downloaded.chapterCount} chapter groups.`);
+    if (selectedCourseId === PYTHON_COURSE_ID) {
+      const hasCachedArchive = fs.existsSync(COMMUNITY_ANSWER_ARCHIVE_PATH);
+      console.log(
+        hasCachedArchive
+          ? 'Refreshing the community answer archive before solving...'
+          : 'The community answer archive is missing. Downloading it before the Python solve...'
+      );
+      try {
+        const downloaded = await syncCommunityAnswers();
+        console.log(
+          `${hasCachedArchive ? 'Refreshed' : 'Installed'} ${downloaded.answerCount} fallback answer(s) across ${downloaded.chapterCount} chapter groups.`
+        );
+      } catch (error) {
+        if (!hasCachedArchive) throw error;
+        console.warn(
+          `Could not refresh the community answer archive (${error.message}). Continuing with the existing cached archive.`
+        );
+      }
     }
 
     const result = await solveCourse(client, {
