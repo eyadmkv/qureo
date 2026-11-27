@@ -78,7 +78,7 @@ test('community choice IDs are accepted only when present in live question choic
 });
 
 
-test('formats archived Chapter 9 full-program examples as line-only answers before submission', () => {
+test('preserves complete archived Chapter 9 programs until QUREO supplies its model answer', () => {
   const answers = {
     '511009040': {
       type: 'description',
@@ -98,7 +98,7 @@ test('formats archived Chapter 9 full-program examples as line-only answers befo
     }
   }, answers), {
     type: 'description',
-    answer_code: 'if a == 5 or b == 10:'
+    answer_code: 'a = 5\nb = 10\nif a == 5 or b == 10:\n    print("The condition is met")'
   });
 
   assert.deepEqual(getQuestionAnswer({
@@ -109,6 +109,6 @@ test('formats archived Chapter 9 full-program examples as line-only answers befo
     }
   }, answers), {
     type: 'description',
-    answer_code: 'if a >= 2 and b >= 3:'
+    answer_code: 'a = 4\nb = 3\nif a >= 2 and b >= 3:\n    print("The condition is met")'
   });
 });

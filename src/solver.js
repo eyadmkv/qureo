@@ -3,7 +3,8 @@ import path from 'node:path';
 import { API_BASE, COURSE_ORIGIN } from './http.js';
 import { DATA_DIR, ROOT } from './paths.js';
 import { planChapterSelection } from './solveSelection.js';
-import { formatPythonAnswerForQuestion, matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
+import { matchPythonAssessmentAnswers } from './pythonAutoAnswers.js';
+import { listRetrievedAssessmentAnswers, saveRetrievedAnswer } from './db.js';
 import { QureoLectureBrowser } from './qureoBrowser.js';
 import { loadCommunityAnswers, mergeCommunityAnswers } from './communityAnswers.js';
 
@@ -32,7 +33,31 @@ function loadAnswers(courseId) {
   if (parsed.course_id !== courseId || !parsed.answers || typeof parsed.answers !== 'object') {
     throw new Error(`Invalid answer bank format: ${file}`);
   }
-  return mergeCommunityAnswers(parsed.answers, loadCommunityAnswers());
+  const answers = mergeCommunityAnswers(parsed.answers, loadCommunityAnswers());
+  const recovered = new Set();
+  for (const row of listRetrievedAssessmentAnswers()) {
+    const questionId = String(row.question_key || '');
+    if (!questionId || recovered.has(questionId)) continue;
+    if (row.answer_type === 'choice') {
+      const choiceId = Number(row.answer_text);
+      if (!Number.isFinite(choiceId)) continue;
+      answers[questionId] = {
+        type: 'choice',
+        choice_id: choiceId,
+        source: 'qureo-result'
+      };
+    } else if (row.answer_type === 'code' && String(row.answer_text || '').trim()) {
+      answers[questionId] = {
+        type: 'description',
+        answer_code: row.answer_text,
+        source: 'qureo-result'
+      };
+    } else {
+      continue;
+    }
+    recovered.add(questionId);
+  }
+  return answers;
 }
 
 function saveAnswers(courseId, answers, sources = {}) {
@@ -110,11 +135,37 @@ export function getQuestionAnswer(item, answers) {
     return { type: 'choice', choice_id: choiceId };
   }
   if (question.type === 'description') {
-    const answerCode = formatPythonAnswerForQuestion(item, saved.answer_code);
-    if (!answerCode) return null;
+    const answerCode = String(saved.answer_code ?? '');
+    if (!answerCode.trim()) return null;
     return { type: 'description', answer_code: answerCode };
   }
   return null;
+}
+
+export function extractVerifiedAssessmentAnswers(payload) {
+  const result = payload?.result || payload || {};
+  const answers = {};
+
+  for (const item of (Array.isArray(result.choice_results) ? result.choice_results : [])) {
+    const questionId = String(item.question_id ?? '');
+    const correctChoice = (Array.isArray(item.choices) ? item.choices : [])
+      .find(choice => choice.correct === true);
+    const choiceId = correctChoice?.choice?.id ??
+      correctChoice?.id ??
+      (item.correct === true ? item.choice_id : null);
+    if (!questionId || choiceId === null || choiceId === undefined) continue;
+    answers[questionId] = { type: 'choice', choice_id: Number(choiceId) };
+  }
+
+  for (const item of (Array.isArray(result.description_results) ? result.description_results : [])) {
+    const questionId = String(item.question_id ?? '');
+    const answerCode = item.model_answer ??
+      (item.correct === true ? item.answer_code : null);
+    if (!questionId || answerCode === null || answerCode === undefined || !String(answerCode).trim()) continue;
+    answers[questionId] = { type: 'description', answer_code: String(answerCode) };
+  }
+
+  return answers;
 }
 
 export function getChapterAssessmentResultPath(chapterId, testType = 'review') {
@@ -261,13 +312,14 @@ export async function markLectureCompleted(client, chapterId, lesson, dryRun, on
   error.lessonId = String(lessonId);
   throw error;
 }
-async function solveChapter(client, chapter, chapterMeta, questions, answers, {
+export async function solveChapter(client, chapter, chapterMeta, questions, answers, {
   dryRun,
   onProgress,
   onCheckpoint = () => {},
   questionDelayMs = 0,
   lessonsAlreadyCompleted = false,
-  lectureBrowser
+  lectureBrowser,
+  persistRetrievedAnswer = saveRetrievedAnswer
 }) {
   const chapterId = String(chapter.id);
   const questionRows = asArray(questions);
@@ -275,10 +327,11 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
     throw new Error(`Chapter ${chapter.seq ?? chapter.sequence ?? chapterId} returned no assessment questions.`);
   }
 
-  const prepared = questionRows.map(item => {
+  const prepareQuestions = () => questionRows.map(item => {
     const question = item?.question || item;
-    return { question, answer: getQuestionAnswer(item, answers) };
+    return { item, question, answer: getQuestionAnswer(item, answers) };
   });
+  let prepared = prepareQuestions();
   const missing = prepared.filter(row => !row.answer).map(row => row.question?.id);
   if (missing.length) {
     throw new Error(`No verified local solution for question(s): ${missing.join(', ')}. No answers were submitted and the chapter was left untouched.`);
@@ -299,9 +352,12 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
 
   if (dryRun) {
     for (const row of prepared) {
-      onProgress(`  [dry-run] question ${row.question.id}: ${row.answer.type === 'choice' ? `choice ${row.answer.choice_id}` : 'code answer ready'}`);
+      const answerPreview = row.answer.type === 'choice'
+        ? `choice ${row.answer.choice_id}`
+        : JSON.stringify(row.answer.answer_code);
+      onProgress(`  [dry-run] question ${row.question.id}: ${answerPreview}`);
     }
-    return { submitted: 0, correct: 0, total: prepared.length, dryRun: true };
+    return { submitted: 0, correct: 0, total: prepared.length, attempts: 0, dryRun: true };
   }
 
   if (!lessonsAlreadyCompleted) {
@@ -318,60 +374,169 @@ async function solveChapter(client, chapter, chapterMeta, questions, answers, {
   const testSlug = testType === 'review' ? 'review' : 'test';
   const testReferer = `${COURSE_ORIGIN}/chapter/${chapterId}/${testSlug}`;
   const initPath = `/students/chapters/${encodeURIComponent(chapterId)}/test`;
-  onProgress(`  initializing ${testType} attempt`);
-  onCheckpoint({ stage: 'assessment-initializing', lesson_id: null, question_id: null, question_index: null });
-  await requestJson(client, initPath, { method: 'PUT', referer: testReferer });
-  onCheckpoint({ stage: 'assessment-initialized' });
+  const resultPath = getChapterAssessmentResultPath(chapterId, testType);
+  const maxAttempts = 3;
+  let totalSubmitted = 0;
+  let lastCorrectCount = 0;
 
-  let submitted = 0;
-  let correct = 0;
-  for (const [index, row] of prepared.entries()) {
-    const questionId = String(row.question.id);
-    const answerPath = `/students/${endpointKind}/${encodeURIComponent(questionId)}/answer/${row.answer.type}`;
-    const payload = row.answer.type === 'choice'
-      ? { choice_id: row.answer.choice_id }
-      : { answer_code: row.answer.answer_code };
-    onCheckpoint({
-      stage: 'question-submitting',
-      question_id: questionId,
-      question_index: index + 1
-    });
-    const result = await requestJson(client, answerPath, { method: 'PUT', body: payload, referer: testReferer });
-    submitted++;
-    if (result?.result?.correct === true) correct++;
-    if (result?.result?.correct === false) {
-      throw new Error(`QUREO marked question ${questionId} incorrect. Submitted ${submitted}/${prepared.length}; stopping before the next chapter.`);
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    prepared = prepareQuestions();
+    const unresolved = prepared.filter(row => !row.answer).map(row => row.question?.id);
+    if (unresolved.length) {
+      throw new Error(`No answer is available for question(s): ${unresolved.join(', ')}. Stopping before starting another attempt.`);
     }
+
+    onProgress(`  initializing ${testType} attempt ${attempt}/${maxAttempts}`);
     onCheckpoint({
-      stage: 'question-submitted',
-      question_id: questionId,
-      question_index: index + 1,
-      questions_submitted_in_chapter: submitted
+      stage: 'assessment-initializing',
+      attempt_number: attempt,
+      lesson_id: null,
+      question_id: null,
+      question_index: null
     });
-    onProgress(`  submitted ${submitted}/${prepared.length} | question ${questionId}${result?.result?.correct === true ? ' | correct' : ''}`);
-    if (questionDelayMs > 0 && index < prepared.length - 1) {
-      onProgress(`  waiting ${(questionDelayMs / 1000).toFixed(1)}s before the next question`);
-      await wait(questionDelayMs);
+    await requestJson(client, initPath, { method: 'PUT', referer: testReferer });
+    onCheckpoint({ stage: 'assessment-initialized', attempt_number: attempt });
+
+    let submitted = 0;
+    let correct = 0;
+    const rejected = [];
+
+    for (const [index, row] of prepared.entries()) {
+      const questionId = String(row.question.id);
+      const answerPath = `/students/${endpointKind}/${encodeURIComponent(questionId)}/answer/${row.answer.type}`;
+      const payload = row.answer.type === 'choice'
+        ? { choice_id: row.answer.choice_id }
+        : { answer_code: row.answer.answer_code };
+      onCheckpoint({
+        stage: 'question-submitting',
+        attempt_number: attempt,
+        question_id: questionId,
+        question_index: index + 1
+      });
+      const response = await requestJson(client, answerPath, {
+        method: 'PUT',
+        body: payload,
+        referer: testReferer
+      });
+      submitted++;
+      totalSubmitted++;
+      if (response?.result?.correct === true) {
+        correct++;
+      } else if (response?.result?.correct === false) {
+        rejected.push(questionId);
+      }
+
+      onCheckpoint({
+        stage: 'question-submitted',
+        attempt_number: attempt,
+        question_id: questionId,
+        question_index: index + 1,
+        questions_submitted_in_chapter: totalSubmitted
+      });
+
+      const status = response?.result?.correct === true
+        ? ' | correct'
+        : response?.result?.correct === false
+          ? ' | incorrect, continuing to retrieve the review answer key'
+          : '';
+      onProgress(`  attempt ${attempt}: submitted ${submitted}/${prepared.length} | question ${questionId}${status}`);
+
+      if (questionDelayMs > 0 && index < prepared.length - 1) {
+        onProgress(`  waiting ${(questionDelayMs / 1000).toFixed(1)}s before the next question`);
+        await wait(questionDelayMs);
+      }
     }
+
+    let resultPayload;
+    try {
+      resultPayload = await client.json(resultPath);
+    } catch (error) {
+      if (correct === prepared.length) {
+        return {
+          submitted: totalSubmitted,
+          correct: prepared.length,
+          total: prepared.length,
+          attempts: attempt,
+          dryRun: false
+        };
+      }
+      throw new Error(
+        `Completed all ${submitted}/${prepared.length} questions in attempt ${attempt}, but QUREO did not expose ${testType} result data (${error.message}). ` +
+        `Incorrect or unverified question(s): ${rejected.join(', ') || 'unknown'}. No blind retry was started.`
+      );
+    }
+
+    const result = resultPayload?.result || resultPayload;
+    const rawCorrectCount = result?.correct_count;
+    const resultCount = rawCorrectCount === undefined || rawCorrectCount === null || rawCorrectCount === ''
+      ? null
+      : Number(rawCorrectCount);
+    lastCorrectCount = Number.isFinite(resultCount) ? resultCount : correct;
+
+    const recovered = extractVerifiedAssessmentAnswers(resultPayload);
+    let recoveredCount = 0;
+    for (const [questionId, recoveredAnswer] of Object.entries(recovered)) {
+      const questionItem = questionRows.find(item =>
+        String((item?.question || item)?.id ?? '') === questionId
+      );
+      const question = questionItem?.question || questionItem || {};
+      const questionText = String(
+        question.content ?? question.text ?? question.prompt ?? question.description ?? ''
+      );
+      const answerType = recoveredAnswer.type === 'choice' ? 'choice' : 'code';
+      const answerText = recoveredAnswer.type === 'choice'
+        ? String(recoveredAnswer.choice_id)
+        : recoveredAnswer.answer_code;
+      const previous = answers[questionId];
+      const changed = recoveredAnswer.type !== previous?.type ||
+        (recoveredAnswer.type === 'choice'
+          ? Number(previous.choice_id) !== recoveredAnswer.choice_id
+          : String(previous.answer_code ?? '') !== recoveredAnswer.answer_code);
+
+      await persistRetrievedAnswer({
+        questionKey: questionId,
+        questionText,
+        answerType,
+        answerText,
+        explanation: 'Authoritative model answer recovered from a completed QUREO assessment result.',
+        sourceUrl: `${API_BASE}${resultPath}`
+      });
+
+      answers[questionId] = {
+        ...recoveredAnswer,
+        source: 'qureo-result'
+      };
+      if (changed) recoveredCount++;
+    }
+
+    onProgress(
+      `  QUREO result: ${Number.isFinite(resultCount) ? resultCount : correct}/${prepared.length} correct; ` +
+      `recovered ${Object.keys(recovered).length} official answer(s)` +
+      (rejected.length ? `; rejected: ${rejected.join(', ')}` : '')
+    );
+
+    if (correct === prepared.length || resultCount === prepared.length) {
+      return {
+        submitted: totalSubmitted,
+        correct: prepared.length,
+        total: prepared.length,
+        attempts: attempt,
+        dryRun: false
+      };
+    }
+
+    if (attempt === maxAttempts || recoveredCount === 0) {
+      throw new Error(
+        `QUREO confirmed ${lastCorrectCount}/${prepared.length} correct after ${attempt} attempt(s). ` +
+        `Recovered ${recoveredCount} new official answer(s). ` +
+        `Incorrect or unverified question(s): ${rejected.join(', ') || 'see QUREO result'}.`
+      );
+    }
+
+    onProgress(`  retrying the chapter with ${recoveredCount} newly recovered QUREO answer(s)`);
   }
 
-  let resultPayload = null;
-  try {
-    resultPayload = await client.json(getChapterAssessmentResultPath(chapterId, testType));
-  } catch {
-    // The per-question submission responses remain the available verification source.
-  }
-  const result = resultPayload?.result || resultPayload;
-  const resultCount = result?.correct_count === undefined || result?.correct_count === null || result?.correct_count === ''
-    ? null
-    : Number(result.correct_count);
-  const verifiedAll = correct === prepared.length || resultCount === prepared.length;
-  const correctCount = verifiedAll ? prepared.length : Number.isFinite(resultCount) ? resultCount : correct;
-  if (!verifiedAll) {
-    throw new Error(`Submitted ${submitted}/${prepared.length} answers, but QUREO did not confirm a complete correct result. Stopping here.`);
-  }
-
-  return { submitted, correct: correctCount, total: prepared.length, dryRun: false };
+  throw new Error(`QUREO did not confirm chapter ${chapterId} after ${maxAttempts} attempts (${lastCorrectCount}/${prepared.length}).`);
 }
 
 export async function solveCourse(client, {

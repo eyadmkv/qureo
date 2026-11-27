@@ -261,6 +261,15 @@ export function saveRetrievedAnswer({ questionKey = '', questionText = '', answe
   return db.prepare('SELECT * FROM saved_answers WHERE answer_id = ?').get(result.lastInsertRowid);
 }
 
+export function listRetrievedAssessmentAnswers() {
+  return db.prepare(`SELECT question_key, answer_type, answer_text, source_url, created_at
+    FROM saved_answers
+    WHERE verified = 1
+      AND instr(source_url, '/api/study/students/chapters/') > 0
+      AND (source_url LIKE '%/review/result' OR source_url LIKE '%/test/result')
+    ORDER BY created_at DESC, answer_id DESC`).all();
+}
+
 export function findApiQuestion(questionId) {
   return db.prepare('SELECT * FROM api_questions WHERE question_id=?').get(String(questionId));
 }

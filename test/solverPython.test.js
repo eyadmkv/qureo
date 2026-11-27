@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted } from '../src/solver.js';
+import { fetchCourseData, getChapterAnswerCoverage, getQuestionAnswer, initializeLecture, markLectureCompleted, solveChapter } from '../src/solver.js';
 
 const pythonAnswers = {
   '511001010': { type: 'choice', choice_id: 5110010101 },
@@ -41,6 +41,26 @@ test('resolves Python description questions to their saved code answers', () => 
   assert.deepEqual(result, {
     type: 'description',
     answer_code: 'print("Good morning")'
+  });
+});
+
+test('preserves full Chapter 9 source code in description answer payloads', () => {
+  const answers = {
+    '511009040': {
+      type: 'description',
+      answer_code: 'a = 5\nb = 10\nif a == 5 or b == 10:\n    print("The condition is met")'
+    }
+  };
+
+  assert.deepEqual(getQuestionAnswer({
+    question: {
+      id: 511009040,
+      type: 'description',
+      content: 'أنهي سطر يتحط مكان الفراغ؟'
+    }
+  }, answers), {
+    type: 'description',
+    answer_code: 'a = 5\nb = 10\nif a == 5 or b == 10:\n    print("The condition is met")'
   });
 });
 
@@ -307,3 +327,116 @@ test('does not retry a completion 404 after browser initialization also fails', 
   );
   assert.equal(directRequests, 1);
 });
+
+test('completes a failed assessment attempt, harvests QUREO model answers, and retries the same chapter', async () => {
+  const modelAnswer4 = 'a = 5\nb = 10\nif a == 5 or b == 10:\n    print("The condition is met")';
+  const modelAnswer5 = 'a = 4\nb = 3\nif a >= 2 and b >= 3:\n    print("The condition is met")';
+  const questionRows = [
+    {
+      question: { id: 511009010, type: 'choice' },
+      choices: [{ id: 5110090101 }, { id: 5110090102 }]
+    },
+    {
+      question: { id: 511009020, type: 'choice' },
+      choices: [{ id: 5110090201 }, { id: 5110090202 }]
+    },
+    {
+      question: { id: 511009030, type: 'choice' },
+      choices: [{ id: 5110090301 }, { id: 5110090302 }]
+    },
+    {
+      question: { id: 511009040, type: 'description', content: 'Question 4' },
+      choices: []
+    },
+    {
+      question: { id: 511009050, type: 'description', content: 'Question 5' },
+      choices: []
+    }
+  ];
+  const answers = {
+    '511009010': { type: 'choice', choice_id: 5110090101 },
+    '511009020': { type: 'choice', choice_id: 5110090201 },
+    '511009030': { type: 'choice', choice_id: 5110090301 },
+    '511009040': { type: 'description', answer_code: 'if a == 5 or b == 10:' },
+    '511009050': { type: 'description', answer_code: 'if a >= 2 and b >= 3:' }
+  };
+  const answerCalls = [];
+  const persisted = [];
+  let attempt = 0;
+  const client = {
+    async request(url, options) {
+      const pathname = new URL(url).pathname;
+      if (pathname.endsWith('/students/chapters/511009/test')) {
+        attempt++;
+        return new Response('{}', { status: 200 });
+      }
+
+      const match = pathname.match(/\/students\/review-questions\/(\d+)\/answer\/(choice|description)$/);
+      assert.ok(match, 'unexpected request: ' + pathname);
+      const questionId = match[1];
+      const body = JSON.parse(options.body);
+      answerCalls.push({ attempt, questionId, body });
+      const incorrect = attempt === 1 && ['511009040', '511009050'].includes(questionId);
+      return new Response(JSON.stringify({ result: { correct: !incorrect } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    },
+    async json(pathname) {
+      assert.equal(pathname, '/students/chapters/511009/review/result');
+      if (attempt === 1) {
+        return {
+          result: {
+            correct_count: 3,
+            choice_results: [],
+            description_results: [
+              { question_id: '511009040', model_answer: modelAnswer4 },
+              { question_id: '511009050', model_answer: modelAnswer5 }
+            ]
+          }
+        };
+      }
+      return {
+        result: {
+          correct_count: 5,
+          choice_results: [],
+          description_results: [
+            { question_id: '511009040', model_answer: modelAnswer4 },
+            { question_id: '511009050', model_answer: modelAnswer5 }
+          ]
+        }
+      };
+    }
+  };
+
+  const result = await solveChapter(
+    client,
+    { id: 511009, seq: 9, name: 'العامل المنطقي', test_type: 'review' },
+    { lectures: [] },
+    questionRows,
+    answers,
+    {
+      dryRun: false,
+      lessonsAlreadyCompleted: true,
+      onProgress: () => {},
+      persistRetrievedAnswer: record => {
+        persisted.push(record);
+        return { answer_id: persisted.length };
+      }
+    }
+  );
+
+  assert.equal(result.attempts, 2);
+  assert.equal(result.submitted, 10);
+  assert.equal(result.correct, 5);
+  assert.equal(answerCalls.length, 10);
+  assert.deepEqual(answerCalls.slice(0, 5).map(call => call.questionId), [
+    '511009010', '511009020', '511009030', '511009040', '511009050'
+  ]);
+  assert.equal(answerCalls[3].body.answer_code, 'if a == 5 or b == 10:');
+  assert.equal(answerCalls[8].body.answer_code, modelAnswer4);
+  assert.equal(answerCalls[9].body.answer_code, modelAnswer5);
+  assert.ok(persisted.some(row => row.questionKey === '511009040' && row.answerText === modelAnswer4));
+  assert.ok(persisted.some(row => row.questionKey === '511009050' && row.answerText === modelAnswer5));
+});
+
