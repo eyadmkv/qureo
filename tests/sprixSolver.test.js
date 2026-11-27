@@ -73,6 +73,73 @@ test('imports subject-3 English chapter and test answer maps', () => {
   assert.equal(bank.source_url, 'https://example.test/subject3.json');
 });
 
+test('imports the English subject-3 text archive using the reference repository schema', () => {
+  const archive = {
+    subject_id: 3,
+    subject_name: 'Financial Literacy',
+    language: 'en',
+    lessons: [{
+      id: 41,
+      title: 'Forms of Modern Money',
+      questions: [
+        {
+          question: 'During a power outage, which form of money can still be used without electricity or internet?',
+          answer: { text: 'Cash can be used without electricity or internet.' }
+        },
+        {
+          question: 'Which payment method requires a working phone and network connection?',
+          answer: { text: 'Electronic money requires a phone and network connection.' }
+        }
+      ]
+    }]
+  };
+  const bank = parseSprixAnswerArchive(JSON.stringify(archive), 'answers_archive_subject3.json');
+
+  assert.equal(bank.format, 'sprix-answer-bank');
+  assert.equal(bank.total, 2);
+  assert.equal(bank.answered, 2);
+  assert.equal(bank.source, 'answers_archive_subject3.json');
+  assert.equal(bank.questions[0].unit, 'Forms of Modern Money');
+});
+
+test('uses the English subject-3 text archive when a live chapter block has no ID mapping', () => {
+  const archive = {
+    lessons: [{
+      id: 41,
+      title: 'Forms of Modern Money',
+      questions: [{
+        question: 'During a power outage, which form of money can still be used without electricity or internet?',
+        answer: { text: 'Cash can be used without electricity or internet.' }
+      }]
+    }]
+  };
+  const archiveBank = parseSprixAnswerArchive(JSON.stringify(archive), 'answers_archive_subject3.json');
+  const result = buildSprixChapterPlan({
+    chapter: { title: 'Forms of Modern Money' },
+    blocks: [{
+      id: 901,
+      type: 'question',
+      question: {
+        text: 'During a power outage, which form of money can still be used without electricity?'
+      },
+      options: [
+        { id: 12, text: 'Electronic money requires a power source.' },
+        { id: 13, text: 'Cash can be used without electricity or internet.' }
+      ]
+    }]
+  }, {
+    subjectId: 3,
+    questions: archiveBank.questions,
+    blockAnswers: {}
+  });
+
+  assert.equal(result.plan.length, 1);
+  assert.equal(result.unmatched.length, 0);
+  assert.equal(result.plan[0].optionId, 13);
+  assert.equal(result.plan[0].answerSource, undefined);
+  assert.match(result.plan[0].bankQuestion, /During a power outage/u);
+});
+
 test('imports Arabic subject-7 chapter and test answer maps', () => {
   const block = Object.fromEntries(Array.from({ length: 200 }, (_, index) => [
     String(index + 1),
