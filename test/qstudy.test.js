@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { createSolvePlan, formatProgressBar, summarizeSprixCurriculum } from '../src/qstudy.js';
+import { DEFAULT_SOLVE_TARGETS, createSolvePlan, formatProgressBar, splitSolvePlan, summarizeSprixCurriculum } from '../src/qstudy.js';
 
 const entryPath = fileURLToPath(new URL('../src/qstudy-entry.js', import.meta.url));
 
@@ -16,6 +16,17 @@ test('QStudy entrypoint exits cleanly for help and version', () => {
     assert.match(result.stdout, expected);
     assert.doesNotMatch(result.stderr, /TypeError|Cannot read properties/);
   }
+});
+
+test('defaults bare QStudy to JavaScript and SPRIX', () => {
+  assert.deepEqual(DEFAULT_SOLVE_TARGETS, ['javascript', 'sprix']);
+});
+
+test('groups QUREO targets together while SPRIX runs as a separate worker', () => {
+  const plan = createSolvePlan(['sprix', 'python', 'javascript']);
+  const groups = splitSolvePlan(plan);
+  assert.deepEqual(groups.qureo.map(task => task.id), ['javascript', 'python']);
+  assert.deepEqual(groups.sprix.map(task => task.id), ['sprix']);
 });
 
 test('builds an ordered solve plan for selected QUREO and SPRIX targets', () => {
