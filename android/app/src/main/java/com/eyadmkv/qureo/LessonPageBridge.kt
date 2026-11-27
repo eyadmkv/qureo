@@ -3,6 +3,7 @@ package com.eyadmkv.qureo
 import android.net.Uri
 import android.net.http.SslError
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -26,6 +27,16 @@ object LessonPageBridge {
     private const val COURSE_ORIGIN = "https://$COURSE_HOST"
     private const val TIMEOUT_MS = 90_000L
     private val attached = AtomicReference<WebView?>(null)
+
+    class CompletionResultBridge(
+        private val webView: WebView,
+        private val callback: (String) -> Unit
+    ) {
+        @JavascriptInterface
+        fun onResult(payload: String) {
+            webView.post { callback(payload) }
+        }
+    }
 
     fun attach(webView: WebView) {
         attached.set(webView)
@@ -59,9 +70,11 @@ object LessonPageBridge {
                         val remainingCookies = AtomicInteger(cookies.size)
                         val rejectedCookies = AtomicInteger(0)
                         val navigationStarted = AtomicBoolean(false)
+                        val completionStarted = AtomicBoolean(false)
 
                         fun finish(result: JSONObject) {
                             if (!settled.compareAndSet(false, true)) return
+                            view.removeJavascriptInterface("QureoNative")
                             if (continuation.isActive) continuation.resume(result)
                         }
 
@@ -131,8 +144,23 @@ object LessonPageBridge {
                                             return
                                         }
 
+                                        if (!completionStarted.compareAndSet(false, true)) return
+                                        webView.addJavascriptInterface(
+                                            CompletionResultBridge(webView) { payload ->
+                                                try {
+                                                    finish(JSONObject(payload))
+                                                } catch (error: Exception) {
+                                                    fail(
+                                                        "Could not decode the QUREO lesson completion response: " +
+                                                            (error.message ?: error.javaClass.simpleName)
+                                                    )
+                                                }
+                                            },
+                                            "QureoNative"
+                                        )
                                         val script = """
                                             (async () => {
+                                              let result;
                                               try {
                                                 const response = await fetch('/api/study/students/lectures/$lessonId/complete', {
                                                   method: 'PUT',
@@ -145,37 +173,32 @@ object LessonPageBridge {
                                                   body: '{}'
                                                 });
                                                 const body = await response.text();
-                                                return JSON.stringify({
+                                                result = {
                                                   status: response.status,
                                                   ok: response.ok,
                                                   body: body.slice(0, 1000)
-                                                });
+                                                };
                                               } catch (error) {
                                                 const detail = error instanceof Error
                                                   ? error.name + ': ' + error.message
                                                   : String(error);
-                                                return JSON.stringify({
+                                                result = {
                                                   status: 0,
                                                   ok: false,
                                                   error: detail
-                                                });
+                                                };
                                               }
-                                            })()
+                                              QureoNative.onResult(JSON.stringify(result));
+                                            })();
                                         """.trimIndent()
 
-                                        webView.evaluateJavascript(script) { encoded ->
-                                            try {
-                                                val decoded = JSONTokener(encoded ?: "null").nextValue() as? String
-                                                    ?: throw IllegalStateException(
-                                                        "QUREO lesson completion returned no JavaScript result."
-                                                    )
-                                                finish(JSONObject(decoded))
-                                            } catch (error: Exception) {
-                                                fail(
-                                                    "Could not decode the QUREO lesson completion response: " +
-                                                        (error.message ?: error.javaClass.simpleName)
-                                                )
-                                            }
+                                        try {
+                                            webView.evaluateJavascript(script, null)
+                                        } catch (error: Exception) {
+                                            fail(
+                                                "Could not start the QUREO lesson completion request: " +
+                                                    (error.message ?: error.javaClass.simpleName)
+                                            )
                                         }
                                     }
                                 }
@@ -191,7 +214,10 @@ object LessonPageBridge {
 
                         continuation.invokeOnCancellation {
                             view.post {
-                                if (settled.compareAndSet(false, true)) view.stopLoading()
+                                if (settled.compareAndSet(false, true)) {
+                                    view.removeJavascriptInterface("QureoNative")
+                                    view.stopLoading()
+                                }
                             }
                         }
 
