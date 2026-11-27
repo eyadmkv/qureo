@@ -99,11 +99,11 @@ sprix bank status --subject 3
 sprix solve --subject 3 --dry-run
 ```
 
-The importer downloads only the subject-3 `block` answer map from a pinned revision of [kky84rgkjy-maker/mohammad](https://github.com/kky84rgkjy-maker/mohammad). It does not import or use the source's test answers. The map is saved under the ignored local `data/sprix/` directory and is not committed or uploaded.
+The importer downloads the subject-3 `block` and `test` ID maps plus `answers_archive_subject3.json` from the pinned revision of [kky84rgkjy-maker/mohammad](https://github.com/kky84rgkjy-maker/mohammad). The files are saved under the ignored local `data/sprix/` directory and are not committed or uploaded.
 
-The map currently contains 274 chapter-block mappings. Before planning an answer, Qureo checks that the mapped option ID exists among the options returned for that live block. Missing mappings and option IDs that no longer exist are reported as unmatched, and the solver stops before submitting any answer for that chapter. The source is third-party, has no declared repository license, and its accuracy and continued availability are not guaranteed. Review the dry-run options before running the solver.
+Before planning an answer, Qureo checks that each mapped option ID exists among the options returned for that live block or test question. When a chapter block has no ID mapping, the English text archive provides a second matching source. The solver applies confidence and ambiguity thresholds and checks the selected option against live data. Missing mappings, ambiguous text matches, and option IDs that no longer exist are reported as unmatched, and the solver stops before submitting any answer for that chapter or test. The source is third-party, has no declared repository license, and its accuracy and continued availability are not guaranteed. Review the dry-run options before running the solver.
 
-The English subject-3 map is kept separate from the Arabic text answer bank. Selecting subject `3` uses only the English block-ID map and will not fall back to Arabic question matches.
+The English subject-3 text archive is kept separate from the Arabic subject-7 archive. Selecting subject `3` loads the English ID map and English question-text archive only.
 
 ## Build a local bank from the course export
 
