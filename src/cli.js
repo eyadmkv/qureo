@@ -17,7 +17,7 @@ import { PYTHON_COURSE_ID, resolveSolveTarget } from './solveCommand.js';
 import { searchSavedPythonAnswers, syncPythonAnswerGuide } from './pythonAnswerGuide.js';
 import { DB_PATH, ROOT } from './paths.js';
 import { getChapterAssessmentResultPath, solveCourse } from './solver.js';
-import { resolveChapterContext } from './chapterContext.js';
+import { fetchChapterQuestions, resolveChapterContext } from './chapterContext.js';
 import { displayCourseName, listSolvableCourses, resolveCourseChoice } from './courseSelection.js';
 import { registerSprixCommands } from './sprix.js';
 
@@ -653,8 +653,18 @@ program.command('chapter <chapterId>')
 
 program.command('questions <chapterId>')
   .description('Fetch and cache exercise questions and visible choices for a chapter')
-  .action(async chapterId => withClient(async client => {
-    const raw = await client.json(`/chapters/${encodeURIComponent(chapterId)}/test`);
+  .action(async chapterId => withClient(async (client, user) => {
+    const candidates = [
+      ...(user?.available_courses || []).map(course => ({
+        id: String(course?.content_id || course?.id || '')
+      })),
+      ...listApiCourses().map(course => ({ id: String(course.course_id || '') })),
+      { id: PYTHON_COURSE_ID },
+      { id: 'javascript_ar' }
+    ].filter(course => course.id);
+    const uniqueCourses = [...new Map(candidates.map(course => [course.id, course])).values()];
+    const { context, questions: raw } = await fetchChapterQuestions(client, uniqueCourses, chapterId);
+    console.log(`Course: ${context.courseId} | section ${context.sectionId}`);
     const questions = asArray(raw);
     if (!questions.length) {
       console.log('QUREO returned no question array for this chapter.');
