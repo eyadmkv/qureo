@@ -64,8 +64,19 @@ export async function resolveAccountChapterContext(client, user, cachedCourses, 
     const id = String(course?.course_id ?? course?.content_id ?? course?.id ?? '').trim();
     if (id && !courses.has(id)) courses.set(id, { id });
   }
+
+  const chapterKey = String(chapterId ?? '');
+  const hintedCourseId = chapterKey.startsWith('511')
+    ? 'python_short_ar'
+    : chapterKey.startsWith('900')
+      ? 'javascript_ar'
+      : null;
+  if (hintedCourseId && !courses.has(hintedCourseId)) {
+    courses.set(hintedCourseId, { id: hintedCourseId });
+  }
+
   if (!courses.size) {
-    throw new Error('QUREO did not return any available or cached courses. Run qureo sync, then retry.');
+    throw new Error('QUREO did not return any available, cached or recognizable course for this chapter. Run qureo sync, then retry.');
   }
   return resolveChapterContext(client, [...courses.values()], chapterId);
 }
