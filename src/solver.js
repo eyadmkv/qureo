@@ -20,8 +20,15 @@ function asArray(value) {
   return [];
 }
 
-function isCompleted(progress) {
-  return Boolean(progress?.completed_at || progress?.is_completed === true || progress?.completed === true);
+function isCompleted(progress, chapter = null) {
+  const explicitlyCompleted = Boolean(
+    progress?.completed_at || progress?.is_completed === true || progress?.completed === true
+  );
+  const questionCount = Number(chapter?.question_count ?? progress?.question_count ?? 0);
+  const bestCorrectCount = Number(progress?.best_correct_count ?? 0);
+  return explicitlyCompleted ||
+    (Number.isInteger(questionCount) && questionCount > 0 &&
+      Number.isFinite(bestCorrectCount) && bestCorrectCount >= questionCount);
 }
 
 function loadAnswers(courseId) {
@@ -191,6 +198,33 @@ export function getQuestionAnswer(item, answers) {
   return null;
 }
 
+export function prepareQuestionAnswer(item, answers = {}) {
+  const question = item?.question || item;
+  const questionId = String(question?.id ?? '');
+  const savedAnswer = questionId ? answers[questionId] : null;
+  const verified = getQuestionAnswer(item, answers);
+  if (verified) return { answer: verified, bootstrap: false };
+
+  const choices = questionChoiceOptions(item, question);
+  if (choices.length) {
+    const firstChoiceId = choices.map(choiceOptionId).find(Boolean);
+    return firstChoiceId
+      ? { answer: { type: 'choice', choice_id: firstChoiceId }, bootstrap: true }
+      : null;
+  }
+
+  const type = normalizedQuestionType(question, item);
+  const explicitlyChoice = /(?:choice|select|radio|option|mcq|multiple_choice)/u.test(type);
+  const explicitlyDescription = /(?:description|code|text|input|fill|blank|short_answer|program|free_response)/u.test(type);
+  if (explicitlyChoice || (type && !explicitlyDescription)) return null;
+
+  if (savedAnswer?.type === 'description' && String(savedAnswer.answer_code ?? '').trim()) {
+    return { answer: { type: 'description', answer_code: String(savedAnswer.answer_code) }, bootstrap: false };
+  }
+
+  return { answer: { type: 'description', answer_code: 'print(1)' }, bootstrap: true };
+}
+
 export function extractVerifiedAssessmentAnswers(payload) {
   const result = payload?.result || payload || {};
   const answers = {};
@@ -244,10 +278,10 @@ async function getProgress(client, sectionId) {
   return new Map(asArray(raw).map(row => [String(row.chapter_id), row]));
 }
 
-async function waitForChapterCompletion(client, sectionId, chapterId, attempts = 6) {
+async function waitForChapterCompletion(client, sectionId, chapterId, expectedQuestions, attempts = 6) {
   for (let attempt = 0; attempt < attempts; attempt++) {
     const progress = await getProgress(client, sectionId);
-    if (isCompleted(progress.get(String(chapterId)))) return true;
+    if (isCompleted(progress.get(String(chapterId)), { question_count: expectedQuestions })) return true;
     if (attempt + 1 < attempts) {
       await new Promise(resolve => setTimeout(resolve, 500));
     }
@@ -297,48 +331,71 @@ export async function markLectureCompleted(client, chapterId, lesson, dryRun, on
   const lessonId = lesson?.id ?? lesson?.lecture_id;
   if (lessonId === undefined || lessonId === null) return;
 
-  const endpoint = '/students/lectures/' + encodeURIComponent(lessonId) + '/complete';
+  const startEndpoint = '/students/lectures/' + encodeURIComponent(lessonId);
+  const endpoint = startEndpoint + '/complete';
   const referer = COURSE_ORIGIN + '/chapter/' + chapterId + '/lecture/' + lessonId;
+  const requestOptions = {
+    method: 'PUT',
+    headers: { Accept: 'application/json, */*', Referer: referer }
+  };
   if (dryRun) {
-    onProgress('  [dry-run] complete lesson ' + lessonId);
+    onProgress('  [dry-run] initialize and complete lesson ' + lessonId);
     return;
   }
 
-  let response = null;
-  let networkError = null;
+  let startResponse = null;
+  let startError = null;
   try {
-    response = await client.request(API_BASE + endpoint, {
-      method: 'PUT',
-      headers: { Accept: 'application/json, */*', Referer: referer }
-    });
+    startResponse = await client.request(API_BASE + startEndpoint, requestOptions);
   } catch (error) {
-    networkError = error;
+    startError = error;
   }
 
-  if (response?.ok) {
-    onProgress('  lesson ' + lessonId + ': completed');
-    return;
-  }
-  if (response?.status === 400 || response?.status === 409) {
-    onProgress('  lesson ' + lessonId + ': already completed');
-    return;
-  }
-  if (response && response.status !== 404) {
-    const body = await response.text().catch(() => '');
-    throw errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
+  const startAccepted = startResponse?.ok ||
+    startResponse?.status === 400 || startResponse?.status === 409;
+  let response = null;
+  let networkError = startError;
+
+  if (startAccepted) {
+    try {
+      response = await client.request(API_BASE + endpoint, requestOptions);
+      networkError = null;
+    } catch (error) {
+      networkError = error;
+    }
+
+    if (response?.ok) {
+      onProgress('  lesson ' + lessonId + ': completed');
+      return;
+    }
+    if (response?.status === 400 || response?.status === 409) {
+      onProgress('  lesson ' + lessonId + ': already completed');
+      return;
+    }
+    if (response && response.status !== 404) {
+      const body = await response.text().catch(() => '');
+      throw errorFromResponse(endpoint, response, body ? { message: body.slice(0, 200) } : null);
+    }
+    if (response?.status === 404) await response.body?.cancel().catch(() => {});
+  } else if (startResponse?.status === 404) {
+    await startResponse.body?.cancel().catch(() => {});
+  } else if (startResponse) {
+    const body = await startResponse.text().catch(() => '');
+    startError = errorFromResponse(startEndpoint, startResponse, body ? { message: body.slice(0, 200) } : null);
   }
 
-  if (response?.status === 404) {
-    await response.body?.cancel().catch(() => {});
-  }
-
-  const reason = networkError
-    ? 'the direct completion request failed'
-    : 'the completion API returned 404';
+  const reason = !startAccepted
+    ? 'lesson initialization was rejected'
+    : networkError
+      ? 'the direct completion request failed'
+      : 'the completion API returned 404';
   onProgress('  lesson ' + lessonId + ': ' + reason + '; opening the actual QUREO lesson in a hidden browser');
 
   if (!lectureBrowser) {
-    throw new Error('Hidden browser initialization is unavailable. Install Chrome or Edge and rerun the solver.');
+    throw new Error(
+      'Hidden browser initialization is unavailable. Install Chrome or Edge and rerun the solver.' +
+      (startError?.message ? ' ' + startError.message : '')
+    );
   }
 
   const browserResult = await lectureBrowser.completeLecture(lessonId, referer);
@@ -351,8 +408,9 @@ export async function markLectureCompleted(client, chapterId, lesson, dryRun, on
     return;
   }
 
+  const stage = browserResult.stage === 'start' ? 'initialization' : 'completion';
   const error = new Error(
-    'QUREO still rejected completion after the lesson page initialized in Chrome: ' +
+    'QUREO still rejected lesson ' + stage + ' after the lesson page loaded in Chrome: ' +
     endpoint + ' (HTTP ' + browserResult.status + '). ' +
     String(browserResult.body || '').slice(0, 250)
   );
@@ -378,10 +436,17 @@ export async function solveChapter(client, chapter, chapterMeta, questions, answ
 
   const prepareQuestions = () => questionRows.map(item => {
     const question = item?.question || item;
-    return { item, question, answer: getQuestionAnswer(item, answers) };
+    const preparedAnswer = prepareQuestionAnswer(item, answers);
+    return {
+      item,
+      question,
+      answer: preparedAnswer?.answer || null,
+      bootstrap: Boolean(preparedAnswer?.bootstrap)
+    };
   });
   let prepared = prepareQuestions();
   const missing = prepared.filter(row => !row.answer);
+  const bootstrapCount = prepared.filter(row => row.bootstrap).length;
   if (missing.length) {
     const details = missing.map(({ item, question }) => {
       const id = String(question?.id ?? 'unknown');
@@ -402,6 +467,9 @@ export async function solveChapter(client, chapter, chapterMeta, questions, answ
 
   const lectures = asArray(chapterMeta?.lectures || chapterMeta?.chapter?.lectures || chapterMeta?.data?.lectures);
   onProgress(`Chapter ${chapter.seq ?? chapter.sequence ?? chapterId}: ${chapter.name || chapter.title || 'Untitled'} | ${lectures.length} lesson(s), ${prepared.length} question(s)`);
+  if (bootstrapCount) {
+    onProgress(`  using ${bootstrapCount} temporary type-safe answer(s) to retrieve QUREO's official answers`);
+  }
   onCheckpoint({
     state: 'running',
     stage: 'chapter-start',
@@ -663,7 +731,7 @@ export async function solveCourse(client, {
   const progressById = await getProgress(client, sectionId);
   const chapters = rawChapters.map(chapter => ({
     ...chapter,
-    completed: isCompleted(progressById.get(String(chapter.id)))
+    completed: isCompleted(progressById.get(String(chapter.id)), chapter)
   }));
 
   const plan = planChapterSelection(chapters, {
@@ -910,7 +978,7 @@ export async function solveCourse(client, {
       }
 
       checkpoint({ stage: 'verifying-chapter-completion' });
-      const completionConfirmed = await waitForChapterCompletion(client, sectionId, chapterId);
+      const completionConfirmed = await waitForChapterCompletion(client, sectionId, chapterId, solved.total);
       if (!completionConfirmed) {
         throw new Error(`Chapter ${chapterSequence} received ${solved.correct}/${solved.total} confirmed correct answers, but QUREO has not marked it complete. Stopping before the next chapter.`);
       }
