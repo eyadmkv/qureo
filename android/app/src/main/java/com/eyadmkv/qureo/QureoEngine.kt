@@ -54,6 +54,15 @@ internal fun jsonObject(text: String): JSONObject {
     return value as? JSONObject ?: throw IllegalStateException("The service returned a non-object JSON response.")
 }
 
+private fun jsonObjectOrArray(text: String): JSONObject {
+    val value = JSONTokener(text).nextValue()
+    return when (value) {
+        is JSONObject -> value
+        is JSONArray -> JSONObject().put("data", value)
+        else -> throw IllegalStateException("The service returned an unsupported JSON response.")
+    }
+}
+
 private fun jsonArrayAt(root: JSONObject, vararg keys: String): JSONArray {
     root.optJSONArray("data")?.let { return it }
     val data = root.optJSONObject("data")
@@ -164,7 +173,7 @@ class QureoClient(context: Context) {
     ): JSONObject {
         val response = request("$QUREO_API$path", method, body, referer)
         val payload = response.body.takeIf { it.isNotBlank() }?.let {
-            runCatching { jsonObject(it) }.getOrNull()
+            runCatching { jsonObjectOrArray(it) }.getOrNull()
         }
         if (!response.successful) {
             val detail = when {
