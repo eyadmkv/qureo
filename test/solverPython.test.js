@@ -164,7 +164,11 @@ test('completes a type-safe bootstrap attempt, harvests official answers, and re
   ]);
   assert.equal(answers['511021030'].choice_id, 5110210301);
   assert.equal(answers['511021050'].answer_code, officialDescription);
-  assert.equal(persisted.length, 2);
+  assert.equal(persisted.length, 4);
+  assert.deepEqual(
+    [...new Set(persisted.map(row => row.questionKey))].sort(),
+    ['511021030', '511021050']
+  );
 });
 
 test('resolves Python choice questions against their actual option IDs', () => {
